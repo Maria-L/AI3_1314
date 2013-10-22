@@ -1,0 +1,27 @@
+ssh-keygen 		        -> Erstellt eine Datei im aktuellen Verzeichnis in dem der SSH 
+                                Key steht. Hierbei wird ein Passwort erfragt, dass für die 			
+                                Operationen über diese Ssh benötigt wird. Eine Ssh bindet den Pc in 			
+                                den Git Account ein
+
+ls 			        -> zeigt die Struktur des momentanen Ordners
+cd /C 			        -> Wechselt in C
+cd ./(Ordnername) 	        -> Wechselt im aktuellen Verzeichnis in den angegebenen Pfad
+cd ..                       	-> Wehselt in den übergeordneten Ordner
+
+git clone (Link) 	        -> Clont den Order auf den der Link verweist in das Verzeichnis in 				
+                                dem man sich befindet
+
+git add . 	    	        -> Alle Dateien im aktuellen Verzeichnis werden dem lokalen Repo zugeordnet
+
+git commit -am "Kommentar"  	-> Nachdem man die Dateien dem lokalen Repo zugeordnet hat muss
+                              	man sie kommentieren bevor man sie hochladen kann.	
+
+git status		        -> fragt ab ob man noch Dateien geaddet (git add) hat die man noch 				
+                              	nicht mit git commit kommentiert hat
+
+git push 		       	-> fügt das aktuelle Verzeichnis in das Verzeichnis auf dem Server 	ein
+
+git pull 		        -> Vereinigt die Dateien des Online Verzeichnisses mit dem aktuellen eigenen
+
+git push origin master      	-> Muss man eingeben wenn Git mault, dass kein Brunch gewählt 					
+                               	wurde. Damit legt man den aktuellen diesen als Master fest.
