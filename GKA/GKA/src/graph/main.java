@@ -1,5 +1,7 @@
 package graph;
 
+import graphAlgorithms.Methods;
+
 
 public class main {
 
@@ -18,25 +20,18 @@ public class main {
 		
 		e1 = start.addEdgeU(k1,k2);
 		e2 = start.addEdgeU(k2,k3);
-		e3 = start.addEdgeD(k3,k1);
+		e3 = start.addEdgeU(k3,k1);
 		
-//		start.deleteEdge(k2,k1);
-//		start.deleteEdge(k3,k1);
-		start.deleteVertex(k1);
-		start.deleteVertex(k3);
-		
-		System.out.println(start.getAdjacent(k2));
-		System.out.println(start.getIncident(k2));
-		
-//		start.getSource(e2);
-//		start.getTarget(e2);
-		
-		start.getVertexes();
-		start.getEdges();
-		
-		System.out.println("Success!");
+		start.setValE(e1, "gewicht", 1);
+		start.setValE(e2, "gewicht", 1);
+		start.setValE(e3, "gewicht", 3);
 
+		Methods.bellmanFord(start, k1);
+		System.out.println(start.getValV(k1, "distanz"));
+		System.out.println(start.getValV(k2, "distanz"));
+		System.out.println(start.getValV(k3, "distanz"));
 		
+		System.out.println(start.getValV(k3, "vorgaenger"));
 	}
 
 }

@@ -185,7 +185,6 @@ public class GraphImpl implements Graph {
 	@Override
 	public void setValV(int v1, String attr, int val) {
 		vertexMap.get(v1).getIntMap().put(attr, val);
-
 	}
 
 	@Override
