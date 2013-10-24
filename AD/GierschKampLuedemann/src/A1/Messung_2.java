@@ -6,13 +6,14 @@ import java.util.*;
 /** Klasse zum Speichern und Auswerten von Messreihen von Zahlen
  * 
  * @author Steffen Giersch, Birger Kamp, Maria Lüdemann */
-public class Messung {
+public class Messung_2 {
 
 	/** Liste aller Messungen */
 	private List<Double> mssg = new ArrayList<Double>();
 
 	/** Summe aller Messungen für den Mittelwert */
 	public double akku_sum = 0.0;
+	public double akku_sqr = 0.0;
 	
 	/** Getter für die Liste der Messungen
 	 * @return Liste der Messungen
@@ -22,7 +23,7 @@ public class Messung {
 	}
 
 	/** Constructor für die Messung */
-	public Messung() {}
+	public Messung_2() {}
 
 	/** Fügt einen Messwert hinzu
 	 * 

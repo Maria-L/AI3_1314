@@ -50,8 +50,8 @@ public class MessungTest {
 		mssg3.add(2);
 		mssg3.add(5);
 
-		assertEquals(1.0, mssg1.varianz(), 0.01);
-		assertEquals(0.0, mssg2.varianz(), 0.01);
+		assertEquals(1.0, mssg1.varianz(), 0.000001);
+		assertEquals(0.0, mssg2.varianz(), 0.000001);
 		assertEquals(Math.sqrt(3), mssg3.varianz(), 0.01);
 	}
 }

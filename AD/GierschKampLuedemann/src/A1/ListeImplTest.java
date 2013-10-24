@@ -64,6 +64,12 @@ public class ListeImplTest {
 		list.head();
 		list.head();
 		assertEquals(0, list.length());
+		
+		Liste list2 = new ListeImpl();
+		for (int i = 0; i < 100; i++) {
+			list2.insert(i, i);
+		}
+		assertEquals(100,list2.length());
 	}
 
 	@Test

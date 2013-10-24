@@ -12,7 +12,7 @@ public class QuadMatrixArrayImpl extends AbstractQuadMatrix {
 		matrix = new double[size][size];
 		for (int i = 0; i < size; i++) {
 			for(int j = 0; j < size; j++) {
-				timeCounter+=2;
+				timeCounter+=1;
 				matrix[i][j] = 0.0;
 			}
 		}
@@ -26,19 +26,19 @@ public class QuadMatrixArrayImpl extends AbstractQuadMatrix {
 
 	@Override
 	public double get(int m, int n) {
-		timeCounter+=2;
+		timeCounter+=1;
 		return matrix[m-1][n-1];
 	}
 
 	@Override
 	public void set(int m, int n, double x) {
-		timeCounter+=2;
+		timeCounter+=1;
 		matrix[m-1][n-1] = x;
 
 	}
 	
 	public void setGen(int m, int n, double x) {
-		timeCounter+=2;
+		timeCounter+=1;
 		matrix[m-1][n-1] = x;
 	}
 

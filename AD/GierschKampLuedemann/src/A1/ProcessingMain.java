@@ -7,7 +7,7 @@ public class ProcessingMain extends PApplet {
 	public static final float CIRCLESIZE 	= 5;			//Größe der angezeigten Kreise
 	public static final float FPS			= (float) 0.5;	//Bilder pro Sekunde
 	public static final int	ANZAHLMESSUNGEN	= 100;			//Anzahl der durchgeführten Messungen pro Bild
-	public static final int LISTENLAENGE	= 200;			//Länge der erstellten Listene
+	public static final int LISTENLAENGE	= 100;			//Länge der erstellten Listene
 	public static final int RIGHTSHIFT		= 66;			//Rechtsshift für das Koordinatensystem in Pixeln
 	private Messung allAverages				= new Messung();//Akkumulator für die Durchschnittswerte aller Messungen
 
