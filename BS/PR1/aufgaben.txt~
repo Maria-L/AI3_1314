@@ -60,3 +60,9 @@ $ ist der leere String am Anfang einer Zeile
 Alle Prozesse, deren Kommandozeile mit k beginnt:
 pstree | grep "\<k"
 
+
+Was tut das Shellscript?:
+###################################
+
+Version des C-Compilers:
+gcc --version
