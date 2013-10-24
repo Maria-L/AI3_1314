@@ -33,23 +33,53 @@ method usage() {
 }
 
 method getType(arg) {
-  return file -b arg
+  return (file -b arg | grep "\<text\>)
+}
+
+method splitting() {
+  while( $1 != "" )
+    if [ getType($1) == "" ]
+      split -d -b ($size * 1000) -a 4 $1	$1.	#split bytes
+      shift
+    else
+      split -d -l $size -a 4 $1 $1.		#split lines
+      shift
+    fi
+  endwhile
 }
 
 ######## main #########
-Variable size = 10;
+Variable $size = 10
 
-if [ noArgument ] 
+if [ $1 == "" ]
   usage
   exit 1
 fi
 
-case argument in
-  "-h" 
-  "--help"
-    usage
-    exit 1
+while [ $1 != "" ]
+  switch argument in
+    case "-h" 
+    case "--help"
+      usage()
+      exit 1
+      
+    case "-s"
+    case "--SIZE"
+      shift
+      $size = $1
+      shift
+      splitting(size)
+      exit 1
     
-  "-s"
-  "--SIZE"
+    case "-v"
+      bash -x $f
+      exit 1
     
+    default
+      shift
+      splitting($size)
+      exit 1
+  endSwitch
+endwhile
+
+exit 0
