@@ -1,0 +1,34 @@
+#Steffen Giersch, Maria Luedemann
+#Dies ist der Entwurf in Pseudocode, er soll verdeutlichen wie wir vorgehen werden und umreisst
+#erstmal nur was wann getan wird. Die genaue Codierung wird im Praktikum vorgelegt
+
+size = 10;
+while(input != "*.txt"){
+	if(input.include(-v || v){
+		start Debbugging messages
+	}
+	if (input.include(-s || -- SIZE){
+		size = input.next;
+	}
+	if (input.include(-h || --help){
+		usage();
+		exit;
+	}
+input.next;
+}
+
+if(input = ""){
+	usage();
+	exit;
+}
+
+while(input != ""){
+	if(input != textfile){
+		split(size) für binary Files mit input.(Vierstelliger Zahlenname);
+		input.next;
+	} else {
+		split(size) für textfiles mit input.(Vierstelliger Zahlenname);
+		input.next;
+	}
+}
+exit;
