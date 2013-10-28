@@ -57,16 +57,17 @@ do
         -s*)        	sflag="true"	#SFlag setzen und angeben, dass das SFlag gerade
 			sfound="true"	#gesetzt wurde mit sfound
                 ;;
-        -*)		echo "Warnung: Unbekanntes Flag $var - dieses wird als Datei interpretiert"
+        -*)		echo "Warnung: Unbekanntes Flag $var - dieses wird ignoriert"
 		;;			#Wenn ein unbekanntes Flag gefunden wurde eine Warnung ausgeben
          esac
     fi
 done
 
 if [ $vflag == "true" ]			#Wenn das VFlag gesetzt ist den Debugmodus anschalten
-then
+then					#und von vorne ausführen
      echo "Debugmodus anschalten"
-     set -x
+     bash -x $0
+     set +x
      exit 1
 fi
 
@@ -76,22 +77,22 @@ then
     exit 1
 fi
 
-while [ "$1" != "" ]
+while [ "$1" != "" ]			#Mit Shift über alle Argumente iterieren
 do    
     case $1 in
-    -v*|--verbose|-h*|--help)	shift
-				;;
-    -s*)                	shift
-				shift
-				;;
-    *)		               	temp=$(file -b $1 | grep -c "text")
-				if [ $temp == "" ]
-				then
-				  split -d -b 'expr $svalue * $byteToKiBi' -a 4 $1 $1	#split bytes
-				else
-				  split -d -l $svalue -a 4 $1 $1.			#split lines
-				fi
-				shift
+    -s*)	shift	#Wenn s gefunden wird,über s und den Wert nach s shiften
+		shift
+		;;
+    -*)		shift   #bei allem anderen drüber weg schiften
+		;;
+    *)		temp=$(file -b $1 | grep -c "text") #wenn kein Argument gegeben wird  abfragen	
+		if [ $temp == "" ]		    # ob es ein Text oder Binaerfile ist
+		then
+		  split -d -b 'expr $svalue * $byteToKiBi' -a 4 $1 $1	#Fuer den Fall eines binearfiles 
+		else							#wird nach bytes gesplitet
+		  split -d -l $svalue -a 4 $1 $1.			#Ein Textfile wird nach lines gesplittet
+		fi
+		shift
     esac
 done
 set +x

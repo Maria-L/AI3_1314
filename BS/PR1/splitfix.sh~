@@ -57,16 +57,17 @@ do
         -s*)        	sflag="true"	#SFlag setzen und angeben, dass das SFlag gerade
 			sfound="true"	#gesetzt wurde mit sfound
                 ;;
-        -*)		echo "Warnung: Unbekanntes Flag $var - dieses wird als Datei interpretiert"
+        -*)		echo "Warnung: Unbekanntes Flag $var - dieses wird ignoriert"
 		;;			#Wenn ein unbekanntes Flag gefunden wurde eine Warnung ausgeben
          esac
     fi
 done
 
 if [ $vflag == "true" ]			#Wenn das VFlag gesetzt ist den Debugmodus anschalten
-then
+then					#und von vorne ausführen
      echo "Debugmodus anschalten"
-     bash -x $f
+     bash -x $0
+     set +x
      exit 1
 fi
 
@@ -76,23 +77,24 @@ then
     exit 1
 fi
 
-while [ "$1" != "" ]
+while [ "$1" != "" ]			#Mit Shift über alle Argumente iterieren
 do    
     case $1 in
-    -v*|--verbose|-h*|--help)	shift
-				;;
-    -s*)                	shift
-				shift
-				;;
-    *)		               	temp=$(file -b $1 | grep -c "text")
-				if [ $temp == "" ]
-				then
-				  split -d -b 'expr $svalue * $byteToKiBi' -a 4 $1 $1	#split bytes
-				else
-				  split -d -l $svalue -a 4 $1 $1.			#split lines
-				fi
-				shift
+    -s*)	shift	#Wenn 
+		shift
+		;;
+    -*)		shift
+		;;
+    *)		temp=$(file -b $1 | grep -c "text")
+		if [ $temp == "" ]
+		then
+		  split -d -b 'expr $svalue * $byteToKiBi' -a 4 $1 $1	#split bytes
+		else
+		  split -d -l $svalue -a 4 $1 $1.			#split lines
+		fi
+		shift
     esac
 done
+set +x
 
 exit 0
