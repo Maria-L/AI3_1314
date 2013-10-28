@@ -1,3 +1,7 @@
+#Autor: Steffen Giersch und Maria Luedemann
+#Praktikumsgruppe 2
+#1. Praktikumstermin
+
 #Gibt den Hilfetext aus
 usage() {
   echo "DESCRIPTION
@@ -66,9 +70,9 @@ done
 if [ $vflag == "true" ]			#Wenn das VFlag gesetzt ist den Debugmodus anschalten
 then					#und von vorne ausführen
      echo "Debugmodus anschalten"
-     bash -x $0
-     set +x
-     exit 1
+     bash -x $0				#startet den Debugg Modus und ruft das Programm nochmal auf
+     set +x				#setzt das xFlag wieder zurück
+     exit 1			
 fi
 
 if [ $hflag == "true" ]			#Wenn das HFlag gesetzt wurde den Hilfetext ausgeben
@@ -95,6 +99,6 @@ do
 		shift
     esac
 done
-set +x
+set +x					#Den Debugmodus ausschalten falls er an ist
 
 exit 0
