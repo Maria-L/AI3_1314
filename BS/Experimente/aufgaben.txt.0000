@@ -1,0 +1,10 @@
+Verwendete Operationen auf sort:
+-r : Umkehren der Sortierreihenfolge
+-n Sortiere Numerisch, oder nach numerischem Stringwert
+-k Sortiere nach einem Key. 5 Bedeutet den Index der Spalte nach dem sortiert wird
+
+
+Resultat unserer Aktionen:
+
+Anfangszustand:
+total 16400

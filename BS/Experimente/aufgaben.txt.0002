@@ -1,0 +1,10 @@
+-rw-r--r-- 1 abl128 student      703 Oct 23 16:37 aufgaben.txt~
+lrwxrwxrwx 1 abl128 student       16 Oct 23 16:34 listeninglink.txt -> my_listening.txt
+-rw-r--r-- 1 abl128 student     2650 Oct 23 16:29 my_listeing2.txt
+-rw-r--r-- 1 abl128 student     2671 Oct 23 16:38 my_listening.txt
+-rw-r--r-- 1 abl128 student 11403264 Oct 23 16:30 script.txt
+An den Änderungszeiten ist zu erkennen, dass sich nicht der Link, sondern die verlinkte
+Datei verändert hat
+
+Löschen von listeninglink.txt:
+total 16400

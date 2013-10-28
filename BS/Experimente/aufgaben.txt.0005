@@ -1,0 +1,10 @@
+ls -l text[12].txt 	-> gibt text1.txt und text2.txt wieder
+ls -l text[1-2].txt	-> gibt text1.txt udn text2.txt wieder
+
+
+Was bedeutet $,^ und \<
+$ ist der leere String am Anfang einer Zeile
+^ ist der leere String am Ende einer Zeile
+\< ist der leere String am Anfang eines Wortes
+
+Alle Prozesse, deren Kommandozeile mit k beginnt:

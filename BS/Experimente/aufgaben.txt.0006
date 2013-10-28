@@ -1,0 +1,8 @@
+pstree | grep "\<k"
+
+
+Was tut das Shellscript?:
+Fragt den Benutzer nach seinem Namen und zeigt dann eine Begrüßung an.
+
+Version des C-Compilers:
+gcc --version

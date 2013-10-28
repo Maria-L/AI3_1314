@@ -1,0 +1,98 @@
+#Gibt den Hilfetext aus
+usage() {
+  echo "DESCRIPTION
+    splitfix.sh [OPTIONS] FILE [FILE ...]
+    Split FILE into fixed-size pieces.
+    The pieces are, by default, 10 lines long, if FILE is a text file.
+    The pieces are, by default, 10 kiB long, if FILE is *not* a text file.
+    The last piece may be smaller - it contains the rest of the original file.
+    The output files bear the name of the input file with a 4-digit numerical suffix.
+    The original file can be reconstructend with the command \"cat FILE.*\".
+  
+  EXAMPLE:
+    splitfix.sh foo.pdf
+      splits foo.pdf into the files
+      foo.pdf.0000 foo.pdf.0001 etc.
+      
+  splitfix.sh [-h | --help] 	This help text
+  splitfix.sh --version		Print version number
+  
+  OPTIONS:
+  -h
+    --help	this help text
+    
+  -s
+    --SIZE	size of the pieces
+		  in lines (for text files)
+		  in kiBytes (for other files)
+  
+  -v
+    --verbose print debugging messages"
+}
+
+#Flags für das Speichern der Optionen und deren Argumente
+hflag="false"
+sflag="false"
+vflag="false"
+sfound="false"
+svalue=10
+
+#Umrechenfaktor für Kilobyte zu Byte
+byteToKiBi=1000
+ 
+for var in "$@"				#var wird ueber alle Argumente der Eingabe iteriert
+do
+    if [ $sfound == "true" ]		#Wenn wir zuvor das sflag gefunden haben, ist das nächste Argument 
+    then				#der Wert fuer s
+        svalue=$var
+        sfound="false"
+    else				#Ansonsten
+        case $var in			#case fuer alle moegligen Flags
+        -v*|--verbose) vflag="true" 	#VFlag setzen
+                ;;
+        
+        -h*|--help)    hflag="true" 	#HFlag setzen
+                ;;
+
+        -s*)        	sflag="true"	#SFlag setzen und angeben, dass das SFlag gerade
+			sfound="true"	#gesetzt wurde mit sfound
+                ;;
+        -*)		echo "Warnung: Unbekanntes Flag $var - dieses wird als Datei interpretiert"
+		;;			#Wenn ein unbekanntes Flag gefunden wurde eine Warnung ausgeben
+         esac
+    fi
+done
+
+if [ $vflag == "true" ]			#Wenn das VFlag gesetzt ist den Debugmodus anschalten
+then
+     echo "Debugmodus anschalten"
+     bash -x $f
+     exit 1
+fi
+
+if [ $hflag == "true" ]			#Wenn das HFlag gesetzt wurde den Hilfetext ausgeben
+then
+    usage
+    exit 1
+fi
+
+while [ "$1" != "" ]
+do    
+    case $1 in
+    -v*|--verbose|-h*|--help)	shift
+				;;
+    -s*)                	shift
+				shift
+				;;
+    *)		               	temp=$(file -b $1 | grep -c "text")
+				if [ $temp == "" ]
+				then
+				  split -d -b 'expr $svalue * $byteToKiBi' -a 4 $1 $1	#split bytes
+				else
+				  split -d -l $svalue -a 4 $1 $1.			#split lines
+				fi
+				shift
+    esac
+done
+
+exit 0

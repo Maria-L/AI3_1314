@@ -1,0 +1,10 @@
+-rw-r--r-- 1 abl128 student     1242 Oct 23 16:40 aufgaben.txt~
+lrwxrwxrwx 1 abl128 student       16 Oct 23 16:42 my_listeing2link.txt -> my_listeing2.txt
+-rw-r--r-- 1 abl128 student     2671 Oct 23 16:38 my_listening.txt
+-rw-r--r-- 1 abl128 student 11403264 Oct 23 16:30 script.txt
+Es wird nur die Datei gelöscht und der Link zeigt auf ein leeres Dokument.
+
+
+Beispiele für Platzhalterzeichen:
+ls ?*? 			-> Gibt jede Datei innerhalb des Ordners wieder
+ls aufgaben?* 		-> gibt jede Datei mit dem Namen "aufgaben" unabhängig der Endung wieder

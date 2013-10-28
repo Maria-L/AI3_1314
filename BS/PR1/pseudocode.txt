@@ -30,6 +30,7 @@ method usage() {
   
   -v
     --verbose print debugging messages
+  EOF
 }
 
 method getType(arg) {

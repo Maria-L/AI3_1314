@@ -1,0 +1,68 @@
+Verwendete Operationen auf sort:
+-r : Umkehren der Sortierreihenfolge
+-n Sortiere Numerisch, oder nach numerischem Stringwert
+-k Sortiere nach einem Key. 5 Bedeutet den Index der Spalte nach dem sortiert wird
+
+
+Resultat unserer Aktionen:
+
+Anfangszustand:
+total 16400
+-rw-r--r-- 1 abl128 student      209 Oct 23 16:32 aufgaben.txt
+-rw-r--r-- 1 abl128 student      153 Oct 23 16:32 aufgaben.txt~
+lrwxrwxrwx 1 abl128 student       16 Oct 23 16:34 listeninglink.txt -> my_listening.txt
+-rw-r--r-- 1 abl128 student     2650 Oct 23 16:29 my_listeing2.txt
+-rw-r--r-- 1 abl128 student     2650 Oct 23 16:21 my_listening.txt
+-rw-r--r-- 1 abl128 student 11403264 Oct 23 16:30 script.txt
+
+Editieren von listeninglink.txt:
+total 16400
+-rw-r--r-- 1 abl128 student      710 Oct 23 16:37 aufgaben.txt
+-rw-r--r-- 1 abl128 student      703 Oct 23 16:37 aufgaben.txt~
+lrwxrwxrwx 1 abl128 student       16 Oct 23 16:34 listeninglink.txt -> my_listening.txt
+-rw-r--r-- 1 abl128 student     2650 Oct 23 16:29 my_listeing2.txt
+-rw-r--r-- 1 abl128 student     2671 Oct 23 16:38 my_listening.txt
+-rw-r--r-- 1 abl128 student 11403264 Oct 23 16:30 script.txt
+An den Änderungszeiten ist zu erkennen, dass sich nicht der Link, sondern die verlinkte
+Datei verändert hat
+
+Löschen von listeninglink.txt:
+total 16400
+-rw-r--r-- 1 abl128 student     1273 Oct 23 16:40 aufgaben.txt
+-rw-r--r-- 1 abl128 student     1242 Oct 23 16:40 aufgaben.txt~
+-rw-r--r-- 1 abl128 student     2650 Oct 23 16:29 my_listeing2.txt
+-rw-r--r-- 1 abl128 student     2671 Oct 23 16:38 my_listening.txt
+-rw-r--r-- 1 abl128 student 11403264 Oct 23 16:30 script.txt
+Nur der Link wird gelöscht.
+
+Löschen der Datei auf die gezeigt wird:
+total 16396
+-rw-r--r-- 1 abl128 student     1273 Oct 23 16:40 aufgaben.txt
+-rw-r--r-- 1 abl128 student     1242 Oct 23 16:40 aufgaben.txt~
+lrwxrwxrwx 1 abl128 student       16 Oct 23 16:42 my_listeing2link.txt -> my_listeing2.txt
+-rw-r--r-- 1 abl128 student     2671 Oct 23 16:38 my_listening.txt
+-rw-r--r-- 1 abl128 student 11403264 Oct 23 16:30 script.txt
+Es wird nur die Datei gelöscht und der Link zeigt auf ein leeres Dokument.
+
+
+Beispiele für Platzhalterzeichen:
+ls ?*? 			-> Gibt jede Datei innerhalb des Ordners wieder
+ls aufgaben?* 		-> gibt jede Datei mit dem Namen "aufgaben" unabhängig der Endung wieder
+ls -l text[12].txt 	-> gibt text1.txt und text2.txt wieder
+ls -l text[1-2].txt	-> gibt text1.txt udn text2.txt wieder
+
+
+Was bedeutet $,^ und \<
+$ ist der leere String am Anfang einer Zeile
+^ ist der leere String am Ende einer Zeile
+\< ist der leere String am Anfang eines Wortes
+
+Alle Prozesse, deren Kommandozeile mit k beginnt:
+pstree | grep "\<k"
+
+
+Was tut das Shellscript?:
+Fragt den Benutzer nach seinem Namen und zeigt dann eine Begrüßung an.
+
+Version des C-Compilers:
+gcc --version
