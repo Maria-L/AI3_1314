@@ -2,13 +2,13 @@ package A2;
 
 
 /**
- * @author Steffen Giersch, Birger Kamp, Maria Janna Martina Lüdemann
+ * @author Steffen Giersch, Birger Kamp, Maria Janna Martina Luedemann
  *
  */
 public interface QuadMatrix {
 	
 	//Getter & Setter
-	/** Gibt das Element am eingegebenen Index zurück
+	/** Gibt das Element am eingegebenen Index zurueck
 	 * @param m Zeilenindex beginnend mit 1
 	 * @param n Spaltenindex beginnend mit 1
 	 * @return Element an diesem Index
@@ -20,28 +20,28 @@ public interface QuadMatrix {
 	 * @param x Element an diesem Index
 	 */
 	public void set(int m, int n, double x);
-	/** Gibt die Größe (int) der Matrix zurück
-	 * @return Größe der Matrix (int)
+	/** Gibt die Groesse (int) der Matrix zurueck
+	 * @return Groesse der Matrix (int)
 	 */
 	public int getSize();
-	/** Gibt eine neue Instanz der QuadMatrix Implementation mit der Größe n (int) zurück
-	 * @param n Größe der zu erzeugenden Matrix
+	/** Gibt eine neue Instanz der QuadMatrix Implementation mit der Groesse n (int) zurueck
+	 * @param n Groesse der zu erzeugenden Matrix
 	 * @return Neue Instanz einer QuadMatrix Implementation
 	 */
 	public QuadMatrix init(int n);
 	
 	//Operationen
-	/** Gleichheitsfunktion für QuadMatrix
+	/** Gleichheitsfunktion fuer QuadMatrix
 	 * @param mtx Zu vergleichendes Objekt
 	 * @return Sind die Matritzen gleich (true) oder nicht (false)
 	 */
 	public boolean equals(Object mtx);
-	/** Matrixaddition über zwei QuadMatrix Implementationen
+	/** Matrixaddition ueber zwei QuadMatrix Implementationen
 	 * @param mtx Zu this zu addierende QuadMatrix
 	 * @return Ergebnis der Matrixaddition (QuadMatrix)
 	 */
 	public QuadMatrix add(QuadMatrix mtx);
-	/** Skalarmultiplikation für QuadMatrix
+	/** Skalarmultiplikation fuer QuadMatrix
 	 * @param n Skalar mit dem multipliziert werden soll
 	 * @return Ergebnis der Skalarmultiplikation
 	 */
@@ -56,11 +56,11 @@ public interface QuadMatrix {
 	 * @return Ergebnis der Matrixmultiplikation
 	 */
 	public QuadMatrix pow(int n);
-	/** Gibt den benötigten Platz dieser Implementation wieder
-	 * @return Benötigter Platz (int)
+	/** Gibt den benoetigten Platz dieser Implementation wieder
+	 * @return Benoetigter Platz (int)
 	 */
 	public int space();
-	/** Gibt die benötigte Anzahl der Dereferenzierungen vom letzten Reset bis jetzt wieder
+	/** Gibt die benoetigte Anzahl der Dereferenzierungen vom letzten Reset bis jetzt wieder
 	 * @return Anzahl der Dereferenzierungen
 	 */
 	public int time();

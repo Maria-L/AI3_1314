@@ -4,7 +4,7 @@ package A2;
 public class QuadMatrixGenerator {
 	/** Gibt eine Zufallsgenerierte QuadMatrix der Implementation von mtx wieder
 	 * @param mtx Typ der Matrix, der wiedergegeben werden soll
-	 * @param x Größe der Matrix
+	 * @param x Groesse der Matrix
 	 * @param n Wahrscheinlichkeit, dass ein Element nicht 0.0 ist
 	 * @param m Reichweite von 0..m die ein Element haben kann
 	 * @return Generierte Matrix
