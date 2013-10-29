@@ -18,17 +18,17 @@ usage() {
       splits foo.pdf into the files
       foo.pdf.0000 foo.pdf.0001 etc.
       
-  splitfix.sh [-h | --help] 	This help text
-  splitfix.sh --version		Print version number
+  splitfix.sh [-h | --help]     This help text
+  splitfix.sh --version        Print version number
   
   OPTIONS:
   -h
-    --help	this help text
+    --help    this help text
     
   -s
-    --SIZE	size of the pieces
-		  in lines (for text files)
-		  in kiBytes (for other files)
+    --SIZE    size of the pieces
+          in lines (for text files)
+          in kiBytes (for other files)
   
   -v
     --verbose print debugging messages"
@@ -44,59 +44,59 @@ svalue=10
 #Umrechenfaktor fuer Kilobyte zu Byte
 byteToKiBi=1000
  
-for var in "$@"				#var wird ueber alle Argumente der Eingabe iteriert
+for var in "$@"                         #var wird ueber alle Argumente der Eingabe iteriert
 do
-    if [ $sfound == "true" ]		#Wenn wir zuvor das sflag gefunden haben, ist das naechste Argument 
-    then				#der Wert fuer s
+    if [ $sfound == "true" ]            #Wenn wir zuvor das sflag gefunden haben, ist das naechste Argument 
+    then                                #der Wert fuer s
         svalue=$var
         sfound="false"
-    else				#Ansonsten
-        case $var in			#case fuer alle moegligen Flags
-        -v*|--verbose) vflag="true" 	#VFlag setzen
+    else                                #Ansonsten
+        case $var in                    #case fuer alle moegligen Flags
+        -v*|--verbose) vflag="true"     #VFlag setzen
                 ;;
         
-        -h*|--help)    hflag="true" 	#HFlag setzen
+        -h*|--help)    hflag="true"     #HFlag setzen
                 ;;
 
-        -s*)        	sflag="true"	#SFlag setzen und angeben, dass das SFlag gerade
-			sfound="true"	#gesetzt wurde mit sfound
+        -s*)           sflag="true"     #SFlag setzen und angeben, dass das SFlag gerade
+                       sfound="true"    #gesetzt wurde mit sfound
                 ;;
-        -*)		echo "Warnung: Unbekanntes Flag $var - dieses wird ignoriert"
-		;;			#Wenn ein unbekanntes Flag gefunden wurde eine Warnung ausgeben
+        -*)            echo "Warnung: Unbekanntes Flag $var - dieses wird ignoriert"
+        ;;                              #Wenn ein unbekanntes Flag gefunden wird eine Warnung ausgeben
          esac
     fi
 done
 
-if [ $vflag == "true" ]			#Wenn das VFlag gesetzt ist den Debugmodus anschalten
-then					#und von vorne ausführen
+if [ $vflag == "true" ]                 #Wenn das VFlag gesetzt ist den Debugmodus anschalten
+then                                    #und von vorne ausführen
      echo "Debugmodus anschalten"
-     bash -x $0				#startet den Debugg Modus und ruft das Programm nochmal auf
-     set +x				#setzt das xFlag wieder zurück
-     exit 1			
+     bash -x $0                         #startet den Debugg Modus und ruft das Programm nochmal auf
+     set +x                             #setzt das xFlag wieder zurück
+     exit 1            
 fi
 
-if [ $hflag == "true" ]			#Wenn das HFlag gesetzt wurde den Hilfetext ausgeben
-then
+if [ $hflag == "true" -o $# -eq 0 ]      #Wenn das HFlag gesetzt wurde oder keine Argumente mitgegeben 
+then                                    #wurden den Hilfetext ausgeben    
     usage
     exit 1
 fi
 
-while [ "$1" != "" ]			#Mit Shift über alle Argumente iterieren
+while [ "$1" != "" ]                            #Mit Shift über alle Argumente iterieren
 do    
     case $1 in
-    -s*)	shift	#Wenn s gefunden wird,über s und den Wert nach s shiften
-		shift
-		;;
-    -*)		shift   #bei allem anderen drüber weg schiften
-		;;
-    *)		temp=$(file -b $1 | grep -c "text") #wenn kein Argument gegeben wird  abfragen	
-		if [ $temp == "" ]		    # ob es ein Text oder Binaerfile ist
-		then
-		  split -d -b 'expr $svalue * $byteToKiBi' -a 4 $1 $1	#Fuer den Fall eines binearfiles 
-		else							#wird nach bytes gesplitet
-		  split -d -l $svalue -a 4 $1 $1.			#Ein Textfile wird nach lines gesplittet
-		fi
-		shift
+    -s*)    shift                               #Wenn s gefunden wird,über s und den Wert nach s shiften
+            shift
+        ;;
+    -*)     shift                               #bei allem anderen drüber weg schiften
+        ;;
+     *)     temp=$(file -b $1 | grep -c "text") #wenn kein Argument gegeben wird  abfragen    
+            if [ $temp == "" ]                  # ob es ein Text oder Binaerfile ist
+            then
+                split -d -b 'expr $svalue * $byteToKiBi' -a 4 $1 $1    #Fuer den Fall eines binearfiles 
+            else                                                       #wird nach bytes gesplitet
+                split -d -l $svalue -a 4 $1 $1.                        #Ein Textfile wird nach lines gesplittet
+            fi
+            shift
     esac
 done
 
