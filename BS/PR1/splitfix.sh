@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #Autor: Steffen Giersch und Maria Luedemann
 #Praktikumsgruppe 2
 #1. Praktikumstermin
@@ -76,7 +78,7 @@ then                                    #und von vorne ausführen
 fi
 
 if [ $hflag == "true" -o $# -eq 0 ]      #Wenn das HFlag gesetzt wurde oder keine Argumente mitgegeben 
-then                                    #wurden den Hilfetext ausgeben    
+then                                     #wurden den Hilfetext ausgeben    
     usage
     exit 1
 fi
@@ -89,12 +91,14 @@ do
         ;;
     -*)     shift                               #bei allem anderen drüber weg schiften
         ;;
-     *)     temp=$(file -b $1 | grep -c "text") #wenn kein Argument gegeben wird  abfragen    
-            if [ $temp == "" ]                  # ob es ein Text oder Binaerfile ist
+     *)     temp=$(file -b $1 | grep -c "\<text")   #wenn kein Argument gegeben wird  abfragen    
+            if [ $temp -eq 0 ]                      #ob es ein Text oder Binaerfile ist
             then
-                split -d -b 'expr $svalue * $byteToKiBi' -a 4 $1 $1    #Fuer den Fall eines binearfiles 
-            else                                                       #wird nach bytes gesplitet
-                split -d -l $svalue -a 4 $1 $1.                        #Ein Textfile wird nach lines gesplittet
+                echo "hallo Welt1"
+                split -d -b "$svalue"K -a 4 $1 $1.  #Fuer den Fall eines binearfiles 
+            else                                    #wird nach bytes gesplitet
+                echo "hallo Welt2"
+                split -d -l $svalue -a 4 $1 $1.     #Ein Textfile wird nach lines gesplittet
             fi
             shift
     esac

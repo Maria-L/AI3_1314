@@ -1,7 +1,7 @@
 Verwendete Operationen auf sort:
 -r : Umkehren der Sortierreihenfolge
--n Sortiere Numerisch, oder nach numerischem Stringwert
--k Sortiere nach einem Key. 5 Bedeutet den Index der Spalte nach dem sortiert wird
+-n : Sortiere Numerisch, oder nach numerischem Stringwert
+-k : Sortiere nach einem Key. 5 Bedeutet den Index der Spalte nach dem sortiert wird
 
 
 Resultat unserer Aktionen:
@@ -46,8 +46,8 @@ Es wird nur die Datei gelöscht und der Link zeigt auf ein leeres Dokument.
 
 
 Beispiele für Platzhalterzeichen:
-ls ?*?             -> Gibt jede Datei innerhalb des Ordners wieder
-ls aufgaben?*         -> gibt jede Datei mit dem Namen "aufgaben" unabhängig der Endung wieder
+ls ?*?                 -> Gibt jede Datei innerhalb des Ordners wieder
+ls aufgaben?*          -> gibt jede Datei mit dem Namen "aufgaben" unabhängig der Endung wieder
 ls -l text[12].txt     -> gibt text1.txt und text2.txt wieder
 ls -l text[1-2].txt    -> gibt text1.txt udn text2.txt wieder
 
