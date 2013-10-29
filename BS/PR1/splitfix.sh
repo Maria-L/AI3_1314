@@ -34,19 +34,19 @@ usage() {
     --verbose print debugging messages"
 }
 
-#Flags für das Speichern der Optionen und deren Argumente
+#Flags fuer das Speichern der Optionen und deren Argumente
 hflag="false"
 sflag="false"
 vflag="false"
 sfound="false"
 svalue=10
 
-#Umrechenfaktor für Kilobyte zu Byte
+#Umrechenfaktor fuer Kilobyte zu Byte
 byteToKiBi=1000
  
 for var in "$@"				#var wird ueber alle Argumente der Eingabe iteriert
 do
-    if [ $sfound == "true" ]		#Wenn wir zuvor das sflag gefunden haben, ist das nächste Argument 
+    if [ $sfound == "true" ]		#Wenn wir zuvor das sflag gefunden haben, ist das naechste Argument 
     then				#der Wert fuer s
         svalue=$var
         sfound="false"
@@ -99,6 +99,5 @@ do
 		shift
     esac
 done
-set +x					#Den Debugmodus ausschalten falls er an ist
 
 exit 0
