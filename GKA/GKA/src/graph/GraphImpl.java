@@ -11,9 +11,21 @@ public class GraphImpl implements Graph {
 	HashMap<Integer, Vertex> vertexMap = new HashMap<Integer, Vertex>();
 	/** HashMap über alle Edges mit ihren IDs als Key */
 	HashMap<Integer, Edge> edgeMap = new HashMap<Integer, Edge>();
+	
+	boolean directed;
 
 	public GraphImpl() {
 		id = new Id(0);
+	}
+	
+	@Override
+	public boolean directed() {
+		return directed;
+	}
+	
+	@Override
+	public void setDirected(boolean val) {
+		directed = val;
 	}
 
 	@Override
@@ -155,11 +167,11 @@ public class GraphImpl implements Graph {
 
 	@Override
 	public String getStrV(int v1, String attr) {
-		String akku = vertexMap.get(v1).getStringMap().get(attr);
+		Vertex akku = vertexMap.get(v1);
 		if(akku == null){
 			return "";
 		}
-		return akku;
+		return vertexMap.get(v1).getStringMap().get(attr);
 	}
 
 	@Override
@@ -202,11 +214,13 @@ public class GraphImpl implements Graph {
 		System.out.println("\n\nKnoten:");
 		for(int id : getVertexes()) {
 			System.out.println("Name: " + getStrV(id, "name"));
+			System.out.println("Distanz: " + getValV(id, "distanz"));
+			System.out.println("Vorgänger: " + getStrV(getValV(id, "vorgaenger"),"name"));
 		}
 		
-		System.out.println("\n\nKanten:\nQuelle: / Senke:");
+		System.out.println("\n\nKanten:\nQuelle: / Senke: / Gewicht");
 		for(int id : getEdges()) {
-			System.out.println(getStrV(getSource(id), "name") + " / " + getStrV(getTarget(id), "name"));
+			System.out.println(getStrV(getSource(id), "name") + " / " + getStrV(getTarget(id), "name") + " Gewicht: " + getValE(id, "gewicht"));
 		}
 		
 	}

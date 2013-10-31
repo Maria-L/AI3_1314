@@ -56,6 +56,11 @@ public interface QuadMatrix {
 	 * @return Ergebnis der Matrixmultiplikation
 	 */
 	public QuadMatrix pow(int n);
+	/**Optionale implementierung zur Potenzierung von this zum Exponenten n (int)
+	 * @param n Potenz (int)
+	 * @return Ergebnis der Matrixmultiplikation (QuadMatrix)
+	 */
+	public QuadMatrix powOp(int n);
 	/** Gibt den benoetigten Platz dieser Implementation wieder
 	 * @return Benoetigter Platz (int)
 	 */

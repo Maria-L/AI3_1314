@@ -77,6 +77,24 @@ public abstract class AbstractQuadMatrix implements QuadMatrix {
 		}
 		return akku;
 	}
+	
+	public QuadMatrix powOp(int n){
+		QuadMatrix akku = this.init(getSize());
+		
+		for(int i = 1; i <= getSize(); i++) {
+			akku.set(i, i, 1);
+		}
+		
+		if(n == 0){
+			return akku;
+		}
+		if(n % 2 == 0){
+			akku = powOp(n/2);
+			return akku.mul(akku);
+		}
+			akku = powOp((n-1)/2);
+			return this.mul(akku).mul(akku);
+	}
 	@Override
 	public int time(){
 		return timeCounter;

@@ -128,4 +128,12 @@ public interface Graph {
 	/** Print-Methode für Graphen
 	 */
 	void print();
+	/**Liefert den Wert ob der Graph directed ist
+	 * @return boolean des directed Atributs
+	 */
+	boolean directed();
+	/**Setzt den Attributwert val (boolean) des Graphen
+	 * @param val (boolean) des Graphen
+	 */
+	void setDirected(boolean val);
 }

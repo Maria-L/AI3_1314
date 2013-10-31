@@ -10,13 +10,19 @@ public class main {
 
 	/** @param args */
 	public static void main(String[] args) {
-
-		for (int i = 0; i < 1000; i++) {
-			counter.reset();
-			System.out.println("##### " + i + " #####");
-			System.out.println("Ergebnis: " + exp(2,i));
-			counter.print();
+		int akku = 0;
+		int oldInt = 0;
+		int newInt = 0;
+		for (int i = 0; i < 1000000; i++) {
+			newInt = expOpt(i,2);
+			if(newInt >= oldInt) {
+				oldInt = newInt;
+			} else {
+				akku = i - 1;
+				break;
+			}
 		}
+		System.out.println(akku);
 	}
 
 	static int exp(int x, int k) {

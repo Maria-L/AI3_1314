@@ -9,25 +9,30 @@ public class main {
 	/** @param args */
 	public static void main(String[] args) {
 
-		int t = 2000;
-		int n = 900;
-		double p = 0.01;
-		QuadMatrix matrix = new QuadMatrixArrayImpl(5);
+		int t = 100;
+		int n = 40;
+		int k = 40;
+		double p = 1.00;
+		QuadMatrix matrix = new QuadMatrixArrayImpl(n);
 
 		//List<QuadMatrix> list = new ArrayList<QuadMatrix>();
 
-		for (int j = 0; j < 5; j++) {
-			Messung msg1 = new Messung();
+		for (int j = 0; j < 100; j++) {
+			//Messung msg1 = new Messung();
 			Messung msg2 = new Messung();
 			for (int i = 0; i < t; i++) {
 				 matrix = QuadMatrixGenerator.random(new QuadMatrixArrayListImpl(1), n, p, 1000);
-				 msg1.add(matrix.space());
+				 //msg1.add(matrix.space());
+				 matrix.timeReset();
+				 matrix.pow(j);
 				 msg2.add(matrix.time());
 			}
-			System.out.println("Dereference: " + Math.rint(msg2.average()));
-			System.out.println("Space: " + Math.rint(msg1.average()));
+			System.out.println((int) Math.rint(msg2.average()));
+			//System.out.println("Space: " + Math.rint(msg1.average()));
 		}
 		//System.out.println(QuadMatrixGenerator.random(new QuadMatrixListImpl(1), n, p, 1000).space());
+		
+		//"Dereference for k = " + j + ": " +
 	}
 	
 	/*
