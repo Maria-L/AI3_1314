@@ -69,39 +69,59 @@ do
     fi
 done
 
-if [ $vflag == "true" ]                 #Wenn das VFlag gesetzt ist den Debugmodus anschalten
-then                                    #und von vorne ausführen
-     echo "Debugmodus anschalten"
-     bash -x $0                         #startet den Debugg Modus und ruft das Programm nochmal auf
-     set +x                             #setzt das xFlag wieder zurück
-     exit 1            
+
+if [ $vflag == "true" ]
+then
+    echo "hflag = " $hflag
+    echo "sflag = " $sflag " | svalue = " $svalue
+    echo "vflag = " $vflag
 fi
 
 if [ $hflag == "true" -o $# -eq 0 ]      #Wenn das HFlag gesetzt wurde oder keine Argumente mitgegeben 
 then                                     #wurden den Hilfetext ausgeben    
+    if [ $vflag == "true" ] 
+    then 
+        echo "print usage" 
+    fi
     usage
+    echo "exit programm"
     exit 1
 fi
 
 while [ "$1" != "" ]                            #Mit Shift über alle Argumente iterieren
 do    
     case $1 in
-    -s*)    shift                               #Wenn s gefunden wird,über s und den Wert nach s shiften
+    -s*)    if [ $vflag == "true" ] 
+            then 
+                echo "found -s* named" $1 
+            fi
+            shift                               #Wenn s gefunden wird,über s und den Wert nach s shiften
             shift
         ;;
-    -*)     shift                               #bei allem anderen drüber weg schiften
+    -*)     if [ $vflag == "true" ] 
+            then 
+                echo "found option named" $1 
+            fi
+            shift                               #bei allem anderen drüber weg schiften
         ;;
      *)     temp=$(file -b $1 | grep -c "\<text")   #wenn kein Argument gegeben wird  abfragen    
             if [ $temp -eq 0 ]                      #ob es ein Text oder Binaerfile ist
             then
-                echo "hallo Welt1"
+                if [ $vflag == "true" ] 
+                then 
+                    echo "splitting binaryfile named" $1 
+                fi
                 split -d -b "$svalue"K -a 4 $1 $1.  #Fuer den Fall eines binearfiles 
             else                                    #wird nach bytes gesplitet
-                echo "hallo Welt2"
+                if [ $vflag == "true" ] 
+                then 
+                    echo "splitting textfile named" $1 
+                fi
                 split -d -l $svalue -a 4 $1 $1.     #Ein Textfile wird nach lines gesplittet
             fi
             shift
     esac
 done
 
+echo "exit programm"
 exit 0
