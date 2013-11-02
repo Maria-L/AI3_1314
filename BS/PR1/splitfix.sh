@@ -91,12 +91,12 @@ fi
 while [ "$1" != "" ]                            #Mit Shift über alle Argumente iterieren
 do    
     case $1 in
-    -s*)    if [ $vflag == "true" ] 
-            then 
-                echo "found -s* named" $1 
-            fi
-            shift                               #Wenn s gefunden wird,über s und den Wert nach s shiften
-            shift
+    -s|--size)  if [ $vflag == "true" ] 
+			    then 
+                    echo "found -s* named" $1 
+                fi
+                shift                               #Wenn s gefunden wird,über s und den Wert nach s shiften
+                shift
         ;;
     -*)     if [ $vflag == "true" ] 
             then 
