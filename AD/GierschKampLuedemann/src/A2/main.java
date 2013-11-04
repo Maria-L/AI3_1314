@@ -10,9 +10,9 @@ public class main {
 	public static void main(String[] args) {
 
 		int t = 100;
-		int n = 40;
+		int n = 10;
 		int k = 40;
-		double p = 1.00;
+		double p = 0.1;
 		QuadMatrix matrix = new QuadMatrixArrayImpl(n);
 
 		//List<QuadMatrix> list = new ArrayList<QuadMatrix>();
@@ -21,7 +21,7 @@ public class main {
 			//Messung msg1 = new Messung();
 			Messung msg2 = new Messung();
 			for (int i = 0; i < t; i++) {
-				 matrix = QuadMatrixGenerator.random(new QuadMatrixArrayListImpl(1), n, p, 1000);
+				 matrix = QuadMatrixGenerator.random(new QuadMatrixListImpl(1), n, p, 1000);
 				 //msg1.add(matrix.space());
 				 matrix.timeReset();
 				 matrix.pow(j);
