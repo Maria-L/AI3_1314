@@ -29,7 +29,7 @@ public class List  {
 	}
 	
 	public boolean insert(Object n, int i) {
-		if(i == 1) {
+		if(i == 0) {
 			head(n);
 			return true;
 		} else if (tail == null) {
