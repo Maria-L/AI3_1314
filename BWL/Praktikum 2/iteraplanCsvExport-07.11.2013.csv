@@ -1,0 +1,13 @@
+Gesamtname	Applikations-ID	Applikationsname	Release-ID	Release	Vater Applikations-ID	Vater Applikationsname	Vater Release-ID	Vater Release	Beschreibung	Von	Bis	Status
+Claim & benefit mgmt assurance	156	Claim & benefit mgmt assurance	203						Claim and benefit management assurance system: this information system checks claims of individual incidents and manages the benefits for customers.  Note: This Information System supports our vision to expand into the assurance sector.	01.06.2041		Soll
+CRM # 3.2	158	CRM	206	03. Feb					Consolidated, main database for customer data 	01.10.2012	01.06.2017	Plan
+CRM RB # 3.2	159	CRM RB	208	03. Feb					CRM application in the regional branchesa new version, used by the division systems. 	01.03.2013		Plan
+Funds txs # r13	170	Funds txs	220	r13					Funds transactions: New shared transaction system for both banks	01.09.2012		Plan
+HR # 4.0cloud	172	HR	223	4.0cloud								Soll
+Insurance & Contract Mgmt	173	Insurance & Contract Mgmt	224						Management System for assurance contracts and conditions.  Note: This Information System supports our vision to expand into the assurance sector.	01.06.2041		Soll
+Insurance & Contract Mgmt : Distribution Support	161	Distribution Support	210		173	Insurance & Contract Mgmt	224		This information system supports the distribution of the assurance.  Note: This Information System supports our vision to expand into the assurance sector.	01.06.2041		Soll
+Insurance & Contract Mgmt : Insurance App	174	Insurance App	225		173	Insurance & Contract Mgmt	224		This information system verifies insurance applications.  Note: This Information System supports our vision to expand into the assurance sector.	01.06.2041		Soll
+Integrated BI # 1.0	175	Integrated BI	226	1.0					Business Intelligence aims to support better business decision-making	01.01.2016		Plan
+Neuronal Network # 12.0	183	Neuronal Network	234	12.0					Neuronal network system supports investigation decissions.			Soll
+Salesforce.com	187	Salesforce.com	238						Cloud based CRM (public cloud).	01.06.2016	01.06.2024	Plan
+Solvency check # 1.1	195	Solvency check	247	01. Jan					Solvency check (with migrated database)	15.12.2012		Plan
