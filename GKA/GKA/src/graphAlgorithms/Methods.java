@@ -1,6 +1,7 @@
 package graphAlgorithms;
 
 import graph.*;
+
 import java.util.*;
 
 
@@ -67,10 +68,10 @@ public class Methods {
 	 * @return
 	 */
 	public static HashMap<String,List<List<Integer>>> floydWarshall(Graph graph) {
-		HashMap<String,List<List<Integer>>> akku = new HashMap<>();
-		List<List<Integer>> trans = new ArrayList<List<Integer>>();
-		List<List<Integer>> dist = new ArrayList<List<Integer>>();
-		List<Integer> vertexes = graph.getVertexes();
+		HashMap<String,List<List<Integer>>> akku = new HashMap<>();	//HashMap zum Ausgeben der Ergebnisse
+		List<List<Integer>> trans = new ArrayList<List<Integer>>();	//Transitmatrix
+		List<List<Integer>> dist = new ArrayList<List<Integer>>();	//Distanzmatrix
+		List<Integer> vertexes = graph.getVertexes();				//Statische Liste der Vertexes
 		int size = graph.getVertexes().size();
 		
 		for(int i = 0; i < size;i++) {
@@ -78,24 +79,53 @@ public class Methods {
 			dist.add(new ArrayList<Integer>());
 			
 			for(int j = 0; j < size;j++) {
-				trans.get(i).add(0);
+				trans.get(i).add(-1);								//transitmatrix mit Fehlerwert befolgen
 				if(i == j) {
-					dist.get(i).add(0);
+					dist.get(i).add(0);								//Weg zu sich selber 0 setzen
 				} else {
-					dist.get(i).add(Integer.MAX_VALUE);
+					dist.get(i).add(Integer.MAX_VALUE);				//Wege zu anderen auf Integer.MaxValue setzen
 				}
 			}
 		}
 		
-		for(int i : graph.getEdges()) {
-			int temp = graph.getValE(i, "distanz");
-			int source = graph.getSource(i);
-			int target = graph.getTarget(i);
+		for(int i : graph.getEdges()) {								//Alle Kanten in der Distanzmatrix Eintragen
+			int temp = graph.getValE(i, "gewicht");
+			int source = graph.getSource(i);	//ID von Source suchen
+			int target = graph.getTarget(i);	//ID von Target suchen
 			
-			source = vertexes.indexOf(source);
+			source = vertexes.indexOf(source);	//Index in der Liste suchen
 			target = vertexes.indexOf(target);
 			
-			
+			if(graph.directed()) {
+				dist.get(source).set(target, temp);
+			} else {
+				dist.get(source).set(target, temp);
+				dist.get(target).set(source, temp);
+			}
+		}
+		
+		for(int j = 0; j < size;j++) {																		//für jeden Knoten j
+			for(int i = 0; i < size;i++) {																	//    für jeden Knoten i != j
+				if(i != j) {														
+					for(int k = 0; k < size;k++) {															//        für jeden Knoten k != j
+						if(k != j) {
+							int dik = dist.get(i).get(k);
+							int dij = dist.get(i).get(j);
+							int djk = dist.get(j).get(k);
+							
+							if(dij != Integer.MAX_VALUE && djk != Integer.MAX_VALUE) {	
+								if(dik > dij + djk) {														//            Wenn D(i,k) > D(i,j) + D(jk)
+									dist.get(i).set(k, dij + djk);											//                D(i,k) = D(i,j) + D(jk)
+									trans.get(i).set(k, j);													//                T(i,k) = j
+								}
+							}
+							if(dist.get(i).get(i) < 0) {													//            Wenn D(i,i) < 0
+								throw new IllegalArgumentException("Es wurden negative Kreise gefunden");	//                Werfe Fehler
+							}
+						}
+					}
+				}
+			}
 		}
 		
 		
