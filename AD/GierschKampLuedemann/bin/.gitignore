@@ -1,0 +1,10 @@
+/A1
+/A2
+/A3
+/A5
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear

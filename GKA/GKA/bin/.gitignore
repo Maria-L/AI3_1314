@@ -1,0 +1,14 @@
+/graph
+/graphAlgorithms
+/graphReader
+<<<<<<< HEAD
+
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear
+=======
+/plot
+>>>>>>> 1f649e4c62c9d4c47c3d554bf7a28cde5731bdd5
