@@ -15,7 +15,7 @@ public class main {
 		BufferedReader br = null;
 
 		try {
-			File file = new File("Z:/Projekte/AI3_1314/GKA/GKA/src/graphReader/graphs/graph_01.graph");
+			File file = new File("F:/GitDaten/AI3_1314/GKA/GKA/src/graphReader/graphs/graph_03.graph");
 			br = new BufferedReader(new FileReader(file));
 
 			graph = graphReaderGewicht(br);
@@ -33,14 +33,22 @@ public class main {
 				}
 			}
 		}
-		for(int i : graph.getVertexes()) {
-			System.out.println("#######" + graph.getStrV(i, "name") + "#######");
-			Methods.bellmanFord(graph, i);
-			graph.print();
-			System.out.println("");
-			System.out.println("");
-			System.out.println("");
+		
+		HashMap<String,List<List<Integer>>> hash = Methods.floydWarshall(graph);
+		List<List<Integer>> list = hash.get("trans");
+		//System.out.println(list);
+		
+		for(int i = 0; i < list.size(); i++) {
+			System.out.println(list.get(i));
 		}
+//		for(int i : graph.getVertexes()) {
+//			System.out.println("#######" + graph.getStrV(i, "name") + "#######");
+//			Methods.bellmanFord(graph, i);
+//			graph.print();
+//			System.out.println("");
+//			System.out.println("");
+//			System.out.println("");
+//		}
 	}
 
 	public static Graph graphReader1(BufferedReader br) throws IOException {
