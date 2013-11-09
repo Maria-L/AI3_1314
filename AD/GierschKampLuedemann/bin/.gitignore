@@ -1,1 +1,7 @@
 /A5
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear

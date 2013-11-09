@@ -1,3 +1,10 @@
 /graph
 /graphAlgorithms
 /graphReader
+
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear
