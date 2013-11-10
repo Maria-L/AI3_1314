@@ -34,13 +34,13 @@ public class main {
 			}
 		}
 		
-		HashMap<String,List<List<Integer>>> hash = Methods.floydWarshall(graph);
-		List<List<Integer>> list = hash.get("trans");
-		//System.out.println(list);
+//		HashMap<String,List<List<Integer>>> hash = Methods.floydWarshall(graph);
+//		List<List<Integer>> list = hash.get("dist");
 		
-		for(int i = 0; i < list.size(); i++) {
-			System.out.println(list.get(i));
-		}
+//		for(int i = 0; i < list.size(); i++) {
+//			System.out.println(list.get(i));
+//		}
+		
 //		for(int i : graph.getVertexes()) {
 //			System.out.println("#######" + graph.getStrV(i, "name") + "#######");
 //			Methods.bellmanFord(graph, i);
@@ -50,13 +50,41 @@ public class main {
 //			System.out.println("");
 //		}
 	}
+	
+	public static Graph readGraphGewicht(String str) {
+		Graph graph = null;
+
+		BufferedReader br = null;
+
+		try {
+			File file = new File(str);
+			br = new BufferedReader(new FileReader(file));
+
+			graph = graphReaderGewicht(br);
+
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		return graph;
+	}
 
 	public static Graph graphReader1(BufferedReader br) throws IOException {
 		String line = null;
 		Graph graph = new GraphImpl();
 		boolean directed;
 
-		if (br.readLine() == "#gerichtet") {	//Prüfen ob der Graph gerichtet ist oder nicht
+		if (br.readLine().startsWith("#g")) {	//Prüfen ob der Graph gerichtet ist oder nicht
 			directed = true;
 		} else {
 			directed = false;
@@ -106,7 +134,7 @@ public class main {
 		String line = null;
 		Graph graph = new GraphImpl();
 
-		if (br.readLine() == "#gerichtet") {	//Prüfen ob der Graph gerichtet ist oder nicht
+		if (br.readLine().startsWith("#g")) {	//Prüfen ob der Graph gerichtet ist oder nicht
 			graph.setDirected(true);
 		} else {
 			graph.setDirected(false);

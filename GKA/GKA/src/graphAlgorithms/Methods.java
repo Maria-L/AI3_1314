@@ -79,7 +79,7 @@ public class Methods {
 			dist.add(new ArrayList<Integer>());
 			
 			for(int j = 0; j < size;j++) {
-				trans.get(i).add(-1);								//transitmatrix mit Fehlerwert befolgen
+				trans.get(i).add(-1);								//transitmatrix mit Fehlerwert befüllen
 				if(i == j) {
 					dist.get(i).add(0);								//Weg zu sich selber 0 setzen
 				} else {
@@ -128,6 +128,13 @@ public class Methods {
 			}
 		}
 		
+		for(int i = 0; i < size;i++) {											//Über die gesammte Transitmatrix iterieren
+			for(int j = 0; j < size;j++) {
+				if(trans.get(i).get(j) != -1) {									//Wenn der Matrixeintrag nicht id.ErrorID entspricht
+					trans.get(i).set(j, vertexes.get(trans.get(i).get(j)));		//    Ersetze die ListenID durch die KnotenID
+				}
+			}
+		}
 		
 		akku.put("trans", trans);
 		akku.put("dist", dist);
