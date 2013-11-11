@@ -25,3 +25,6 @@ git pull 		        -> Vereinigt die Dateien des Online Verzeichnisses mit dem ak
 
 git push origin master      	-> Muss man eingeben wenn Git mault, dass kein Brunch gewählt 					
                                	wurde. Damit legt man den aktuellen diesen als Master fest.
+git stash				-> Legt alle Dateien, die ab dem letzten Commit verändert wurden, auf einen Stack. Dadurch kann man seine File quasi wieder auf den letzten Commit zurücksetzen.
+
+git stash pop			-> Holt den letzten Stash vom Stack und schreibt die Files wieder ins Dateisystem.
