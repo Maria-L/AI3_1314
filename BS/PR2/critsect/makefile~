@@ -1,0 +1,2 @@
+eritsect02: critsect02.c
+	gcc -o -pthread -g -Wall -lpthread critsect02 critsect02.c
