@@ -1,12 +1,12 @@
-Eclipse Hotkeys
+﻿Eclipse Hotkeys
 
-CTRL+Shift+O	Organize Imports
+CTRL+Shift+O		Organize Imports
 
 CTRL+D			Delete Row
 
 CTRL+1			Quick fix
 
-CTRL+Shift+f 	AutoFormat
+CTRL+Shift+f 		AutoFormat
 
 CTRL+Space		AutoComplete (Versuchs mal mit syso -> System.out.println() -> BÄM!)
 
