@@ -1,0 +1,15 @@
+
+
+CTRL+Shift+O	Organize Imports
+
+CTRL+D			Delete Row
+
+CTRL+1			Quick fix
+
+CTRL+Shift+f 	AutoFormat
+
+CTRL+Space		AutoComplete (Versuchs mal mit syso -> System.out.println() -> BÄM!)
+
+Hold CTRL and Click on class or methd		Go to the implementation of the clicked class/method
+
+Shift+Alt+J		Creates a JavaDoc-Template for the thing (class,method,variable) where the cursor is on it.
