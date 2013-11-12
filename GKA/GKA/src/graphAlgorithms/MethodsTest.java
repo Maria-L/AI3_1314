@@ -18,7 +18,7 @@ public class MethodsTest {
 	@Test
 	public void testBellmanFord() {
 		//Test für einen gerichteten Graphen
-		Graph graph = readGraphGewicht("F:/GitDaten/AI3_1314/GKA/GKA/src/graphReader/graphs/graph_03.graph");
+		Graph graph = readGraphGewicht("Z:/Projekte/AI3_1314/GKA/GKA/src/graphReader/graphs/graph_03.graph");
 		List<Integer> vertexes = graph.getVertexes();
 		int s = vertexes.get(0); int u = vertexes.get(1);
 		int x = vertexes.get(2); int v = vertexes.get(3);
@@ -36,7 +36,7 @@ public class MethodsTest {
 		assertEquals(x,graph.getValV(y, "vorgaenger"));
 		
 		//Test für einen ungerichteten Graphen
-		graph = readGraphGewicht("F:/GitDaten/AI3_1314/GKA/GKA/src/graphReader/graphs/graph_10.graph");
+		graph = readGraphGewicht("Z:/Projekte/AI3_1314/GKA/GKA/src/graphReader/graphs/graph_10.graph");
 		vertexes = graph.getVertexes();
 		int v1 = vertexes.get(0); int v2 = vertexes.get(1);
 		int v3 = vertexes.get(2); int v4 = vertexes.get(3);
@@ -53,11 +53,17 @@ public class MethodsTest {
 		assertEquals(v1,graph.getValV(v4, "vorgaenger"));
 		assertEquals(v1,graph.getValV(v5, "vorgaenger"));
 	}
+	
+	@Test (expected = IllegalArgumentException.class)
+	public void testBellmanFordExc() {
+		Graph graph = readGraphGewicht("Z:/Projekte/AI3_1314/GKA/GKA/src/graphReader/graphs/graph_07.graph");
+		Methods.bellmanFord(graph, 0);
+	}
 
 	@Test
 	public void testFloydWarshall() {
 		//Test für einen gerichteten Graphen
-		Graph graph = readGraphGewicht("F:/GitDaten/AI3_1314/GKA/GKA/src/graphReader/graphs/graph_03.graph");
+		Graph graph = readGraphGewicht("Z:/Projekte/AI3_1314/GKA/GKA/src/graphReader/graphs/graph_03.graph");
 		HashMap<String,List<List<Integer>>> hash = Methods.floydWarshall(graph);
 		List<Integer> listDist = Arrays.asList(0,8,5,9,7);
 		List<Integer> listTrans = Arrays.asList(-1,3,-1,3,3);
@@ -65,7 +71,7 @@ public class MethodsTest {
 		assertEquals(listTrans,hash.get("trans").get(0));
 		
 		//Test für einen ungerichteten Graphen
-		graph = readGraphGewicht("F:/GitDaten/AI3_1314/GKA/GKA/src/graphReader/graphs/graph_10.graph");
+		graph = readGraphGewicht("Z:/Projekte/AI3_1314/GKA/GKA/src/graphReader/graphs/graph_10.graph");
 		hash = Methods.floydWarshall(graph);
 		listDist = Arrays.asList(10,15,0,25,30);
 		assertEquals(listDist, hash.get("dist").get(2));
@@ -73,7 +79,7 @@ public class MethodsTest {
 	
 	@Test (expected = IllegalArgumentException.class)
 	public void testFloydWarshallExc() {
-		Graph graph = readGraphGewicht("F:/GitDaten/AI3_1314/GKA/GKA/src/graphReader/graphs/graph_07.graph");
+		Graph graph = readGraphGewicht("Z:/Projekte/AI3_1314/GKA/GKA/src/graphReader/graphs/graph_07.graph");
 		HashMap<String,List<List<Integer>>> hash = Methods.floydWarshall(graph);
 	}
 

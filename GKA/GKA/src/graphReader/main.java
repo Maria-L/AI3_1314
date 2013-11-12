@@ -10,45 +10,29 @@ public class main {
 
 	/** @param args */
 	public static void main(String[] args) {
-		Graph graph = null;
-
-		BufferedReader br = null;
-
-		try {
-			File file = new File("F:/GitDaten/AI3_1314/GKA/GKA/src/graphReader/graphs/graph_03.graph");
-			br = new BufferedReader(new FileReader(file));
-
-			graph = graphReaderGewicht(br);
-
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			if (br != null) {
-				try {
-					br.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
+		List<Graph> list = new ArrayList<Graph>();
+		
+		list.add(readGraphGewicht("Z:/Projekte/AI3_1314/GKA/GKA/src/graphReader/graphs/graph_01.graph"));
+		list.add(readGraphGewicht("Z:/Projekte/AI3_1314/GKA/GKA/src/graphReader/graphs/graph_02.graph"));
+		list.add(readGraphGewicht("Z:/Projekte/AI3_1314/GKA/GKA/src/graphReader/graphs/graph_03.graph"));
+		list.add(readGraphGewicht("Z:/Projekte/AI3_1314/GKA/GKA/src/graphReader/graphs/graph_06.graph"));
+		list.add(readGraphGewicht("Z:/Projekte/AI3_1314/GKA/GKA/src/graphReader/graphs/graph_08.graph"));
+		list.add(readGraphGewicht("Z:/Projekte/AI3_1314/GKA/GKA/src/graphReader/graphs/graph_09.graph"));
+		list.add(readGraphGewicht("Z:/Projekte/AI3_1314/GKA/GKA/src/graphReader/graphs/graph_10.graph"));
+		list.add(readGraphGewicht("Z:/Projekte/AI3_1314/GKA/GKA/src/graphReader/graphs/graph_11.graph"));
+		
+		for(Graph graph : list) {
+			System.out.println("##########");
+			System.out.println();
+			Methods.bellmanFord(graph, 0);
+			System.out.println(Methods.counter.getCount());
+			Methods.counter.reset();
+			Methods.floydWarshall(graph);
+			System.out.println(Methods.counter.getCount());
+			System.out.println(Methods.counterMatrix.getCount());
+			Methods.counter.reset();
+			Methods.counterMatrix.reset();
 		}
-		
-//		HashMap<String,List<List<Integer>>> hash = Methods.floydWarshall(graph);
-//		List<List<Integer>> list = hash.get("dist");
-		
-//		for(int i = 0; i < list.size(); i++) {
-//			System.out.println(list.get(i));
-//		}
-		
-//		for(int i : graph.getVertexes()) {
-//			System.out.println("#######" + graph.getStrV(i, "name") + "#######");
-//			Methods.bellmanFord(graph, i);
-//			graph.print();
-//			System.out.println("");
-//			System.out.println("");
-//			System.out.println("");
-//		}
 	}
 	
 	public static Graph readGraphGewicht(String str) {

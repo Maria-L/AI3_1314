@@ -1,0 +1,18 @@
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <semaphore.h>
+
+#define NPHILO 5
+#define THINK_LOOP 1000000000
+#define EAT_LOOP 500000000
+
+void *philo(void *arg);            //Pointer auf die Philosophenfunktion
+int[NPHILO] stickCond;             //Zustandsarray der Staebchen
+pthread_mutex_t[NPHILO] stickSem;  //Array der Staebchen-Mutexe
+
+pthread_barrier_t barrier;         //Barriere für das sichere Erstellen der Philosophen
+
+
