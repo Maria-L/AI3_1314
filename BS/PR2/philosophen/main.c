@@ -4,32 +4,44 @@
 #include <string.h>
 #include <pthread.h>
 #include <semaphore.h>
+#include <ncurses.h>
 
 #define MSGLEN 128
 #define NPHILO 5
-#define THINK_LOOP 100000000
-#define EAT_LOOP 50000000
+#define THINK_LOOP 1000000000
+#define EAT_LOOP 500000000
+#define CONSOLESIZEX 50
+#define CONSOLESIZEY 40
+#define ASCIICHARTOINTOFFSET 48
 
 void *philo(void *arg);            //Pointer auf die Philosophenfunktion
 int stickCond[NPHILO];             //Zustandsarray der Staebchen 0->frei 1->belegt
+sem_t block[NPHILO];               //Semaphoren zum benutzergesteuerten Blockieren
 pthread_mutex_t mutex;             //Mutex fuer das Probieren  die Staebchen aufzunehmen
 pthread_mutex_t mutexPrint;        //Mutex fuer das Drucken von Ausgaben
-pthread_cont_t condBlock;          //Condition für das benutzergesteuerte Blockieren
 pthread_cond_t condStick[NPHILO];  //Condition-Array fuer Staebchen-Blockieren
 pthread_barrier_t barrierSingle;   //Barriere fuer das sichere Erstellen der einzelnen Philosophen
 pthread_barrier_t barrierAll;      //Barriere fuer das sichere Erstellen aller Philosophen.
 char command[NPHILO];
 char state[NPHILO];
 int err;
+int lineCount;
 
 void printStates(int n, char ch) {
   pthread_mutex_lock(&mutexPrint);
   state[n] = ch;
   int i;
-  printf("\n");
-  for(i = 0; i < NPHILO;i++) {
-    printf("%d %c   ", i, state[i]);
+  lineCount = lineCount + 1;
+  if(lineCount >= CONSOLESIZEY) {
+    clear();
+    lineCount = 0;
   }
+  
+  printw("\n");
+  for(i = 0; i < NPHILO;i++) {
+    printw("%d %c   ", i, state[i]);
+  }
+  refresh();
   for(i = 0; i < NPHILO; i++) {
     if(state[i] == 'E' && state[(i+1)%NPHILO] == 'E') {
 	perror("Ungueltiger Zustand");
@@ -73,7 +85,6 @@ void *philo(void *arg) {
   int philono = *((int *) arg);
   int i;
   pthread_barrier_wait(&barrierSingle);
-  printf("\nHello, I am Philosoph no %d\n", philono);
   state[philono] = 'T';
   pthread_barrier_wait(&barrierAll);
 
@@ -81,12 +92,19 @@ void *philo(void *arg) {
     //Thinkloop
     for(i = 0; i < THINK_LOOP;i++) {
       if(command[philono] == 'b') {
-        pthread_cond_wait(&condBlock[philono]);
+        sem_wait(&block[philono]);
+      } else if(command[philono] == 'p') {
+        command[philono] = ' ';
+        break;
       }
-    };
+    }
     //Eatloop
     getSticks(philono);
-    for(i = 0; i < EAT_LOOP;i++) {};
+    for(i = 0; i < EAT_LOOP;i++) {
+      if(command[philono] == 'b') {
+        sem_wait(&block[philono]);
+      }
+    };
     putSticks(philono);
   }
 
@@ -98,6 +116,13 @@ int main(void) {
   void *thread_result[NPHILO] = {0};  //Array der Thread-Ergebnisse
   int i;                              //Laufzeilenindex
   char ch;
+  lineCount = 0;
+
+  initscr();
+  raw();
+  noecho();
+  resize_term(CONSOLESIZEY, CONSOLESIZEX);
+  refresh();
 
   err = pthread_mutex_init(&mutex, NULL);
   if(err != 0) {
@@ -111,6 +136,14 @@ int main(void) {
     exit(EXIT_FAILURE);
   }
 
+  for(i = 0; i < NPHILO;i++) {
+    err = sem_init(&block[i], 0, 0);
+    if(err != 0) {
+      perror("Semaphor initalisation failed");
+      exit(EXIT_FAILURE);
+    }
+  }
+
   err = pthread_barrier_init(&barrierSingle, NULL, 2);
   if(err != 0) {
     perror("\n Barrier initialisation failed\n");
@@ -122,7 +155,7 @@ int main(void) {
     perror("\n Barrier initialisation failed\n");
     exit(EXIT_FAILURE);
   }
-
+  
   for(i = 0; i < NPHILO;i++) {
     err = pthread_create(&tid[i], NULL, philo, (void *) &i);
     if(err != 0) {
@@ -132,19 +165,25 @@ int main(void) {
     pthread_barrier_wait(&barrierSingle);
   }
   pthread_barrier_wait(&barrierAll);
-
+  
   while(ch != 'q'){
-    ch = _getch();
+    ch = getch();
     if(ch == 'q') {
       for(i = 0; i < NPHILO; i++) {
         command[i] = ch;
       }
+    } else if(ch == 'b') {
+      i = getch() - ASCIICHARTOINTOFFSET;
+      command[i] = 'b';
+    } else if(ch == 'u') {
+      i = getch() - ASCIICHARTOINTOFFSET;
+      command[i] = 'u';
+      sem_post(&block[i]);
+    } else if(ch == 'p') {
+      i = getch() - ASCIICHARTOINTOFFSET;
+      command[i] = 'p';
     }
   }
-
-
-
-
 
 
   for(i = 0; i < NPHILO;i++) {
@@ -155,10 +194,12 @@ int main(void) {
       perror(msg);
       exit(EXIT_FAILURE);
     }
-    printf("\nThread %d joined\n", i);
   }
 
-  sem_destroy(&condBlock);
-  sem_destroy(&condStick);
+  for(i = 0; i < NPHILO; i++) {
+    sem_destroy(&block[i]);
+  }
+  //sem_destroy(&condStick);
+  endwin();
   return 0;
 }
