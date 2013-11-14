@@ -5,6 +5,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <ncurses.h>
+#include "philo.h"
 
 #define MSGLEN 128
 #define NPHILO 5
