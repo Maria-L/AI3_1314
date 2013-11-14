@@ -10,7 +10,7 @@
 #define NPHILO 5
 #define THINK_LOOP 1000000000
 #define EAT_LOOP 500000000
-#define CONSOLESIZEX 50
+#define CONSOLESIZEX 70
 #define CONSOLESIZEY 40
 #define ASCIICHARTOINTOFFSET 48
 
@@ -26,66 +26,7 @@ char command[NPHILO];              //Commandoarray
 char state[NPHILO];                //Statusarray der Philosophen
 int lineCount;                     //Linienzähler für die Ausgabe via NCurses
 
-//Schreibt Statusaenderungen auf den Bildschirm und aktuallisiert diese im state-Array
-//int n   -> Nummer des Philosophen
-//char ch -> Neuer Status
-void printStates(int n, char ch) {
-  pthread_mutex_lock(&mutexPrint);                        //Speeren auf den Print-Mutex um zu verhinden, dass zwei Prozesse Gleichzeitig drucken
-  state[n] = ch;                                          //Status aktuallisieren
-  int i;                                                  //Zaehlvariable
-  lineCount = lineCount + 1;                              //Den Linienzaehler aktualisieren 
-  if(lineCount >= CONSOLESIZEY) {                         //Wenn der linienzaehler größer als die Konsole ist
-    clear();                                              //dann loesche die Konsole
-    lineCount = 0;                                        //und setze den Linienzaehler auf 0
-  }
-  
-  printw("\n");                                           //Drucke einen Zeilenumbruch
-  for(i = 0; i < NPHILO;i++) {                            //Drucke den Status aller Philosophen
-    printw("%d %c   ", i, state[i]);
-  }
-  refresh();                                              //Aktualisiere die Ausgabe
-  for(i = 0; i < NPHILO; i++) {                           //Pruefe für jeden Philosophenstatus
-    if(state[i] == 'E' && state[(i+1)%NPHILO] == 'E') {   //ob zwei Philosophen nebeneinander essen
-	perror("Ungueltiger Zustand");                        //Wenn ja -> Schreibe einen Fehler und beende das Programm
-        exit(EXIT_FAILURE);
-      }
-  }
-  pthread_mutex_unlock(&mutexPrint);                      //Gebe den Print-Mutex wieder frei
-}
 
-//Wartet bis das linke und das rechte Staebchen frei sind und belegt diese
-//dann fuer den aufrufenden Philosophen
-//int no -> Nummer des aufrufenden Philosophen
-void getSticks(int no) {
-  printStates(no, 'H');                                               //Druckt den veraenderten Status des Philosophen
-                                                                      //in die Konsole
-  pthread_mutex_lock(&mutex);                                         //Blockiere auf dem Philosophen-Mutex
-  while(stickCond[no%NPHILO] != 0 || stickCond[(no+1)%NPHILO] != 0) { //Wenn das linke oder das rechte Staebchen nicht frei sind
-    pthread_cond_wait(&condStick[no], &mutex);                        //  dann gib den Mutex wieder frei und blockiere auf der Philosophen-Semaphore
-  }                                                                   //  diese Blockierung endet wenn der linke oder rechte Philosoph ein Staebchen weglegt
-  //Kritischer Abschnitt beginnt
-  stickCond[no%NPHILO] = 1;                                           //Belege das linke Staebchen
-  stickCond[(no+1)%NPHILO] = 1;                                       //Belege das rechte Staebchen
-  //Kritischer Abschnit endet
-  pthread_mutex_unlock(&mutex);                                       //Gib den Mutex wieder frei
-  
-  printStates(no, 'E');                                               //Druckt den veraenderten Status des Philosophen
-}
-
-//Laesst den aufrufenden Philosophen seine Staebchen wieder weglegen und
-//benachrichtigt seinen linken und rechten Nachbar darueber
-//int no -> Nummer des aufrufenden Philosophen
-void putSticks(int no) {
-  pthread_mutex_lock(&mutex);                                     //Blockiere auf dem Philosophen-Mutex
-
-  stickCond[no%NPHILO] = 0;                                       //Gebe das linke Staebchen frei
-  stickCond[(no+1)%NPHILO] = 0;                                   //Gebe das rechte Staebchen frei
-  pthread_cond_signal(&condStick[(no-1 < 0 ? NPHILO-1 : no-1)]);  //Gib dem linken Philosophen bescheid darueber
-  pthread_cond_signal(&condStick[(no+1)%NPHILO]);                 //Gib dem rechten Philosophen bescheid darueber
-
-  printStates(no, 'T');                                           //Druck den veraenderten Philosphenstatus
-  pthread_mutex_unlock(&mutex);                                   //Gib den Philosophen-Mutex wieder frei
-}
 
 //Philosophenthread.
 //Dieser denkt, ist hungrig und isst.
@@ -208,12 +149,19 @@ int main(void) {
       exit(EXIT_FAILURE);
     }
   }
-
-  for(i = 0; i < NPHILO; i++) { //Zerstoere alle Synchronisationsobjekte
-    sem_destroy(&block[i]);
-	sem_destroy(&condStick[i]);
-  }
   
+  //Zerstören aller Synchronisationsobjekte
+  pthread_mutex_destroy(&mutex);
+  pthread_mutex_destroy(&mutexPrint);
+  pthread_barrier_destroy(&barrierSingle);
+  pthread_barrier_destroy(&barrierAll);
+  for(i = 0; i < NPHILO; i++) {
+    sem_destroy(&block[i]);
+    pthread_cond_destroy(&condStick[i]);
+  }
+
+  printw("\nAll threads have successfully terminated - ready to quit");
+  getch();
   endwin();  //Beende die NCurses-Console
   return 0;
 }
