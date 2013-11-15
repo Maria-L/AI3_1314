@@ -1,0 +1,130 @@
+funktion main
+  lineCount = 0
+  
+  NCurses.initialice
+  
+  initialice(&mutex, &mutexPrint, &blockSem)
+  initialice(&barrierSingle, 2)
+  initialice(&barrierAll, NPHILO+1)
+  
+  for 1..NPHILO
+    initialice(philo)
+	wait_for(&barrierSingle)
+  endfor
+  
+  wait_for(&barrierAll)
+  
+  while ch != 'q'
+    ch = getch
+	if ch == 'q'
+	  for i = 0..NPHILO-1
+	    command[i] = 'q'
+	  endfor
+	else if ch == 'b'
+	  i = getnum
+	  command[i] = 'b'
+	else if ch == 'u'
+	  i = getnum
+	  command[i] = 'u'
+	  sem_post(&blockSem[i])
+	else if ch == 'p'
+	  i = getnum
+	  command[i] = 'p'
+	endif
+  endwhile
+  
+  for i = 0..NPHILO-1
+    wait_for_thread(i)
+  endfor
+  
+  destroy_all_synchronisers
+  
+  NCruses.terminate
+end main
+
+
+funktion philo
+  state[philono] = 'T'
+  waitfor(&barrierSingle)
+  waitfor(&barrierAll)
+  
+  while command[philono] != 'q'
+    for i..THINKLOOP
+	  if command[philono] == 'b'
+	    wait_for(blockSem[philono])
+	  else if command[philono] == 'p'
+	    command[philono] = NULL
+		endForloop
+	  endif
+	endfor
+	
+	getSticks
+  
+  while command[philono] != 'q'
+    for i..EATLOOP
+	  if command[philono] == 'b'
+	    wait_for(blockSem[philono])
+	  else if command[philono] == 'p'
+	    command[philono] = NULL
+		endForloop
+	  endif
+	endfor
+  endwhile
+  
+  putsticks
+  
+  endwhile
+end philo
+
+
+function changeAndDisplayStates(n, ch)
+  wait_for(&mutexPrint)
+  
+  state[n] = ch
+  lineCount += 1
+  
+  if lineCount > CONSOLESIZEY
+    clearConsole
+	lineCount = 0
+  endif
+  
+  print(states)
+  
+  refreshConsole
+  
+  for i = 0..NPHILO-1
+    if state[i] and state[i+1] == 'E'
+	  exitWithError
+	endif
+  endfor
+  
+  release(&mutexPrint)
+end changeAndDisplayStates
+
+
+function getSticks(no)
+  changeAndDisplayStates(no, 'H')
+  
+  wait_for(&mutex)
+  while leftStick and rightStick not 0
+    wait_for(&condStick[no], &mutex)
+  endwhile
+  
+  leftStick = 1
+  rightStick = 1
+  
+  release(&mutex)
+  
+  changeAndDisplayStates(no, 'E')
+end getSticks
+
+
+function putSticks(no)
+  wait_for(&mutex)
+  changeAndDisplayStates(no, 't)
+  leftStick = 0
+  rightStick = 0
+  signal(leftPhilo)
+  signal(rightPhilo)
+  release(&mutex)
+end putSticks
