@@ -1,5 +1,17 @@
+Array command[]
+NPHILO 5
+THINK_LOOP 1000000000
+EAT_LOOP 500000000
+CONSOLESIZEX 70
+CONSOLESIZEY 40
+ASCIICHARTOINTOFFSET 48
+
+Array state[NPHILO]
+Array command[NPHILO]
+
 funktion main
   lineCount = 0
+  
   
   NCurses.initialice
   
