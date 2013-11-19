@@ -4,7 +4,6 @@
 #include <string.h>
 #include <pthread.h>
 #include <semaphore.h>
-#include <ncurses.h>
 
 #include "philo_global.h"
 #include "monitor.h"
@@ -17,31 +16,7 @@ int main(void) {
   int i;                              //Laufzeilenindex
   char ch;                            //Character 
   int err;                            //Speicher fuer Ausgabewerte
-  lineCount = 0;                      //Initialisiere den lineCount mit 0;
-
-  err = initscr();                               //Initialisiere die Konsole fuer NCurses
-  if(err != 0) {                                 //Pruefe auf einen Fehler bei der Initialisierung
-    perror("\n NCruses initialisation failed\n");
-    exit(EXIT_FAILURE);
-  }
-  
-  err = noecho();                                //Deaktiviere das automatische Ausgeben von Eingaben
-  if(err != 0) {                                   //Pruefe auf einen Fehler bei der Initialisierung
-    perror("\n noecho failed\n");
-    exit(EXIT_FAILURE);
-  }
-  
-  err = resize_term(CONSOLESIZEY, CONSOLESIZEX); //Definiere den Druckbereich der Konsole
-  if(err != 0) {                                   //Pruefe auf einen Fehler bei der Initialisierung
-    perror("\n resice failed\n");
-    exit(EXIT_FAILURE);
-  }
-  
-  err = refresh();                               //Aktualisiere die Konsole
-  if(err != 0) {                                   //Pruefe auf einen Fehler bei der Initialisierung
-    perror("\n refresh failed\n");
-    exit(EXIT_FAILURE);
-  }
+  char input[BUFFERSIZE];
   
   err = pthread_mutex_init(&mutex, NULL);          //Initialisiere den Mutex fuer die Philosophen
   if(err != 0) {                                   //Pruefe auf einen Fehler bei der Initialisierung
@@ -86,21 +61,23 @@ int main(void) {
   pthread_barrier_wait(&barrierAll);                          //Lasse alle Philosophen und die main gleichzeitig weiter machen
   
   while(ch != QUIT){                        //Solange der Prozess nicht beendet werden soll
-    ch = getch();                           //  Lese die Benutzereingabe ein. q -> Quit, b -> block, u -> unblock
+    fgets(input, BUFFERSIZE, stdin);
+    ch = input[0];
+    //ch = getch();                         //  Lese die Benutzereingabe ein. q -> Quit, b -> block, u -> unblock
     if(ch == QUIT) {                        //  Wenn ch = q ist
       for(i = 0; i < NPHILO; i++) {         //    Dann schreibe bei jedem Philosophen das Kommando auf 'q'
         command[i] = ch;
 	sem_post(&block[i]);
       }
     } else if(ch == BLOCK) {                 //  Wenn ch = b ist
-      i = getch() - ASCIICHARTOINTOFFSET;    //    Warte auf eine Zweite Benutzereingabe, die die Nummer des Philosophen sein muss
+      i = input[1] - ASCIICHARTOINTOFFSET;   
       command[i] = BLOCK;                    //    Schreibe dem jeweiligen Philosophen ein 'b' in die Kommandozeile
     } else if(ch == UNBLOCK) {               //  wenn ch = u ist
-      i = getch() - ASCIICHARTOINTOFFSET;    //    Warte auf eine Zweite Benutzereingabe, die die Nummer des Philosophen sein muss
+      i = input[1] - ASCIICHARTOINTOFFSET;
       command[i] = UNBLOCK;                  //    Schreibe dem jeweiligen Philosophen ein 'u' in die Kommandozeile
       sem_post(&block[i]);                   //    Fuehre ein sem_post auf der Semaphore des geblockten Philosophen aus
     } else if(ch == PROCEED) {               //  wenn ch = p ist
-      i = getch() - ASCIICHARTOINTOFFSET;    //    Warte auf eine Zweite Benutzereingabe, die die Nummer des Philosophen sein muss
+      i = input[1] - ASCIICHARTOINTOFFSET;
       command[i] = PROCEED;                  //    Schreibe dem jeweiligen Philosophen ein 'p' in die Kommandozeile
     }
   }                                          //Prozess soll beendet werden
@@ -113,6 +90,9 @@ int main(void) {
       perror(msg);
       exit(EXIT_FAILURE);
     }
+    pthread_mutex_lock(&mutexPrint);
+    printf("\nPhilosoph %d joined", i);
+    pthread_mutex_unlock(&mutexPrint);
   }
   
   //Zerstören aller Synchronisationsobjekte
@@ -124,9 +104,8 @@ int main(void) {
     sem_destroy(&block[i]);
     pthread_cond_destroy(&condStick[i]);
   }
-
-  printw("\nAll threads have successfully terminated - ready to quit");
-  getch();
-  endwin();  //Beende die NCurses-Console
+  
+  printf("\nAll threads have successfully terminated - quit\n");
+  
   return 0;
 }

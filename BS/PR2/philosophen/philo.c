@@ -16,6 +16,7 @@
 void *philo(void *arg) {
   int philono = *((int *) arg);             //Speichere die Nummer des Philosophen als philono ab
   int i;                                    //Zaehlvariable fuer den Philosophen
+  printf("\nPhilosoph %d ready to think!", philono);
   pthread_barrier_wait(&barrierSingle);     //Wartet darauf, dass der main-thread fertig mit dem Erstellen ist
   state[philono] = THINKING;                //Setzt seinen Status auf 'T' -> Thinking
   pthread_barrier_wait(&barrierAll);        //Wartet darauf, dass alle Philosphen erstellt wurden

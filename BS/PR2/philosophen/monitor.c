@@ -16,26 +16,11 @@ void changeAndDisplayStates(int n, char ch) {
   pthread_mutex_lock(&mutexPrint);                        //Speeren auf den Print-Mutex um zu verhinden, dass zwei Prozesse Gleichzeitig drucken
   state[n] = ch;                                          //Status aktuallisieren
   int i;                                                  //Zaehlvariable
-  int err;
-  lineCount = lineCount + 1;                              //Den Linienzaehler aktualisieren 
-  if(lineCount >= CONSOLESIZEY-1) {                       //Wenn der linienzaehler groesser als die Konsole ist
-    err = clear();                                              //dann loesche die Konsole
-    if(err != 0){
-     perror("\n clear failed \n"); 
-     exit(EXIT_FAILURE);
-    } 
-    lineCount = 0;                                        //und setze den Linienzaehler auf 0
-  }
   
-  printw("\n");                                           //Drucke einen Zeilenumbruch
+  printf("\n");                                           //Drucke einen Zeilenumbruch
   for(i = 0; i < NPHILO;i++) {                            //Drucke den Status aller Philosophen
-    printw("%d %c   ", i, state[i]);
+    printf("%d %c   ", i, state[i]);
   }
-  err = refresh();                                              //Aktualisiere die Ausgabe
-     if(err != 0){
-     perror("\n refresh failed \n"); 
-     exit(EXIT_FAILURE);
-    } 
     
   for(i = 0; i < NPHILO; i++) {                           //Pruefe fuer jeden Philosophenstatus
     if(state[i] == EAT && state[(i+1)%NPHILO] == EAT) {   //ob zwei Philosophen nebeneinander essen

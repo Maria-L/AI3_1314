@@ -12,6 +12,7 @@
 #define THINKING 'T'
 #define EAT 'E'
 #define HUNGRY 'H'
+#define BUFFERSIZE 10
 
 
 int stickCond[NPHILO];             //Zustandsarray der Staebchen 0->frei 1->belegt
@@ -23,4 +24,3 @@ pthread_barrier_t barrierSingle;   //Barriere fuer das sichere Erstellen der ein
 pthread_barrier_t barrierAll;      //Barriere fuer das sichere Erstellen aller Philosophen.
 char command[NPHILO];              //Commandoarray
 char state[NPHILO];                //Statusarray der Philosophen
-int lineCount;                     //Linienzähler für die Ausgabe via NCurses
