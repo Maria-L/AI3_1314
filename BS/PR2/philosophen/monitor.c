@@ -4,7 +4,6 @@
 #include <string.h>
 #include <pthread.h>
 #include <semaphore.h>
-#include <ncurses.h>
 
 #include "monitor.h"
 
@@ -36,9 +35,9 @@ void changeAndDisplayStates(int n, char ch) {
 //dann fuer den aufrufenden Philosophen
 //int no -> Nummer des aufrufenden Philosophen
 void getSticks(int no) {
+  pthread_mutex_lock(&mutex);                                         //Blockiere auf dem Philosophen-Mutex
   changeAndDisplayStates(no, HUNGRY);                                 //Druckt den veraenderten Status des Philosophen
                                                                       //in die Konsole
-  pthread_mutex_lock(&mutex);                                         //Blockiere auf dem Philosophen-Mutex
   while(stickCond[no%NPHILO] != 0 || stickCond[(no+1)%NPHILO] != 0) { //Wenn das linke oder das rechte Staebchen nicht frei sind
     pthread_cond_wait(&condStick[no], &mutex);                        //  dann gib den Mutex wieder frei und blockiere auf der Philosophen-Semaphore
   }                                                                   //  diese Blockierung endet wenn der linke oder rechte Philosoph ein Staebchen weglegt
@@ -46,9 +45,9 @@ void getSticks(int no) {
   stickCond[no%NPHILO] = 1;                                           //Belege das linke Staebchen
   stickCond[(no+1)%NPHILO] = 1;                                       //Belege das rechte Staebchen
   //Kritischer Abschnit endet
-  pthread_mutex_unlock(&mutex);                                       //Gib den Mutex wieder frei
   
   changeAndDisplayStates(no, EAT);                                    //Druckt den veraenderten Status des Philosophen
+  pthread_mutex_unlock(&mutex);                                       //Gib den Mutex wieder frei
 }
 
 
