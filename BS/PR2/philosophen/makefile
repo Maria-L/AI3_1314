@@ -1,8 +1,9 @@
 CC=/usr/bin/gcc
-FLAG=-lncurses -pthread -g -Wall -lpthread -O
+CFLAGS=-pthread -g -Wall -lpthread -O
+LDFLAGS=-pthread 
 
-philosophen: main.c philo.c monitor.c
-	$(CC) $(FLAG) -o $@ $+
+philosophen: main.o philo.o monitor.o
+	$(CC) $(LDFLAGS) -o $@ $+
 
 %.o: %.c
-	$(CC) $(FLAG) -c $<
+	$(CC) $(CFLAGS) -c $<

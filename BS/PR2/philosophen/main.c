@@ -62,8 +62,7 @@ int main(void) {
   
   while(ch != QUIT){                        //Solange der Prozess nicht beendet werden soll
     fgets(input, BUFFERSIZE, stdin);
-    ch = input[0];
-    //ch = getch();                         //  Lese die Benutzereingabe ein. q -> Quit, b -> block, u -> unblock
+    ch = input[0];                          //  Lese die Benutzereingabe ein. q -> Quit, b -> block, u -> unblock
     if(ch == QUIT) {                        //  Wenn ch = q ist
       for(i = 0; i < NPHILO; i++) {         //    Dann schreibe bei jedem Philosophen das Kommando auf 'q'
         command[i] = ch;
