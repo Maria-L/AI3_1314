@@ -9,6 +9,12 @@ public class Methods {
 	public static Counter counter = new Counter(0);
 	public static Counter counterMatrix = new Counter(0);
 
+	
+	public static void fordFulkerson(Graph graph, int source, int target) {
+		
+	}
+	
+	
 	/** Berechnet den kürzesten Weg zu jedem Knoten im Graphen von v (Int) aus.
 	 * Hierbei werden die ermittelten Werte im Graphen in jedem Knoten als "distanz" und "vorgaenger" gespeichert.
 	 * Wenn "distanz" Integer.MAX_VALUE entspricht, dann gibt es keinen Weg zu diesem Knoten.
