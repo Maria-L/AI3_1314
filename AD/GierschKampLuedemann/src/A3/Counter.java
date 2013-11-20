@@ -6,19 +6,19 @@ public class Counter {
 	
 	public Counter() {};
 	
-	void print() {
+	public void print() {
 		System.out.println(count);
 	}
 	
-	void reset() {
+	public void reset() {
 		count = 0;
 	}
 	
-	void increment() {
+	public void increment() {
 		count++;
 	}
 	
-	void increment(int n) {
+	public void increment(int n) {
 		count = count + n;
 	}
 }
