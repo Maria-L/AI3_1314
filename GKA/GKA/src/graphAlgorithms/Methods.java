@@ -10,7 +10,16 @@ public class Methods {
 	public static Counter counterMatrix = new Counter(0);
 
 	
+	/**Berechnet einen optimalen Fluss in einem schwach zusammenhängenden schlichten
+	 * Digraphen. In diesem Digraphen müssen für jede Kante eine Kapazität "kapazitaet" 
+	 * gegeben sein.
+	 * @param graph Zu bearbeitender Graph
+	 * @param source Quelle des Graphen
+	 * @param target Senke des Graphen
+	 */
 	public static void fordFulkerson(Graph graph, int source, int target) {
+		//1 Initialisierung
+		//Die Kapazität ist als Attribut "gewicht" gegeben
 		
 	}
 	
