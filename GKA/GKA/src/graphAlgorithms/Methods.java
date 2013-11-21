@@ -25,12 +25,52 @@ public class Methods {
 			graph.setValE(id, "fluss", 0);
 		}
 		
+		//Markiere jede Ecke als nicht inspiziert (0) und nicht markiert (0)
 		for(int id : graph.getVertexes()) {
 			graph.setValV(id, "inspiziert", 0);
+			graph.setValV(id, "markiert", 0);
 		}
 		
-		//2 Inspektion und Markierung
+		//Markiere die Quelle
+		graph.setValV(source, "markiert", 1);
+		graph.setValV(source, "maxFlow", Integer.MAX_VALUE);
 		
+		//2 Inspektion und Markierung
+		//a Wenn alle markierten Ecken inspiziert wurden gehe nach 4
+		while(true){
+			boolean allInspected = true;
+			for(int id : graph.getVertexes()) {
+				if(graph.getValV(id, "inspiziert") != 0) {
+					allInspected = false;
+					break;
+				}
+			}
+			
+			if(allInspected) {break;}
+			
+			//b Wähle eine beliebige markierte, aber noch nicht inspizierte
+			//Ecke vi und inspiziere sie wie folgt
+			int vi = -1;
+			for(int id : graph.getVertexes()) {
+				if(graph.getValV(id, "markiert") == 1 && graph.getValV(id, "inspiziert") == 0) {
+					vi = id;
+					break;
+				}
+			}
+			
+			//Vorwärtskante: Für jede Kante e die inzident von vi ist mit unmarkierter Ecke vj
+			//und fluss(e) < kapazität(e) markiere vj mit 
+			//-> vorgaenger(vi), pos(1), neg(0) und maxFlow(min(kapazität(e), maxFlow(vi))
+			for(int id : graph.getIncident(vi)){
+				//Wenn das Ziel der Kante nicht markiert ist und deren Kapazität größer ist als der Fluss
+				if(graph.getValV(graph.getTarget(id), "markiert") == 0 && graph.getValE(id, "kapazitaet") > graph.getValE(id, "fluss")) {
+					graph.setValV(graph.getTarget(id), "vorgaenger", graph.getSource(id));
+					graph.setValV(graph.getTarget(id), "pos", 1);
+					graph.setValV(graph.getTarget(id), "neg", 0);
+					graph.setValV(graph.getTarget(id), "maxFlow", Math.min(graph.getValE(id, "kapazitaet"), graph.getValV(graph.getValE(id, "source"), "fluss")));
+				}
+			}
+		}
 	}
 	
 	
