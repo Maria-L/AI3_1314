@@ -19,7 +19,17 @@ public class Methods {
 	 */
 	public static void fordFulkerson(Graph graph, int source, int target) {
 		//1 Initialisierung
-		//Die Kapazität ist als Attribut "gewicht" gegeben
+		//Die Kapazität ist als Attribut "kapazitaet" gegeben
+		//In der folgenden Schleife wird der Fluss auf 0 gesetzt
+		for(int id : graph.getEdges()) {
+			graph.setValE(id, "fluss", 0);
+		}
+		
+		for(int id : graph.getVertexes()) {
+			graph.setValV(id, "inspiziert", 0);
+		}
+		
+		//2 Inspektion und Markierung
 		
 	}
 	
