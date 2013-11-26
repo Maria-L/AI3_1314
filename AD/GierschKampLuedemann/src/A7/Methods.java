@@ -7,14 +7,14 @@ import java.util.List;
 
 public class Methods {
 	public static List<Integer> investment(List<Integer> investments){
-		int accu = -1;
+		int accu = Integer.MIN_VALUE;
 		int iopt = 0;
 		int jopt = 0;
 		int diff = 0;
 		List<Integer> result = new ArrayList<Integer>();
 		
 		for(int i = 0 ; i < investments.size() ; i++){
-			for(int j = i ; j < investments.size() ; j++){
+			for(int j = i+1 ; j < investments.size() ; j++){
 				diff = investments.get(j) - investments.get(i);
 				if( diff > accu){
 					iopt = i;
@@ -34,6 +34,17 @@ public class Methods {
 		List<List<Integer>> lists = new ArrayList<List<Integer>>();
 		List<List<Integer>> lists2 = new ArrayList<List<Integer>>();
 		
+		if(investments.size() == 1) {
+			throw new IllegalArgumentException("Das Array hat nur ein Element");
+		} else if(investments.size() == 2){
+			if(investments.get(0) <= investments.get(1)) {
+				akku.addAll(Arrays.asList(0,1,investments.get(1) - investments.get(0)));
+				return akku;
+			} else {
+				throw new IllegalArgumentException("Es gibt keinen gewinnbringenden Zeitraum");
+			}
+		}
+		
 		//Aufteilen der Liste in 4er Arrays
 		for(int i = 0; i < investments.size(); i += 4) {
 			lists.add(Arrays.asList(investments.get(i), investments.get(i+1), investments.get(i+2), investments.get(i+3)));
@@ -52,10 +63,22 @@ public class Methods {
 			}
 			List<Integer> best = investment(list);
 			lists2.add(Arrays.asList(min,max,list.get(best.get(0)),list.get(best.get(1)),best.get(2)));
-			//list = Arrays.asList(min,max,best.get(0),best.get(1),best.get(2));
 		}
 
 		akku = investHelper(lists2);
+		
+		if(akku.get(4) < 0) {
+			throw new IllegalArgumentException("Es gibt keinen gewinnbringenden Zeitraum");
+		}
+		
+		akku.set(2, investments.indexOf(akku.get(2)));
+		for(int i = akku.get(2); i < investments.size();i++) {
+			if(akku.get(3) == investments.get(i)) {
+				akku.set(3, i);
+				break;
+			}
+		}
+		
 		return Arrays.asList(akku.get(2), akku.get(3), akku.get(4));
 	}
 	
@@ -92,14 +115,16 @@ public class Methods {
 					list2.add(lists.get(i));
 				}
 			}
-			return investHelper(Arrays.asList(investHelper(list1),investHelper(list1))); 
+			return investHelper(Arrays.asList(investHelper(list1),investHelper(list2))); 
 		}
 	}
 	
 	public static void main(String[] args) {
 		List<Integer> invest = new ArrayList<Integer>();
 		
-		invest.addAll(Arrays.asList(24,3,20,4,5,2,22,24,6,5,2,4,6,1,12,15));
+		//invest.addAll(Arrays.asList(24,20,18,11));
+		invest.addAll(Arrays.asList(24,3,20,4,5,2,22,6,24,5,2,4,6,1,12,15));
+		//invest.addAll(Arrays.asList(1,2));
 		
 		System.out.println(investm(invest));
 		System.out.println(investment(invest));
