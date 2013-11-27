@@ -33,19 +33,22 @@ public class main {
 //			Methods.counter.reset();
 //			Methods.counterMatrix.reset();
 //		}
-		Graph graph = readGraphKapazitaet("Z:/Projekte/AI3_1314/GKA/GKA/src/graphReader/graphs/graph_09.graph");
+		Graph graph = readGraphKapazitaet("Z:/Projekte/AI3_1314/GKA/GKA/src/graphReader/graphs/graph_08.graph");
 		int quelle = -1;
 		int senke = -1;
 		
 		for(int id : graph.getVertexes()) {
-			if(graph.getStrV(id, "name").equals("Quelle")) {
+			if(graph.getStrV(id, "name").equals("Rostock")) {
 				quelle = id;
-			} else if(graph.getStrV(id, "name").equals("Senke")) {
+			} else if(graph.getStrV(id, "name").equals("München")) {
 				senke = id;
 			}
 		}
+		System.out.println("Quelle-ID: " + quelle);
+		System.out.println("Senke-ID: " + senke);
 		
-		Methods.fordFulkerson(graph, quelle, senke);
+		
+		System.out.println(Methods.fordFulkerson(graph, quelle, senke));
 		
 	}
 	
