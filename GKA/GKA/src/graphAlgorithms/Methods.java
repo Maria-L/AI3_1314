@@ -228,13 +228,15 @@ public class Methods {
 				//-> vorgaenger(vi), pos(1), neg(0) und maxFlow(min(kapazität(e)-fluss(e), maxFlow(vi)))
 				for(int id : graph.getIncident(vi)) {
 					//Wenn das Ziel der Kante nicht markiert ist und deren Kapazität größer ist als der Fluss
-					if(graph.getValV(graph.getTarget(id), "markiert") == 0 && graph.getValE(id, "kapazitaet") > graph.getValE(id, "fluss")) {
-						graph.setValV(graph.getTarget(id), "vorgaenger", graph.getSource(id));
-						graph.setValV(graph.getTarget(id), "pos", 1);
-						graph.setValV(graph.getTarget(id), "neg", 0);
-						graph.setValV(graph.getTarget(id), "maxFlow", Math.min(graph.getValE(id, "kapazitaet") - graph.getValE(id, "fluss"), graph.getValV(graph.getSource(id), "maxFlow")));
-						graph.setValV(graph.getTarget(id), "markiert", 1);
-						System.out.println("Neue Vorwärtskante zu: " + graph.getStrV(graph.getTarget(id),"name"));
+					int s = graph.getSource(id);
+					int t = graph.getTarget(id);
+					if(graph.getValV(t, "markiert") == 0 && graph.getValE(id, "kapazitaet") > graph.getValE(id, "fluss")) {
+						graph.setValV(t, "vorgaenger", s);
+						graph.setValV(t, "pos", 1);
+						graph.setValV(t, "neg", 0);
+						graph.setValV(t, "maxFlow", Math.min(graph.getValE(id, "kapazitaet") - graph.getValE(id, "fluss"), graph.getValV(s, "maxFlow")));
+						graph.setValV(t, "markiert", 1);
+						System.out.println("Neue Vorwärtskante zu: " + graph.getStrV(t,"name"));
 					}
 				}
 				

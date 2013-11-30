@@ -11,7 +11,7 @@ public class main {
 	/** @param args */
 	public static void main(String[] args) {
 
-		Graph graph = readGraphWith("Z:/Projekte/AI3_1314/GKA/GKA/src/graphReader/graphs/graph_08.graph", "kapazitaet");
+		Graph graph = readGraphWith("F:/GitDaten/AI3_1314/GKA/GKA/src/graphReader/graphs/graph_08.graph", "kapazitaet");
 		int quelle = -1;
 		int senke = -1;
 		
@@ -25,7 +25,7 @@ public class main {
 		System.out.println("Quelle-ID: " + quelle);
 		System.out.println("Senke-ID: " + senke);
 		
-		System.out.println(Methods.edmondsKarp(graph, quelle, senke));
+		System.out.println(Methods.fordFulkerson(graph, quelle, senke));
 	}
 	
 	public static Graph readGraphWith(String gr, String attribut) {

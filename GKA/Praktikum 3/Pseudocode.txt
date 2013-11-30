@@ -1,0 +1,100 @@
+fordFulkerson source target
+	Setze den Fluss(e) aller Kanten auf 0
+	Markiere jede Ecke als nicht inspiziert (0) und nicht markiert (0)
+	Markiere die Quelle und setze maxFlow(v) auf unendlich
+	
+	while(true)
+		allInspected = false
+		
+		while(true)
+			Wenn target markiert ist bricht die Schleife ab
+			Wähle eine zufällige markierte, aber nicht inspizierte Ecke vi und markiere sie als inspiziert
+			Wenn keine Ecke gefunden wurde, setze allInspected = true und brich die Schleife ab
+			
+			Für jede ausgehende Kante ei aus vi
+				Wenn ei nicht markiert und nicht voll ausgelastet ist
+					Markiere das Ziel von ei
+					Setze den Vorgänger von diesem auf vi
+					Markiere den Fluss als Positiv
+					Setze maxFlow(ziel) auf min(kapazität(ei) - fluss(ei), maxFlow(vi))
+					
+			Für jede eingehende Kante ei in vi
+				Wenn ei nicht markiert ist und einen Fluss > 0 hat
+					Markiere die Quelle von ei
+					Setze den Vorgänger von dieser auf vi
+					Markiere den Fluss als Negativ
+					Setze maxFlow(quelle) auf min(fluss(ei), maxFlow(vi)
+					
+			endWhile
+			
+		Wenn allInspected = true dann brich die Schleife ab
+			
+		id = target
+		moreFlow = maxFlow(target)
+			
+		while(id ist nicht die Quelle)
+			Wenn wir eine Vorwärtskante haben
+				Addiere zum Fluss in id  von dem Vorgänger aus moreFlow hinzu
+			Wenn wir eine Rückwärtskante haben
+				Subtrahiere vom Fluss aus id in den Vorgänger moreFlow
+			id = vorgänger(id)
+		endWhile
+			
+		Entferne die Markierungen von allen Ecken außer der Quelle
+	endWhile	
+	
+	Gebe die Summe aller ausgehenden Flüsse aus source als Ergebnis aus
+end
+
+
+
+
+edmondsKarp source target
+	Setze den Fluss(e) aller Kanten auf 0
+	Markiere jede Ecke als nicht inspiziert (0) und nicht markiert (0)
+	Markiere die Quelle und setze maxFlow(v) auf unendlich
+	
+	while(true)
+		allInspected = false
+		warteschlange = {}
+		
+		while(true)
+			Wenn target markiert ist bricht die Schleife ab
+			Füge alle neu markierten und nicht inspizierten Ecken hinten an die warteschlange an
+			Wenn die warteschlange leer ist, setze allInspected = true und brich die Schleife ab
+			Setze vi auf das vorderste Element der Warteschlange
+			
+			Für jede ausgehende Kante ei aus vi
+				Wenn ei nicht markiert und nicht voll ausgelastet ist
+					Markiere das Ziel von ei
+					Setze den Vorgänger von diesem auf vi
+					Markiere den Fluss als Positiv
+					Setze maxFlow(ziel) auf min(kapazität(ei) - fluss(ei), maxFlow(vi))
+					
+			Für jede eingehende Kante ei in vi
+				Wenn ei nicht markiert ist und einen Fluss > 0 hat
+					Markiere die Quelle von ei
+					Setze den Vorgänger von dieser auf vi
+					Markiere den Fluss als Negativ
+					Setze maxFlow(quelle) auf min(fluss(ei), maxFlow(vi)
+					
+			endWhile
+			
+		Wenn allInspected = true dann brich die Schleife ab
+			
+		id = target
+		moreFlow = maxFlow(target)
+			
+		while(id ist nicht die Quelle)
+			Wenn wir eine Vorwärtskante haben
+				Addiere zum Fluss in id  von dem Vorgänger aus moreFlow hinzu
+			Wenn wir eine Rückwärtskante haben
+				Subtrahiere vom Fluss aus id in den Vorgänger moreFlow
+			id = vorgänger(id)
+		endWhile
+			
+		Entferne die Markierungen von allen Ecken außer der Quelle
+	endWhile	
+	
+	Gebe die Summe aller ausgehenden Flüsse aus source als Ergebnis aus
+end
