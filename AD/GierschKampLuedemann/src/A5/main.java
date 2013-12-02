@@ -23,15 +23,15 @@ public class main {
 		//			}
 		//
 		//		}
-//		Liste list1 = new ListeImpl();
-//		List list2 = new List();
-//
-//		for (int i = 0; i < 1337; i++) {
-//			int n = (int) (Math.rint(Math.random() * (i - 1)));
-//			list1.insert(n, i);
-//			list2.insert(n, i);
+		Liste list1 = new ListeImpl();
+		List list2 = new List();
+
+		for (int i = 0; i < 1337; i++) {
+			int n = (int) (Math.rint(Math.random() * (i - 1)));
+			list1.insert(n, i);
+			list2.insert(n, i);
 			//			System.out.println("I: "+i +" N: "+ n);
-		//}
+		}
 		//		int list1length=list1.length();
 		//		System.out.println(list1length);
 		//		for( int i = 1; i <= list1length; i++) {
@@ -42,11 +42,11 @@ public class main {
 		//			System.out.print((int) list2.head() + " ");
 		//			list2 = list2.tail();
 		//		}
-//		System.out.println();
-//		System.out.println("Alte Impl: " + list1.getStepCounter());
-//		System.out.print("Neue Impl: ");
-//		list2.printTime();
-//		System.out.println();
+		System.out.println();
+		System.out.println("Alte Impl: " + list1.getStepCounter());
+		System.out.print("Neue Impl: ");
+		list2.printTime();
+		System.out.println();
 
 		//		Liste list1 = new ListeImpl();
 		//		
@@ -62,32 +62,32 @@ public class main {
 		//		}
 
 		//		for(int i=0;i<=9;i++){
-		//			System.out.println("Ergebnis für " + i + " ist " + Methods.fancyFunction(i));
+		//			System.out.println("Ergebnis fï¿½r " + i + " ist " + Methods.fancyFunction(i));
 		//		}
 		//		for(int i=0;i<=Integer.MAX_VALUE;i++){
 		//			int result =  Methods.fancyFunction(i);
-		//			System.out.println("Ergebnis für " + i + " ist " + result);
+		//			System.out.println("Ergebnis fï¿½r " + i + " ist " + result);
 		//			if(result < 0){
 		//				break;
 		//			}
 		//		}
 		
-		int n = 20;
-		for (int i = 0; i < n; i++) {
-			Methods.arrayNormal.add(i, 0);
-			Methods.arrayFancy.add(i, 0);
-		}
-
+//		int n = 20;
 //		for (int i = 0; i < n; i++) {
-//			System.out.println("Normal:    " + Methods.fancyFunction(i));
-//			System.out.println("Optimiert: " + Methods.fancyFunctionOpt(i));
+//			Methods.arrayNormal.add(i, 0);
+//			Methods.arrayFancy.add(i, 0);
 //		}
-		Methods.fancyFunction(n-1);
-		Methods.fancyFunctionOpt(n-1);
-
-		System.out.println(Methods.arrayNormal);
-		System.out.println(Methods.arrayFancy);
-		System.out.println(Methods.fancyArray);
+//
+////		for (int i = 0; i < n; i++) {
+////			System.out.println("Normal:    " + Methods.fancyFunction(i));
+////			System.out.println("Optimiert: " + Methods.fancyFunctionOpt(i));
+////		}
+//		Methods.fancyFunction(n-1);
+//		Methods.fancyFunctionOpt(n-1);
+//
+//		System.out.println(Methods.arrayNormal);
+//		System.out.println(Methods.arrayFancy);
+//		System.out.println(Methods.fancyArray);
 	}
 
 }
