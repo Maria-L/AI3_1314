@@ -40,8 +40,10 @@ public class main {
 		//			list2 = list2.tail();
 		//		}
 		System.out.println();
-		System.out.println("Messung iterative Impl: " + messIter.toString());
-		System.out.println("Messung rekursive Impl: " + messRec.toString());
+		System.out.println("Messung iterative Impl: ");
+		messIter.printStringforExcel();
+		System.out.println("Messung rekursive Impl: ");
+		messRec.printStringforExcel();
 		System.out.println();
 
 		//		Liste list1 = new ListeImpl();

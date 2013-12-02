@@ -63,4 +63,9 @@ public class Messung {
 		System.out.println(mssg.size());
 		return mssg.toString();
 	}
+	public void printStringforExcel(){
+		for(double val : mssg){
+			System.out.println((int)val);
+		}
+	}
 }
