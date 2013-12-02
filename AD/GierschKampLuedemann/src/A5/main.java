@@ -10,27 +10,24 @@ public class main {
 	/** @param args */
 	public static void main(String[] args) {
 
-//		Messung m1 = new Messung();
-
-		//		for (int t = 0; t < 100; t++) {
-		//			Liste list1 = new ListeImpl();
-		//			List list2 = new List();
-		//			
-		//			for (int i = 1; i <= 100; i++) {
-		//				int n = (int) (Math.rint(Math.random() * (i-1)));
-		//				list1.insert(i, n);
-		//				list2.insert(n, i);
-		//			}
-		//
-		//		}
-		Liste list1 = new ListeImpl();
-		List list2 = new List();
-
-		for (int i = 0; i < 100 ; i++) {
-			int n = (int) (Math.rint(Math.random() * (i - 1)));
-			list1.insert(i, n);
-			list2.insert(i, n);
-			//			System.out.println("I: "+i +" N: "+ n);
+		Messung messIter = new Messung();
+		Messung messRec = new Messung();
+		
+		for (int t = 0; t < 100; t++) {
+			Liste list1 = new ListeImpl();
+			List list2 = new List();
+			for (int i = 0; i < 100 ; i++) {
+				int n = (int) (Math.rint(Math.random() * (i - 1)));
+				list1.insert(i, n);
+				list2.insert(i, n);
+				//			System.out.println("I: "+i +" N: "+ n);
+			}
+			messIter.add(list1.getStepCounter());
+			messRec.add(list2.getStepCounter());
+			System.out.println("Alte Impl: " + list1.getStepCounter());
+			System.out.println("Neue Impl: " + list2.getStepCounter());
+			list1.resetStepCounter();
+			list2.resetStepCounter();
 		}
 		//		int list1length=list1.length();
 		//		System.out.println(list1length);
@@ -43,13 +40,9 @@ public class main {
 		//			list2 = list2.tail();
 		//		}
 		System.out.println();
-		System.out.println("Alte Impl: " + list1.getStepCounter());
-		System.out.println("Neue Impl: " + list2.getStepCounter());
+		System.out.println("Messung iterative Impl: " + messIter.toString());
+		System.out.println("Messung rekursive Impl: " + messRec.toString());
 		System.out.println();
-		System.out.println("Länge: " + list1.length());
-		System.out.println("Alte Liste: " + list1.toString());
-		System.out.println("Länge: " + list2.length());
-		System.out.println("Neue Liste: " + list2.toString());
 
 		//		Liste list1 = new ListeImpl();
 		//		
