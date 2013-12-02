@@ -28,8 +28,8 @@ public class main {
 
 		for (int i = 0; i < 100 ; i++) {
 			int n = (int) (Math.rint(Math.random() * (i - 1)));
-			list1.insert(i, i);
-			list2.insert(i, i);
+			list1.insert(i, n);
+			list2.insert(i, n);
 			//			System.out.println("I: "+i +" N: "+ n);
 		}
 		//		int list1length=list1.length();

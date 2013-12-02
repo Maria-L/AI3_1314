@@ -58,14 +58,11 @@ public class List  {
 	public String toString(){
 		String accu = "[ ";
 		List temp = this;
-		int blah = 0;
-		for(int i=0; i< this.length(); i++){
+		for(int i=0; i < length; i++){
 			accu = accu.concat(String.valueOf(temp.head()));
 			accu = accu.concat(", ");
-			blah++;
 		}
 		accu = accu.concat(" ]");
-		System.out.println("Blah: " + blah);
 		return accu;
 	}
 }

@@ -42,7 +42,7 @@ public class ListeImpl implements Liste {
 		} else {
 			Object element = elem.getElem();		//Das Objekt des ersten Listenelements zwischenspeichern
 			elem = elem.getNext();					//Referenz auf den Rest der Liste in elem speichern um so die Liste zu verk�rzen
-			lengthCounter = lengthCounter - 1;		//lengthCounter um einen veringern um die L�nge aktuell zu halten
+//			lengthCounter = lengthCounter - 1;		//lengthCounter um einen veringern um die L�nge aktuell zu halten
 			stepCounter++;							//Eine Dereferenzierung ist erfolg
 			return element;
 		}
@@ -68,21 +68,18 @@ public class ListeImpl implements Liste {
 			return true;
 		} else {
 			lengthCounter += 1;		//sonst n um einen veringern und die Aufgabe an das erste Listenelement weitergeben
-			stepCounter = stepCounter + elem.insert(x, n - 1, 0,this);
+			stepCounter += elem.insert(x, n - 1, 0);
 			return true;
 		}
 	}
 	public String toString(){
 		String accu = "[ ";
 		Liste temp = this;
-		int blah = 0;
-		for(int i=0; i< this.length(); i++){
+		for(int i=0; i < lengthCounter; i++){
 			accu = accu.concat(String.valueOf(temp.head()));
 			accu = accu.concat(", ");
-			blah++;
 		}
 		accu = accu.concat(" ]");
-		System.out.println("Blah: " + blah);
 		return accu;
 	}
 }
