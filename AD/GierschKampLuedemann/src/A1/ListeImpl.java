@@ -1,17 +1,17 @@
 package A1;
 
-/** Implementation für verkettete Listen
+/** Implementation fï¿½r verkettete Listen
  *  Reicht die Anfragen nur an das Objekt "first" weiter.
  * 
- * @author Steffen Giersch, Birger Kamp, Maria Lüdemann */
+ * @author Steffen Giersch, Birger Kamp, Maria Lï¿½demann */
 public class ListeImpl implements Liste {
 	
 	/** Referenz auf das erste Element der Liste 
 	 *  null wenn die Liste leer ist*/
 	private ListElement elem = null;
-	/** Zähler für die Länge der Liste */
+	/** Zï¿½hler fï¿½r die Lï¿½nge der Liste */
 	private int lengthCounter = 0;
-	/** Zähler für Anzahl der Dereferenzierungen */
+	/** Zï¿½hler fï¿½r Anzahl der Dereferenzierungen */
 	private int stepCounter = 0;
 	
 	public int getStepCounter() {
@@ -41,8 +41,8 @@ public class ListeImpl implements Liste {
 			throw new NullPointerException("Liste ist leer");
 		} else {
 			Object element = elem.getElem();		//Das Objekt des ersten Listenelements zwischenspeichern
-			elem = elem.getNext();					//Referenz auf den Rest der Liste in elem speichern um so die Liste zu verkürzen
-			lengthCounter = lengthCounter - 1;		//lengthCounter um einen veringern um die Länge aktuell zu halten
+			elem = elem.getNext();					//Referenz auf den Rest der Liste in elem speichern um so die Liste zu verkï¿½rzen
+			lengthCounter = lengthCounter - 1;		//lengthCounter um einen veringern um die Lï¿½nge aktuell zu halten
 			stepCounter++;							//Eine Dereferenzierung ist erfolg
 			return element;
 		}
@@ -54,22 +54,35 @@ public class ListeImpl implements Liste {
 			throw new NullPointerException("Liste ist leer");
 		} else {
 			stepCounter = stepCounter + 1;			//Bevorstehende Dereferenzierung eintragen
-			return elem.getElem();					//Objekt des ersten Listenelements zurückgeben
+			return elem.getElem();					//Objekt des ersten Listenelements zurï¿½ckgeben
 		}
 	}
 
 	public boolean insert(Object x, int n) {
-		if (n > this.length()) {					//wenn n größer ist als die Liste lang ist, false zurückgeben
+		if (n > this.length()) {					//wenn n grï¿½ï¿½er ist als die Liste lang ist, false zurï¿½ckgeben
 			return false;
-		} else if (n < 0) {							//wenn n kleiner als 0 ist, false zurückgeben
+		} else if (n < 0) {							//wenn n kleiner als 0 ist, false zurï¿½ckgeben
 			return false;
-		} else if (n == 0) {						//wenn n gleich 0 ist, cons aufrufen, da das Element vorne an die Liste gefügt werden muss
+		} else if (n == 0) {						//wenn n gleich 0 ist, cons aufrufen, da das Element vorne an die Liste gefï¿½gt werden muss
 			this.cons(x);
 			return true;
 		} else {
-			lengthCounter = lengthCounter + 1;		//sonst n um einen veringern und die Aufgabe an das erste Listenelement weitergeben
-			stepCounter = stepCounter + elem.insert(x, n - 1, 1);
+			lengthCounter += 1;		//sonst n um einen veringern und die Aufgabe an das erste Listenelement weitergeben
+			stepCounter = stepCounter + elem.insert(x, n - 1, 0,this);
 			return true;
 		}
+	}
+	public String toString(){
+		String accu = "[ ";
+		Liste temp = this;
+		int blah = 0;
+		for(int i=0; i< this.length(); i++){
+			accu = accu.concat(String.valueOf(temp.head()));
+			accu = accu.concat(", ");
+			blah++;
+		}
+		accu = accu.concat(" ]");
+		System.out.println("Blah: " + blah);
+		return accu;
 	}
 }

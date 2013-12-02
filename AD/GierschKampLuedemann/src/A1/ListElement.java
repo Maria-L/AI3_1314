@@ -46,13 +46,7 @@ public class ListElement {
 	 * @param i Dereferenzierungs-Zaehler - Hilfsvariable fuer ListeImpl
 	 * @return Anzahl der Dereferenzierungen
 	 */
-	public int insert(Object x, int n, int counter) {
-//		if (n != 0) {
-//			return next.insert(x, n - 1, i + 1);
-//		} else {
-//			next = new ListElement(x, next);
-//			return i + 1;
-//		}
+	public int insert(Object x, int n, int counter,ListeImpl datList) {
 		List<Object> oldValues = new ArrayList<Object>();
 		for(int i=0 ; i<n ; i++){
 			oldValues.add(elem);
