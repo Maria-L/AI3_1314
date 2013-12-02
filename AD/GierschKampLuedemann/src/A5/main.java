@@ -10,7 +10,7 @@ public class main {
 	/** @param args */
 	public static void main(String[] args) {
 
-		Messung m1 = new Messung();
+//		Messung m1 = new Messung();
 
 		//		for (int t = 0; t < 100; t++) {
 		//			Liste list1 = new ListeImpl();
@@ -26,10 +26,10 @@ public class main {
 		Liste list1 = new ListeImpl();
 		List list2 = new List();
 
-		for (int i = 0; i < 1337; i++) {
+		for (int i = 0; i < 100 ; i++) {
 			int n = (int) (Math.rint(Math.random() * (i - 1)));
-			list1.insert(n, i);
-			list2.insert(n, i);
+			list1.insert(i, n);
+			list2.insert(i, n);
 			//			System.out.println("I: "+i +" N: "+ n);
 		}
 		//		int list1length=list1.length();
@@ -44,9 +44,12 @@ public class main {
 		//		}
 		System.out.println();
 		System.out.println("Alte Impl: " + list1.getStepCounter());
-		System.out.print("Neue Impl: ");
-		list2.printTime();
+		System.out.println("Neue Impl: " + list2.getStepCounter());
 		System.out.println();
+		System.out.println("Länge: " + list1.length());
+		System.out.println("Alte Liste: " + list1.toString());
+		System.out.println("Länge: " + list2.length());
+		System.out.println("Neue Liste: " + list2.toString());
 
 		//		Liste list1 = new ListeImpl();
 		//		

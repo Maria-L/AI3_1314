@@ -1,12 +1,12 @@
 package A5;
 import A3.Counter;
 
-import A1.Liste;
 
 
 public class List  {
 	Object head = null;
 	List tail = null;
+	static int length = 0;
 	static Counter count = new Counter();
 	
 	public List() {
@@ -19,16 +19,23 @@ public class List  {
 	
 	public Object head() {
 		count.increment();
-		return head;
+		Object temp = head;
+		head = tail.head;
+		tail = tail.tail;
+		return temp;
 	}
 	
 	public List tail() {
 		count.increment();
 		return tail;
 	}
+	public int length(){
+		return length;
+	}
 	
 	public void head(Object n) {
-		count.increment();
+//		count.increment();
+		length++;
 		this.tail = new List(this.head, this.tail);
 		this.head = n;
 	}
@@ -45,7 +52,17 @@ public class List  {
 			return true;
 		}
 	}
-	public void printTime(){
-		count.print();
+	public int getStepCounter(){
+		return count.getCount();
+	}
+	public String toString(){
+		String accu = "[ ";
+		List temp = this;
+		for(int i=0; i < length; i++){
+			accu = accu.concat(String.valueOf(temp.head()));
+			accu = accu.concat(", ");
+		}
+		accu = accu.concat(" ]");
+		return accu;
 	}
 }

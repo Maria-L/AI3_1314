@@ -6,8 +6,8 @@ public class Counter {
 	
 	public Counter() {};
 	
-	public void print() {
-		System.out.println(count);
+	public int getCount() {
+		return count;
 	}
 	
 	public void reset() {

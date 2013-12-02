@@ -1,6 +1,7 @@
 package A1;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ListElement {
@@ -47,21 +48,25 @@ public class ListElement {
 	 * @return Anzahl der Dereferenzierungen
 	 */
 	public int insert(Object x, int n, int counter) {
-//		if (n != 0) {
-//			return next.insert(x, n - 1, i + 1);
-//		} else {
-//			next = new ListElement(x, next);
-//			return i + 1;
-//		}
 		List<Object> oldValues = new ArrayList<Object>();
-		for(int i=0 ; i<n ; i++){
+		for(int i=0 ; i<n+1 ; i++){
 			oldValues.add(elem);
-			elem = next.getElem();
-			counter++;
-			next = next.getNext();
+			if(next == null){
+				next = null;
+			} else {
+				elem = next.getElem();
+			}
+			
+			if(next == null){
+				next = null;
+			} else {
+				counter++;
+				next = next.getNext();
+			}
 		}
-		next = new ListElement(x,next);
+		next = new ListElement(elem,next);
 		elem = x;
+		Collections.reverse(oldValues);
 		for(Object o : oldValues){
 			next = new ListElement(elem,next);
 			elem = o;
