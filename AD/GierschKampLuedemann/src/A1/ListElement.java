@@ -4,12 +4,12 @@ public class ListElement {
 
 	/** Zu speicherndes Objekt */
 	private Object elem;
-	/** Referenz auf das nächste Listenelement
+	/** Referenz auf das nï¿½chste Listenelement
 	 *  null, wenn kein weiteres Element folgt */
 	private ListElement next;
 
 	/**
-	 * Constructor für das ListElement
+	 * Constructor fï¿½r das ListElement
 	 * @param x    Zu speicherndes Objekt
 	 * @param tail Referenz auf den Rest der Liste
 	 */
@@ -19,7 +19,7 @@ public class ListElement {
 	}
 
 	/**
-	 * Gibt das gespeicherte Objekt zurück
+	 * Gibt das gespeicherte Objekt zurueck
 	 * @return Gespeichertes Objekt
 	 */
 	public Object getElem() {
@@ -27,7 +27,7 @@ public class ListElement {
 	}
 
 	/**
-	 * Gibt die Referenz auf den Rest der Liste zurück
+	 * Gibt die Referenz auf den Rest der Liste zurueck
 	 * @return Referenz auf den Rest der Liste
 	 */
 	public ListElement getNext() {
@@ -35,21 +35,21 @@ public class ListElement {
 	}
 
 	/**
-	 * Wenn n == 0 ist, dann wird das Objekt x hinter dieses ListElement gefügt.
+	 * Wenn n == 0 ist, dann wird das Objekt x hinter dieses ListElement gefuegt.
 	 * Ansonsten wird die Aufgabe an das Folgende ListElement weitergereicht und
 	 * n um 1 dekrementiert.
 	 * @param x Zu Speicherndes Objekt
-	 * @param n Indexzähler für den Speicherort
-	 * @param i Dereferenzierungs-Zähler - Hilfsvariable für ListeImpl
+	 * @param n Indexzaehler fuer den Speicherort
+	 * @param i Dereferenzierungs-Zaehler - Hilfsvariable fuer ListeImpl
 	 * @return Anzahl der Dereferenzierungen
 	 */
 	public int insert(Object x, int n, int i) {
-		if (n != 0) {
-			return next.insert(x, n - 1, i + 1);
-		} else {
-			next = new ListElement(x, next);
-			return i + 1;
-		}
+//		if (n != 0) {
+//			return next.insert(x, n - 1, i + 1);
+//		} else {
+//			next = new ListElement(x, next);
+//			return i + 1;
+//		}
 	}
 
 }
