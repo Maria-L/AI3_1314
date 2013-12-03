@@ -20,7 +20,6 @@
 
 #define SHMKEY          "/vmem.h"
 #define SHMPROCID       'C'
-int SHMID;              //ID des Shared-Memory
 
 typedef unsigned int Bmword;    /* Frame bitmap */
 

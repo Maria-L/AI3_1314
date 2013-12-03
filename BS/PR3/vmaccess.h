@@ -1,5 +1,5 @@
 /* Header file for vmappl.c
- * File: vmappl.h
+ * File: vmaccess.h
  * Prof. Dr. Wolfgang Fohl, HAW Hamburg
  * 2010
  */
@@ -8,7 +8,10 @@
 #define VMACCESS_H
 
 #include <stdio.h>
+#include <unistd.h>
 #include <stdlib.h>
+#include <pthread.h>
+#include <semaphore.h>
 #include "vmem.h"
 
 /** Connect to shared memory (key from vmem.h) */
