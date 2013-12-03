@@ -20,6 +20,7 @@
 
 #define SHMKEY          "/vmem.h"
 #define SHMPROCID       'C'
+int SHMID;              //ID des Shared-Memory
 
 typedef unsigned int Bmword;    /* Frame bitmap */
 
@@ -85,15 +86,15 @@ Page:  Speicherseite im Logischen Speicher
 
 Wir lesen Daten aus:
 - Wir geben eine logische Adresse logAdr an vmaccess. Dieser Prozess geht mit der dazu passenden PageNummer 
-    (logAdr / ITEMS_PER_PAGE) an das Array entries und prueft ob die Page im Physikalischen Speicher liegt 
+    (logAdr / VMEM_PAGESIZE) an das Array entries und prueft ob die Page im Physikalischen Speicher liegt 
     pt_entry.flags == present
-- Wenn ja, dann nehmen wir pt_entry.frame * VMEM_PAGESIZE + Offset (logAdr % ITEMS_PER_PAGE) aus data. So 
+- Wenn ja, dann nehmen wir pt_entry.frame * VMEM_PAGESIZE + Offset (logAdr % VMEM_PAGESIZE) aus data. So 
     erhalten wir den gewuenschten Wert
 - Sonst muss mmanage die page in vmem schubsen, sodass vmaccess nun auslesen kann
 
 Wir schreiben Daten:
 - Wir erhalten num (zu speichernde Zahl) und index (index der Zahl)
-- Wir pruefen, ob sich die Page (index / ITEMS_PER_PAGE) im Physikalischen Speicher befindet
+- Wir pruefen, ob sich die Page (index / VMEM_PAGESIZE) im Physikalischen Speicher befindet
 - Wenn ja: Wir setzen das dirty-Flag der fraglichen Page in der Pagetable
 - Dann schreiben wir num in data[pt_entry.frame * VMEM_PAGESIZE + Offset]
  */
