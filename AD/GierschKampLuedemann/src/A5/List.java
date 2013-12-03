@@ -55,6 +55,12 @@ public class List  {
 	public int getStepCounter(){
 		return count.getCount();
 	}
+<<<<<<< HEAD
+=======
+	public void resetStepCounter(){
+		count.reset();
+	}
+>>>>>>> 23cc085d6d3c29fb08326db6c58c1a62cfc37f76
 	public String toString(){
 		String accu = "[ ";
 		List temp = this;
