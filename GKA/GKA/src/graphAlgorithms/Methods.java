@@ -20,12 +20,16 @@ public class Methods {
 		//1 Initialisierung
 		//Die Kapazität ist als Attribut "kapazitaet" gegeben
 		//In der folgenden Schleife wird der Fluss auf 0 gesetzt
+		counter.increment();
 		for(int id : graph.getEdges()) {
+			counter.increment();
 			graph.setValE(id, "fluss", 0);
 		}
 		
 		//Markiere jede Ecke als nicht inspiziert (0) und nicht markiert (0)
+		counter.increment();
 		for(int id : graph.getVertexes()) {
+			counter.increment(2);
 			graph.setValV(id, "inspiziert", 0);
 			graph.setValV(id, "markiert", 0);
 		}
@@ -34,6 +38,7 @@ public class Methods {
 		
 		//Füge die Quelle als erste zur Warteschlange hinzu
 		//warteschlange.add(source);
+		counter.increment(2);
 		graph.setValV(source, "markiert", 1);
 		graph.setValV(source, "maxFlow", Integer.MAX_VALUE);
 		
@@ -46,6 +51,7 @@ public class Methods {
 
 			while(true) {
 				//Falls target markiert ist gehe zu 3.
+				counter.increment();
 				if(graph.getValV(target, "markiert") != 0) {
 					break;
 				}
@@ -53,7 +59,9 @@ public class Methods {
 				//b Wähle die nächste Kante aus unserer Warteschleife. Diese ist markiert und
 				//noch nicht inspiziert.
 				int vi = -1;
+				counter.increment();
 				for(int id : graph.getVertexes()) {
+					counter.increment(2);
 					if(graph.getValV(id, "markiert") != 0 && graph.getValV(id, "inspiziert") == 0 && !warteschlange.contains(id)) {	
 						warteschlange.add(id);
 					}
@@ -72,6 +80,7 @@ public class Methods {
 				
 				vi = warteschlange.get(0);
 				warteschlange.remove(0);
+				counter.increment();
 				graph.setValV(vi, "inspiziert", 1);
 				
 				
@@ -80,15 +89,20 @@ public class Methods {
 				//Vorwärtskante: Für jede Kante e die inzident von vi ist mit unmarkierter Ecke vj
 				//und fluss(e) < kapazität(e) markiere vj mit 
 				//-> vorgaenger(vi), pos(1), neg(0) und maxFlow(min(kapazität(e)-fluss(e), maxFlow(vi)))
+				counter.increment();
 				for(int id : graph.getIncident(vi)) {
 					//Wenn das Ziel der Kante nicht markiert ist und deren Kapazität größer ist als der Fluss
-					if(graph.getValV(graph.getTarget(id), "markiert") == 0 && graph.getValE(id, "kapazitaet") > graph.getValE(id, "fluss")) {
-						graph.setValV(graph.getTarget(id), "vorgaenger", graph.getSource(id));
-						graph.setValV(graph.getTarget(id), "pos", 1);
-						graph.setValV(graph.getTarget(id), "neg", 0);
-						graph.setValV(graph.getTarget(id), "maxFlow", Math.min(graph.getValE(id, "kapazitaet") - graph.getValE(id, "fluss"), graph.getValV(graph.getSource(id), "maxFlow")));
-						graph.setValV(graph.getTarget(id), "markiert", 1);
-						System.out.println("Neue Vorwärtskante zu: " + graph.getStrV(graph.getTarget(id),"name"));
+					counter.increment(5);
+					int s = graph.getSource(id);
+					int t = graph.getTarget(id);
+					if(graph.getValV(t, "markiert") == 0 && graph.getValE(id, "kapazitaet") > graph.getValE(id, "fluss")) {
+						counter.increment(8);
+						graph.setValV(t, "vorgaenger", s);
+						graph.setValV(t, "pos", 1);
+						graph.setValV(t, "neg", 0);
+						graph.setValV(t, "maxFlow", Math.min(graph.getValE(id, "kapazitaet") - graph.getValE(id, "fluss"), graph.getValV(s, "maxFlow")));
+						graph.setValV(t, "markiert", 1);
+						System.out.println("Neue Vorwärtskante zu: " + graph.getStrV(t,"name"));
 					}
 				}
 				
@@ -96,9 +110,11 @@ public class Methods {
 				//und fluss(e) > 0 markiere vj mit
 				//-> vorgaenger(vi), pos(0), neg(1) und maxFlow(min(fluss(e), maxFlow(vi)))
 				for(int id : graph.getEdges()) {
+					counter.increment(5);
 					int s = graph.getSource(id);
 					int t = graph.getTarget(id);
 					if(t == vi && graph.getValV(s, "markiert") == 0 && graph.getValE(id, "fluss") > 0) {
+						counter.increment(8);
 						graph.setValV(s, "vorgaenger", t);
 						graph.setValV(s, "pos", 0);
 						graph.setValV(s, "neg", 1);
@@ -116,28 +132,36 @@ public class Methods {
 			//zu source rückwärts durchlaufen. Für jede Vorwärtskante wird fluss(e) um maxFlow(target) erhöht und für jede 
 			//Rückwärtskante wird fluss(e) um maxFlow(target) vermindert. 
 			int id = target;
+			counter.increment();
 			int moreFlow = graph.getValV(target, "maxFlow");
 			System.out.println("Folgender Fluss wird addiert: " + moreFlow);
 			System.out.println("Der aktuelle Fluss in jeder Kante beträgt: ");
 
 			while(id != source) {
+				counter.increment();
 				if(graph.getValV(id, "pos") != 0){			//Wenn wir eine Vorwärtskante haben
+					counter.increment(2);
 					for(int eid : graph.getIncident(graph.getValV(id, "vorgaenger"))) {
+						counter.increment();
 						if(graph.getTarget(eid) == id) {
+							counter.increment(2);
 							graph.setValE(eid, "fluss", graph.getValE(eid, "fluss") + moreFlow);
 						}
 					}
 				} else {
+					counter.increment();
 					for(int eid : graph.getIncident(id)) {
+						counter.increment();
 						if(graph.getTarget(eid) == id) {
+							counter.increment(2);
 							graph.setValE(eid, "fluss", graph.getValE(eid, "fluss") - moreFlow);
 						}
 					}
 				}
 				//Setze die neue ID auf den Vorgänger
+				counter.increment();
 				id = graph.getValV(id, "vorgaenger");
 			}
-			
 			
 			for(int ide : graph.getEdges()) {
 				System.out.println(graph.getStrV(graph.getSource(ide), "name") + " -> " + graph.getStrV(graph.getTarget(ide), "name") + " = " + graph.getValE(ide,"fluss") + "/" + graph.getValE(ide,"kapazitaet"));
@@ -147,8 +171,10 @@ public class Methods {
 			
 			
 			//Anschließend werden bei allen Ecke mit Ausnahme von q die Markierungen entfernt. Gehe zu 2.
+			counter.increment();
 			for(int vid : graph.getVertexes()) {
 				if(vid != source) {
+					counter.increment(6);
 					graph.setValV(vid, "vorgaenger", 0);
 					graph.setValV(vid, "pos", 0);
 					graph.setValV(vid, "neg", 0);
@@ -157,11 +183,14 @@ public class Methods {
 					graph.setValV(vid, "inspiziert", 0);
 				}
 			}
+			counter.increment();
 			graph.setValV(source, "inspiziert", 0);
 		}
 		//4 Es gibt keinen vergrößernden Weg. Der jetzige Flusswert jeder Kante ist optimal
 		int ergebnis = 0;
+		counter.increment();
 		for(int id : graph.getIncident(source)) {
+			counter.increment();
 			ergebnis += graph.getValE(id, "fluss");
 		}
 		return ergebnis;
@@ -180,19 +209,24 @@ public class Methods {
 		//1 Initialisierung
 		//Die Kapazität ist als Attribut "kapazitaet" gegeben
 		//In der folgenden Schleife wird der Fluss auf 0 gesetzt
+		counter.increment();
 		for(int id : graph.getEdges()) {
+			counter.increment();
 			graph.setValE(id, "fluss", 0);
 		}
 		
 		Random generator = new Random();
 		
 		//Markiere jede Ecke als nicht inspiziert (0) und nicht markiert (0)
+		counter.increment();
 		for(int id : graph.getVertexes()) {
+			counter.increment(2);
 			graph.setValV(id, "inspiziert", 0);
 			graph.setValV(id, "markiert", 0);
 		}
 		
 		//Markiere die Quelle
+		counter.increment(2);
 		graph.setValV(source, "markiert", 1);
 		graph.setValV(source, "maxFlow", Integer.MAX_VALUE);
 		
@@ -203,6 +237,7 @@ public class Methods {
 
 			while(true) {
 				//Falls target markiert ist gehe zu 3.
+				counter.increment();
 				if(graph.getValV(target, "markiert") != 0) {
 					break;
 				}
@@ -211,7 +246,9 @@ public class Methods {
 				//Ecke vi und inspiziere sie wie folgt
 				List<Integer> markierte = new ArrayList<Integer>();
 				int vi = -1;
+				counter.increment();
 				for(int id : graph.getVertexes()) {
+					counter.increment(2);
 					if(graph.getValV(id, "markiert") != 0 && graph.getValV(id, "inspiziert") == 0) {	
 						markierte.add(id);
 					}
@@ -220,17 +257,22 @@ public class Methods {
 				if(markierte.size() == 0) {allInspected = true; break;}
 				vi = markierte.get(generator.nextInt(markierte.size()));
 				graph.setValV(vi, "inspiziert", 1);
+				counter.increment();
 				
 				System.out.println("Gewählte Ecke: " + graph.getStrV(vi, "name"));
 				
 				//Vorwärtskante: Für jede Kante e die inzident von vi ist mit unmarkierter Ecke vj
 				//und fluss(e) < kapazität(e) markiere vj mit 
 				//-> vorgaenger(vi), pos(1), neg(0) und maxFlow(min(kapazität(e)-fluss(e), maxFlow(vi)))
+				counter.increment();
 				for(int id : graph.getIncident(vi)) {
 					//Wenn das Ziel der Kante nicht markiert ist und deren Kapazität größer ist als der Fluss
+					counter.increment(2);
 					int s = graph.getSource(id);
 					int t = graph.getTarget(id);
+					counter.increment(3);
 					if(graph.getValV(t, "markiert") == 0 && graph.getValE(id, "kapazitaet") > graph.getValE(id, "fluss")) {
+						counter.increment(8);
 						graph.setValV(t, "vorgaenger", s);
 						graph.setValV(t, "pos", 1);
 						graph.setValV(t, "neg", 0);
@@ -243,10 +285,14 @@ public class Methods {
 				//Rückwärtskante: Für jede Kante e mit unmarkierter Ecke vj und Ziel vi
 				//und fluss(e) > 0 markiere vj mit
 				//-> vorgaenger(vi), pos(0), neg(1) und maxFlow(min(fluss(e), maxFlow(vi)))
+				counter.increment();
 				for(int id : graph.getEdges()) {
+					counter.increment(2);
 					int s = graph.getSource(id);
 					int t = graph.getTarget(id);
+					counter.increment(2);
 					if(t == vi && graph.getValV(s, "markiert") == 0 && graph.getValE(id, "fluss") > 0) {
+						counter.increment(8);
 						graph.setValV(s, "vorgaenger", t);
 						graph.setValV(s, "pos", 0);
 						graph.setValV(s, "neg", 1);
@@ -263,30 +309,40 @@ public class Methods {
 			//3. Bei target beginnend lässt sich anhand der Markierungen der gefundene vergrößernde Weg bis 
 			//zu source rückwärts durchlaufen. Für jede Vorwärtskante wird fluss(e) um maxFlow(target) erhöht und für jede 
 			//Rückwärtskante wird fluss(e) um maxFlow(target) vermindert. 
+			counter.increment();
 			int id = target;
 			int moreFlow = graph.getValV(target, "maxFlow");
 			System.out.println("Folgender Fluss wird addiert: " + moreFlow);
 			while(id != source) {
+				counter.increment();
 				if(graph.getValV(id, "pos") != 0){			//Wenn wir eine Vorwärtskante haben
+					counter.increment(2);
 					for(int eid : graph.getIncident(graph.getValV(id, "vorgaenger"))) {
+						counter.increment();
 						if(graph.getTarget(eid) == id) {
+							counter.increment(2);
 							graph.setValE(eid, "fluss", graph.getValE(eid, "fluss") + moreFlow);
 						}
 					}
 				} else {
+					counter.increment();
 					for(int eid : graph.getIncident(id)) {
+						counter.increment();
 						if(graph.getTarget(eid) == id) {
 							graph.setValE(eid, "fluss", graph.getValE(eid, "fluss") - moreFlow);
 						}
 					}
 				}
 				//Setze die neue ID auf den Vorgänger
+				counter.increment();
 				id = graph.getValV(id, "vorgaenger");
 			}
 			
 			//Anschließend werden bei allen Ecke mit Ausnahme von q die Markierungen entfernt. Gehe zu 2.
+			counter.increment();
 			for(int vid : graph.getVertexes()) {
 				if(vid != source) {
+					counter.increment(6);
 					graph.setValV(vid, "vorgaenger", 0);
 					graph.setValV(vid, "pos", 0);
 					graph.setValV(vid, "neg", 0);
@@ -295,11 +351,14 @@ public class Methods {
 					graph.setValV(vid, "inspiziert", 0);
 				}
 			}
+			counter.increment();
 			graph.setValV(source, "inspiziert", 0);
 		}
 		//4 Es gibt keinen vergrößernden Weg. Der jetzige Flusswert jeder Kante ist optimal
 		int ergebnis = 0;
+		counter.increment();
 		for(int id : graph.getIncident(source)) {
+			counter.increment();
 			ergebnis += graph.getValE(id, "fluss");
 		}
 		return ergebnis;

@@ -11,21 +11,27 @@ public class main {
 	/** @param args */
 	public static void main(String[] args) {
 
-		Graph graph = readGraphWith("F:/GitDaten/AI3_1314/GKA/GKA/src/graphReader/graphs/graph_08.graph", "kapazitaet");
+		Graph graph = readGraphWith("Z:/Projekte/AI3_1314/GKA/GKA/src/graphReader/graphs/graph_09.graph", "kapazitaet");
 		int quelle = -1;
 		int senke = -1;
 		
 		for(int id : graph.getVertexes()) {
-			if(graph.getStrV(id, "name").equals("Rostock")) {
+			if(graph.getStrV(id, "name").equals("Quelle")) {
 				quelle = id;
-			} else if(graph.getStrV(id, "name").equals("München")) {
+			} else if(graph.getStrV(id, "name").equals("Senke")) {
 				senke = id;
 			}
 		}
 		System.out.println("Quelle-ID: " + quelle);
 		System.out.println("Senke-ID: " + senke);
 		
+		Methods.counter.reset();
+		System.out.println(Methods.edmondsKarp(graph, quelle, senke));
+		System.out.println("\n\nEdmonds und Karp Zeit: " + Methods.counter.getCount() + "\n\n");
+		
+		Methods.counter.reset();
 		System.out.println(Methods.fordFulkerson(graph, quelle, senke));
+		System.out.println("\n\nFord und Fulkerson: " + Methods.counter.getCount() + "\n\n");
 	}
 	
 	public static Graph readGraphWith(String gr, String attribut) {
