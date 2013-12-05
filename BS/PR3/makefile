@@ -13,3 +13,5 @@ mmanage: mmanage.o
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $<
+
+all: vmappl mmanage

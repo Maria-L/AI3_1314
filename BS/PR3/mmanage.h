@@ -48,7 +48,7 @@ int find_remove_clock2(void);
 
 int search_bitmap(void);
 
-int find_free_bit(Bmword bmword, Bmword mask);
+int find_free_bit(Bmword bmword);
 
 void init_pagefile(const char *pfname);
 

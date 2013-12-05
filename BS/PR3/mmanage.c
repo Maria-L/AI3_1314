@@ -30,14 +30,9 @@ int
 main(void)
 {
     struct sigaction sigact;
-    vmem_init();
 
     /* Init pagefile */
     init_pagefile(MMANAGE_PFNAME);
-    if(!pagefile) {
-        perror("Error creating pagefile");
-        exit(EXIT_FAILURE);
-    }
 
     /* Open logfile */
     logfile = fopen(MMANAGE_LOGFNAME, "w");
@@ -88,18 +83,34 @@ main(void)
     /* Signal processing loop */
     while(1) {
         signal_number = 0;
+	fprintf(stderr, "Warte auf Signal\n");
         pause();
-        if(signal_number == SIGUSR1) {  /* Page fault */
-            fprintf(stderr, "Processed SIGUSR1\n");
-            signal_number = 0;
+        if(signal_number == SIGUSR1) {              /* Page fault */
+	  int free_space;    //Freie Seite im Phyischen Speicher
+	  free_space = find_free_bit(vmem->adm.bitmap);  //Suche freien Platz im Physischen Speicher
+	  
+	  if(free_space < 0) {                           //Wenn keiner gefunden wurde
+	    int to_delete;
+	    to_delete = find_remove_clock();             //Suche eine Seite zum löschen
+	    store_page(to_delete);                       //Speichere diese in die pagefile
+	    free_space = to_delete;                      //Diese Seite kann nun im physischen Speicher überschrieben werden
+	  }
+	  
+	  fetch_page(free_space);
+	  
+	  pthread_cond_signal(&(vmem->adm.sema));
+	  
+          fprintf(stderr, "Processed SIGUSR1\n");
+          signal_number = 0;
         }
-        else if(signal_number == SIGUSR2) {     /* PT dump */
+        else if(signal_number == SIGUSR2) {         /* PT dump */
             fprintf(stderr, "Processed SIGUSR2\n");
             signal_number = 0;
         }
-        else if(signal_number == SIGINT) {
+        else if(signal_number == SIGINT) {          /* Exit Program */
 	    cleanup();
             fprintf(stderr, "Processed SIGINT\n");
+	    break;
         }
     }
 
@@ -112,33 +123,52 @@ void sighandler(int signo) {
 }
 
 void vmem_init(void) {
+  int err;
+  int i;
 
   shm_key = ftok(SHMKEY, 1);
   shm_id = shmget(shm_key, SHMSIZE, IPC_CREAT | 0666);
   vmem = shmat(shm_id, 0, 0);
 
-  vmem->adm.size = 0;
-    
+  vmem->adm.size = VMEM_PHYSMEMSIZE;
+  vmem->adm.mmanage_pid = getpid();
+  vmem->adm.shm_id = shm_id;
+  vmem->adm.req_pageno = -1;
+  vmem->adm.next_alloc_idx = -1;
+  vmem->adm.pf_count = 0;
+  err = sem_init(&(vmem->adm.sema), 0, 0);
+  if(err != 0) {
+    perror("Semaphore initialisation failed");
+  }
   
-  //shm_id = shm_open(SHMKEY, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
-  //ftruncate(shm_id, SHMSIZE);
-  //vmem = mmap(NULL, SHMSIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shm_id, 0);
+  for(i = 0; i < VMEM_NPAGES; i++) {
+    vmem->pt.entries[i].flags = 0;
+    vmem->pt.entries[i].frame = -1;
+  }
+  
+  for(i = 0; i < VMEM_BMSIZE; i++) {
+    vmem->adm.bitmap[i] = 0;
+  }
+  
+  for(i = 0; i < VMEM_NFRAMES; i++) {
+    vmem->pt.framepage[i] = -1;
+  }
 }
 
 void cleanup(void) {
-  //munmap(vmem, SHMSIZE);
-  //close(shm_id);
-  //shm_unlink(SHMKEY);
-
   shmdt(vmem);
 
   fclose(logfile);
   fclose(pagefile);
 }
 
-/*int init_pagefile(char *fileName) {
+void init_pagefile(const char *fileName) {
   pagefile = fopen(MMANAGE_PFNAME, "r+w");
-  }*/
+  if(!pagefile) {
+        perror("Error creating pagefile");
+        exit(EXIT_FAILURE);
+  }
+}
 
 
 /* Do not change!  */
