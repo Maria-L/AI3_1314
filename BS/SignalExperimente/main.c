@@ -1,21 +1,33 @@
+//main1
+
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+int signal_number = 0;
  
 static void catch_function(int signo) {
     puts("Interactive attention signal caught.");
 }
  
 int main(void) {
-    if (signal(SIGUSR1, catch_function) == SIG_ERR) {
-        fputs("An error occurred while setting a signal handler.\n", stderr);
-        return EXIT_FAILURE;
+
+  struct sigaction sicact;
+
+  sigact.sa_handler = sighandler;
+  sigemptyset(&sigact.sa_mask);
+  sigact.sa_flags = 0;
+  if(sigaction(SIGUSR1, &sigact, NULL) == -1) {
+      perror("Error installing signal handler for USR1");
+      exit(EXIT_FAILURE);
+  }
+
+  while(1) {
+    signal_number = 0;
+    pause();
+    if(signal_number == SIGUSR1) {
+      fprintf("SIGUSR1 bekommen");
     }
-    puts("Raising the interactive attention signal.");
-    if (raise(SIGUSR1) != 0) {
-        fputs("Error raising the signal.\n", stderr);
-        return EXIT_FAILURE;
-    }
-    puts("Exiting.");
+  }
     return 0;
 }

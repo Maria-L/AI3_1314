@@ -23,11 +23,14 @@ struct vmem_struct *vmem = NULL;
 FILE *pagefile = NULL;
 FILE *logfile = NULL;
 int signal_number = 0;          /* Received signal */
+key_t shm_key;
+int shm_id;
 
 int
 main(void)
 {
     struct sigaction sigact;
+    vmem_init();
 
     /* Init pagefile */
     init_pagefile(MMANAGE_PFNAME);
@@ -49,11 +52,9 @@ main(void)
         perror("Error initialising vmem");
         exit(EXIT_FAILURE);
     }
-#ifdef DEBUG_MESSAGES
     else {
         fprintf(stderr, "vmem successfully created\n");
     }
-#endif /* DEBUG_MESSAGES */
 
     /* Setup signal handler */
     /* Handler for USR1 */
@@ -64,52 +65,41 @@ main(void)
         perror("Error installing signal handler for USR1");
         exit(EXIT_FAILURE);
     }
-#ifdef DEBUG_MESSAGES
     else {
         fprintf(stderr, "USR1 handler successfully installed\n");
     }
-#endif /* DEBUG_MESSAGES */
 
     if(sigaction(SIGUSR2, &sigact, NULL) == -1) {
         perror("Error installing signal handler for USR2");
         exit(EXIT_FAILURE);
     }
-#ifdef DEBUG_MESSAGES
     else {
         fprintf(stderr, "USR2 handler successfully installed\n");
     }
-#endif /* DEBUG_MESSAGES */
 
     if(sigaction(SIGINT, &sigact, NULL) == -1) {
         perror("Error installing signal handler for INT");
         exit(EXIT_FAILURE);
     }
-#ifdef DEBUG_MESSAGES
     else {
         fprintf(stderr, "INT handler successfully installed\n");
     }
-#endif /* DEBUG_MESSAGES */
 
     /* Signal processing loop */
     while(1) {
         signal_number = 0;
         pause();
         if(signal_number == SIGUSR1) {  /* Page fault */
-#ifdef DEBUG_MESSAGES
             fprintf(stderr, "Processed SIGUSR1\n");
-#endif /* DEBUG_MESSAGES */
             signal_number = 0;
         }
         else if(signal_number == SIGUSR2) {     /* PT dump */
-#ifdef DEBUG_MESSAGES
             fprintf(stderr, "Processed SIGUSR2\n");
-#endif /* DEBUG_MESSAGES */
             signal_number = 0;
         }
         else if(signal_number == SIGINT) {
-#ifdef DEBUG_MESSAGES
+	    cleanup();
             fprintf(stderr, "Processed SIGINT\n");
-#endif /* DEBUG_MESSAGES */
         }
     }
 
@@ -117,7 +107,38 @@ main(void)
 }
 
 /* Your code goes here... */
+void sighandler(int signo) {
+  signal_number = signo;
+}
 
+void vmem_init(void) {
+
+  shm_key = ftok(SHMKEY, 1);
+  shm_id = shmget(shm_key, SHMSIZE, IPC_CREAT | 0666);
+  vmem = shmat(shm_id, 0, 0);
+
+  vmem->adm.size = 0;
+    
+  
+  //shm_id = shm_open(SHMKEY, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+  //ftruncate(shm_id, SHMSIZE);
+  //vmem = mmap(NULL, SHMSIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shm_id, 0);
+}
+
+void cleanup(void) {
+  //munmap(vmem, SHMSIZE);
+  //close(shm_id);
+  //shm_unlink(SHMKEY);
+
+  shmdt(vmem);
+
+  fclose(logfile);
+  fclose(pagefile);
+}
+
+/*int init_pagefile(char *fileName) {
+  pagefile = fopen(MMANAGE_PFNAME, "r+w");
+  }*/
 
 
 /* Do not change!  */

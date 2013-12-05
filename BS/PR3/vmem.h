@@ -3,6 +3,10 @@
  * Model of virtual memory management
  */
 
+/*SIGUSR1: Signalisiert, dass mmanage 
+ *
+ */
+
 #ifndef VMEM_H
 #define VMEM_H
 
@@ -17,6 +21,7 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include <pthread.h>
 
 #define SHMKEY          "/vmem.h"
 #define SHMPROCID       'C'

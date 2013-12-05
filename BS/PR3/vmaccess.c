@@ -5,14 +5,15 @@
  */
 
 #include "vmaccess.h"
-
+key_t shm_key;
+int shm_id;
 
 struct vmem_struct *vmem = NULL;
 
 void vm_init(void) {
-  kill(SIGUSR1, vmem->adm.mmanage_pid);
-  sem_wait(&(vmem->adm.sema));
-  vmem = shmat(SHMPROCID,0,0);
+  shm_key = ftok(SHMKEY, 1);
+  shm_id = shmget(shm_key, SHMSIZE, IPC_CREAT | 0666);
+  vmem = shmat(shm_id, 0, 0);
 }
 
 
@@ -25,7 +26,7 @@ int vmem_read(int address) {
 
   if(!(vmem->pt.entries[pageNum].flags & PTF_PRESENT)) {   //Wenn die Page nicht Present ist
     vmem->adm.req_pageno = pageNum;                        //Speicher die aktuelle Seite in req_pageno
-    kill(SIGUSR2, vmem->adm.mmanage_pid);                  //Signal, dass mmanage eine Seite laden muss
+    kill(SIGUSR1, vmem->adm.mmanage_pid);                  //Signal, dass mmanage eine Seite laden muss
     sem_wait(&(vmem->adm.sema));                           //Warte auf Signal von mmanage
   }
                                                            //Berechne die Physische Adresse
@@ -43,7 +44,7 @@ void vmem_write(int address, int data) {
 
   if(!(vmem->pt.entries[pageNum].flags & PTF_PRESENT)) {
     vmem->adm.req_pageno = pageNum;
-    kill(SIGUSR2, vmem->adm.mmanage_pid);
+    kill(SIGUSR1, vmem->adm.mmanage_pid);
     sem_wait(&(vmem->adm.sema));
   }
 

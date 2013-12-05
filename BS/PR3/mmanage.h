@@ -8,6 +8,13 @@
 #define MMANAGE_H
 #include "vmem.h"
 #include <limits.h>
+#include <sys/types.h>
+#include <signal.h>
+#include <unistd.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h> 
+
 
 /** Event struct for logging */
 struct logevent {
