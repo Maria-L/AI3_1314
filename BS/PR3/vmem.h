@@ -25,6 +25,7 @@
 
 #define SHMKEY          "/vmem.h"
 #define SHMPROCID       'C'
+#define NULLPAGE        -1
 
 typedef unsigned int Bmword;    /* Frame bitmap */
 
@@ -64,7 +65,7 @@ struct vmem_adm_struct {
     int next_alloc_idx;         /* Next frame to allocate (FIFO, CLOCK) 
                                  */
     int pf_count;               /* Page fault counter */
-    Bmword bitmap[VMEM_BMSIZE]; /* 0 = free */
+    //Bmword bitmap[VMEM_BMSIZE]; /* 0 = free */
 };
 
 struct pt_struct {

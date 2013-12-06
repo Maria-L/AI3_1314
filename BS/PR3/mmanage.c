@@ -86,17 +86,17 @@ main(void)
 	fprintf(stderr, "Warte auf Signal\n");
         pause();
         if(signal_number == SIGUSR1) {              /* Page fault */
-	  int free_space;    //Freie Seite im Phyischen Speicher
-	  free_space = find_free_bit(vmem->adm.bitmap);  //Suche freien Platz im Physischen Speicher
+	  int free_frame;    //Freie Seite im Phyischen Speicher
+	  free_frame = find_free_frame();  //Suche freien Platz im Physischen Speicher
 	  
-	  if(free_space < 0) {                           //Wenn keiner gefunden wurde
+	  if(free_frame < 0) {                           //Wenn keiner gefunden wurde
 	    int to_delete;
 	    to_delete = find_remove_clock();             //Suche eine Seite zum löschen
 	    store_page(to_delete);                       //Speichere diese in die pagefile
-	    free_space = to_delete;                      //Diese Seite kann nun im physischen Speicher überschrieben werden
+	    free_frame = to_delete;                      //Diese Seite kann nun im physischen Speicher überschrieben werden
 	  }
 	  
-	  fetch_page(free_space);
+	  fetch_page(free_frame);
 	  
 	  pthread_cond_signal(&(vmem->adm.sema));
 	  
@@ -146,13 +146,23 @@ void vmem_init(void) {
     vmem->pt.entries[i].frame = -1;
   }
   
-  for(i = 0; i < VMEM_BMSIZE; i++) {
+  /*for(i = 0; i < VMEM_BMSIZE; i++) {
     vmem->adm.bitmap[i] = 0;
-  }
+  }*/
   
   for(i = 0; i < VMEM_NFRAMES; i++) {
     vmem->pt.framepage[i] = -1;
   }
+}
+
+int find_free_frame(void) {
+  int i;
+  for(i = 0; i < VMEM_NFRAMES; i++) {
+    if(vmem->pt.framepage[i] == NULLPAGE) {
+      return i;
+    }
+  }
+  return -1;
 }
 
 void cleanup(void) {
