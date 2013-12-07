@@ -1,5 +1,5 @@
 CC=/usr/bin/gcc
-CFLAGS=-pthread -g -Wall -lpthread -O
+CFLAGS=-pthread -g -Wall -lpthread
 LDFLAGS=-pthread 
 
 vmappl: vmappl.o vmaccess.o
@@ -15,3 +15,6 @@ mmanage: mmanage.o
 	$(CC) $(CFLAGS) -c $<
 
 all: vmappl mmanage
+
+clean:
+	rm *.o vmappl mmanage

@@ -36,6 +36,10 @@ void fetch_page(int pt_idx);
 
 void store_page(int pt_idx);
 
+void page_fault(void);
+
+int readNum(char *reader);
+
 void update_pt(int frame);
 
 int find_remove_frame(void);
@@ -57,8 +61,11 @@ void logger(struct logevent le);
 void dump_pt(void);
 
 /** Misc */
-#define MMANAGE_PFNAME "./pagefile.bin" /**< pagefile name */
-#define MMANAGE_LOGFNAME "./logfile.txt"        /**< logfile name */
+#define MMANAGE_PFNAME "./pagefile.bin"    /**< pagefile name */
+#define MMANAGE_LOGFNAME "./logfile.txt"   /**< logfile name */
+
+#define NEXTVALUE ','
+#define NEXTPAGE  '\n'
 
 #define VMEM_ALGO_FIFO  0
 #define VMEM_ALGO_LRU   1
