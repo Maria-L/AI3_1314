@@ -61,6 +61,7 @@ struct vmem_adm_struct {
     pid_t mmanage_pid;  //Prozessid
     int shm_id;         //ID des geteilten Speichers
     sem_t sema;                 /* Coordinate acces to shm */
+    //pthread_mutex_t lock;       //Mutex aufgrund von massiven synchronisationsproblemen
     int req_pageno;             /* Number of requested page */
     int next_alloc_idx;         /* Next frame to allocate (FIFO, CLOCK) 
                                  */

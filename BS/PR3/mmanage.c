@@ -100,7 +100,6 @@ main(void)
 	fprintf(stderr, "Warte auf Signal\n");
         pause();
         if(signal_number == SIGUSR1) {              /* Page fault */
-          fprintf(stderr, "Processed SIGUSR1\n");
           signal_number = 0;
         }
         else if(signal_number == SIGUSR2) {         /* PT dump */
@@ -128,18 +127,19 @@ void sighandler(int signo) {
 }
 
 void page_fault(void) {
+  struct logevent log;
+  log.req_pageno = vmem->.adm.req_pageno;
   int free_frame;
+  int to_delete;
   free_frame = find_free_frame();                //Suche freien Platz im Physischen Speicher
 	  
   if(free_frame < 0) {                           //Wenn keiner gefunden wurde
-    int to_delete;
-    to_delete = find_remove_clock();             //    Suche eine Seite zum löschen
+    to_delete = find_remove_fifo();              //    Suche einen Frame zum löschen
     store_page(to_delete);                       //    Speichere diese in die pagefile
     free_frame = to_delete;                      //    Diese Seite kann nun im physischen Speicher überschrieben werden
   }
-  
   fetch_page(free_frame);                        //Überschreibe die alte Page mit der benötigten aus der pagef
-  
+  fprintf(stderr, "Processed SIGUSR1 - loaded PageNr %d\n", vmem->adm.req_pageno);
 }
 
 void vmem_init(void) {
@@ -160,6 +160,7 @@ void vmem_init(void) {
   if(err != 0) {
     perror("Semaphore initialisation failed");
   }
+  //err = pthread_mutex_init(&vmem->adm.lock);
   
   for(i = 0; i < VMEM_NPAGES; i++) {
     vmem->pt.entries[i].flags = 0;
@@ -186,86 +187,61 @@ int find_free_frame(void) {
 }
 
 void store_page(int pt_index) {
-  int frame_num = vmem->pt.entries[pt_index].frame;
+  int old_page = vmem->pt.framepage[pt_index];
+  vmem->pt.entries[old_page].flags &= ~(PTF_PRESENT);
   
-  if(vmem->pt.entries[pt_index].flags & PTF_DIRTY) {                          //Wenn die Page verändert wurde
-    fseek(pagefile, sizeof(int) * VMEM_PAGESIZE * pt_index, SEEK_SET);        //Setze den Filepointer auf die gewünschte Position
-    fwrite(&vmem->data[VMEM_PAGESIZE * frame_num], sizeof(int), VMEM_PAGESIZE, pagefile); //Schreibe die Daten
+  if(vmem->pt.entries[old_page].flags & PTF_DIRTY) {                          //Wenn die Page verändert wurde
+    fseek(pagefile, sizeof(int) * VMEM_PAGESIZE * old_page, SEEK_SET);          //Setze den Filepointer auf die gewünschte Position
+    fwrite(&vmem->data[VMEM_PAGESIZE * pt_index], sizeof(int), VMEM_PAGESIZE, pagefile); //Schreibe die Daten
     rewind(pagefile);
   }
 }
 
-void fetch_page(int pt_index) {
-  /*fseek(pagefile, 0, SEEK_END);    //Setze den Filepointer an der Ende der Pagefile
-  int size = ftell(pagefile);      //Speichere die Position (Filelänge) in size
-  rewind(pagefile);                //Setze den Filepointer wieder an den Anfang der Pagefile
+void fetch_page(int pt_index) { 
+  int old_page = vmem->pt.framepage[pt_index];
+  vmem->pt.entries[old_page].flags &= ~(PTF_PRESENT);
   
-  char *buffer = malloc(size + 1); //Allokiere Speicher für den Inhalt der pagefile
-  fread(buffer, size, 1, pagefile);
-  
-  char *reader = buffer;
-  
-  int i = 0;
-  while(i < vmem->adm.req_pageno) {    //Wenn die richtige Zeile nicht gefunden ist
-    while(*reader != '\n') {           //    Spule bis zur nächsten Zeile
-      reader++;
-    }
-    reader++;
-    i++;
-  }
-  
-  for(i = 0; i < VMEM_PAGESIZE; i++) {    //Parse und schreibe aus der pagefile in data
-    vmem->data[pt_index * VMEM_PAGESIZE + i] = readNum(reader);
-  }
-  
-  free(buffer);                    //Gib den Allokierten Speicher wieder frei
-  
-  vmem->pt.entries[pt_index].flags |= PTF_PRESENT & PTF_USED & PTF_USED1;  //Setze das Present, Used und Used1 Flag auf 1
-  vmem->pt.entries[pt_index].flags &= ~(PTF_DIRTY);                        //Setze das Dirty-Flag auf 0*/
-  
-  int frame_num = vmem->pt.entries[pt_index].frame;
-  
-  fseek(pagefile, sizeof(int) * VMEM_PAGESIZE * pt_index, SEEK_SET);       //Setze den filepointer auf die gewünschte Position
-  fread(&vmem->data[VMEM_PAGESIZE * frame_num], sizeof(int), VMEM_PAGESIZE, pagefile); //Lese die Daten aus
+  fseek(pagefile, sizeof(int) * VMEM_PAGESIZE * vmem->adm.req_pageno, SEEK_SET);      //Setze den filepointer auf die gewünschte Position
+  fread(&vmem->data[VMEM_PAGESIZE * pt_index], sizeof(int), VMEM_PAGESIZE, pagefile); //Lese die Daten aus
   rewind(pagefile);
   
-  vmem->pt.entries[pt_index].flags |= PTF_PRESENT | PTF_USED | PTF_USED1;  //Setze das Present, Used und Used1 Flag auf 1
-  vmem->pt.entries[pt_index].flags &= ~(PTF_DIRTY);                        //Setze das Dirty-Flag auf 0
+  vmem->pt.entries[vmem->adm.req_pageno].flags |= PTF_PRESENT | PTF_USED | PTF_USED1;  //Setze das Present, Used und Used1 Flag auf 1
+  vmem->pt.entries[vmem->adm.req_pageno].flags &= ~(PTF_DIRTY);                        //Setze das Dirty-Flag auf 0
+  vmem->pt.entries[vmem->adm.req_pageno].frame = pt_index;                             //Aktualisiere den Speicherort
+  vmem->pt.framepage[pt_index] = vmem->adm.req_pageno;
 }
 
-/*int readNum(char *reader) {
-  int akku = 0;
-  int potenz = 1;
-  
-  while(*reader != NEXTVALUE && *reader != NEXTPAGE) {
-    reader++;
-  }
-  reader--;
-  
-  while(*reader != NEXTVALUE && *reader != NEXTPAGE) {
-    akku += (*reader - 48) * potenz;
-    potenz *= 10;
-    reader--;
-  }
-  reader++;
-  
-  while(*reader != NEXTVALUE && *reader != NEXTPAGE) {
-    reader++;
-  }
-  reader++;
-  
-  return akku;
-}*/
+int find_remove_fifo(void) {
+  int idx = vmem->adm.next_alloc_idx;
+  vmem->adm.next_alloc_idx = (vmem->adm.next_alloc_idx + 1) % VMEM_NFRAMES;
+  return idx;
+}
 
 int find_remove_clock(void) {
   while(1) {
-    if((vmem->pt.entries[vmem->adm.next_alloc_idx].flags & PTF_USED) == 0) {     //Wenn das Used-Bit nicht gesetzt ist
-      int idx = vmem->adm.next_alloc_idx;                                        //    Speichere diesn Index
+    if((vmem->pt.entries[vmem->pt.framepage[vmem->adm.next_alloc_idx]].flags & PTF_USED) == 0) {     //Wenn das Used-Bit nicht gesetzt ist
+      int idx = vmem->adm.next_alloc_idx;                                        //    Speichere diesen Index
       vmem->adm.next_alloc_idx = (vmem->adm.next_alloc_idx + 1) % VMEM_NFRAMES;  //    Schalte den globalen Index um einen weiter
       return idx;                                                                //    Gib den vorherigen Index zurück
     } else {                                                                     //Sonst
-      vmem->pt.entries[vmem->adm.next_alloc_idx].flags &= ~(PTF_USED);           //    Setze das Used-Bit auf 0
+      vmem->pt.entries[vmem->pt.framepage[vmem->adm.next_alloc_idx]].flags &= ~(PTF_USED);           //    Setze das Used-Bit auf 0
       vmem->adm.next_alloc_idx = (vmem->adm.next_alloc_idx + 1) % VMEM_NFRAMES;  //    Schalte den Index einen weiter
+    }
+  }
+}
+
+int find_remove_clock2(void) {
+  while(1) {
+    if((vmem->pt.entries[vmem->pt.framepage[vmem->adm.next_alloc_idx]].flags & PTF_USED) == 0) {
+      int idx = vmem->adm.next_alloc_idx;                                        //    Speichere diesen Index
+      vmem->adm.next_alloc_idx = (vmem->adm.next_alloc_idx + 1) % VMEM_NFRAMES;  //    Schalte den globalen Index um einen weiter
+      return idx;
+    } else if((vmem->pt.entries[vmem->pt.framepage[vmem->adm.next_alloc_idx]].flags & PTF_USED1) == 1){ //Wenn PTF_USED1 == 1
+      vmem->pt.entries[vmem->pt.framepage[vmem->adm.next_alloc_idx]].flags &= ~(PTF_USED1);             //    Setze PTF_USED1 = 0
+      vmem->adm.next_alloc_idx = (vmem->adm.next_alloc_idx + 1) % VMEM_NFRAMES;                         //    Schalte den globalen Index um einen weiter
+    } else {                                                                                            //Ansonsten
+      vmem->pt.entries[vmem->pt.framepage[vmem->adm.next_alloc_idx]].flags &= ~(PTF_USED);              //    Setze PTF_USED1 = 0
+      vmem->adm.next_alloc_idx = (vmem->adm.next_alloc_idx + 1) % VMEM_NFRAMES;                         //    Schalte den globalen Index um einen weiter
     }
   }
 }
@@ -278,16 +254,6 @@ void cleanup(void) {
 }
 
 void init_pagefile(const char *fileName) {
-  /*int i;
-  remove("MMANAGE_PFNAME");                   //Lösche die alte Pagefile
-  pagefile = fopen(MMANAGE_PFNAME, "r+w");    //Öffne die neue Pagefile
-  if(!pagefile) {
-        perror("Error creating pagefile");
-        exit(EXIT_FAILURE);
-  }
-  for(i = 0; i < VMEM_NPAGES; i++) {
-    fputs("NEXTPAGE", pagefile);                    //Befülle die File mit \n für jede Page. Geplante Struktur im Dateikopf
-  }*/
   
   int array_size = VMEM_NPAGES * VMEM_PAGESIZE;
   int data[array_size];

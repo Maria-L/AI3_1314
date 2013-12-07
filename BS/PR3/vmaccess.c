@@ -22,7 +22,7 @@ void vm_init(void) {
     perror("Error attatching to shared Memory");
     exit(EXIT_FAILURE);
   } else {
-    printf("\nSuccessfully attatched to shared Memory");
+    fprintf(stderr, "\nSuccessfully attatched to shared Memory");
   }
 }
 
@@ -39,9 +39,9 @@ int vmem_read(int address) {
     kill(vmem->adm.mmanage_pid, SIGUSR1);                  //Signal, dass mmanage eine Seite laden muss
     sem_wait(&(vmem->adm.sema));                           //Warte auf Signal von mmanage
   }
-                                                           //Berechne die Physische Adresse
+                                                   //Berechne die Physische Adresse
   int physAddr = vmem->pt.entries[pageNum].frame * VMEM_PAGESIZE + (address % VMEM_PAGESIZE);
-  vmem->pt.entries[pageNum].flags |= PTF_USED;             //Setzt das Used-Bit für den Clock Algorithmus
+  vmem->pt.entries[pageNum].flags |= PTF_USED | PTF_USED1; //Setzt das Used-Bit für den Clock Algorithmus
   return vmem->data[physAddr];
 }
 
@@ -52,17 +52,15 @@ void vmem_write(int address, int data) {
   }
 
   int pageNum = address / VMEM_PAGESIZE;
-  int pagePresent = ((vmem->pt.entries[pageNum].flags) & PTF_PRESENT) == PTF_PRESENT;
-  
   vmem->adm.req_pageno = pageNum;
   
-  if(!pagePresent) {
+  if(!(vmem->pt.entries[pageNum].flags & PTF_PRESENT)) {
     kill(vmem->adm.mmanage_pid, SIGUSR1);
     sem_wait(&(vmem->adm.sema));
+    usleep(10000);
   }
 
-  vmem->pt.entries[pageNum].flags |= PTF_USED;            //Setze das Used-Bit für den Clock Algorithmus
-  vmem->pt.entries[pageNum].flags |= PTF_DIRTY;           //Setze das Dirty-Bit, damit die Seite beim Einlagern in die Festplatte erneuert wird
+  vmem->pt.entries[pageNum].flags |= PTF_USED | PTF_USED1 | PTF_DIRTY;//Setze das Used, Used1 und Dirty-Flag
   int physAddr = vmem->pt.entries[pageNum].frame * VMEM_PAGESIZE + (address % VMEM_PAGESIZE);
   vmem->data[physAddr] = data;                            //Schreibe data in das Daten-Array
 }

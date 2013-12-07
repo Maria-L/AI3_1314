@@ -30,19 +30,11 @@ void sighandler(int signo);
 
 void vmem_init(void);
 
-void allocate_page(void);
-
 void fetch_page(int pt_idx);
 
 void store_page(int pt_idx);
 
 void page_fault(void);
-
-int readNum(char *reader);
-
-void update_pt(int frame);
-
-int find_remove_frame(void);
 
 int find_remove_fifo(void);
 

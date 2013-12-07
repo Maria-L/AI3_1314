@@ -9,11 +9,11 @@
 int
 main(void)
 {
-  int testing = 1;
+  int testing = 0;
   if(!testing) {
     /* Fill memory with pseudo-random data */
     printf("\ninitialisiere Daten\n");
-    init_data(4);
+    init_data(LENGTH);
 
     /* Display unsorted */
     printf("\nUnsorted:\n");
@@ -34,11 +34,14 @@ main(void)
     
     vmem_write(0, 24);
     vmem_write(1, 36);
+    vmem_write(2, 48);
     
     printf("\nErste Zahl: %d", vmem_read(0));
     printf("\nZweite Zahl: %d", vmem_read(1));
+    printf("\nDritte Zahl: %d", vmem_read(2));
     
-    printf("\nTest Success");
+    printf("\nTest Success\n");
+    
     return 0;
   }
 }
@@ -54,7 +57,6 @@ init_data(int length)
 
     for(i = 0; i < length; i++) {
         val = rand() % RNDMOD;
-	printf("\nschreibe...");
         vmem_write(i, val);
     }   /* end for */
 }

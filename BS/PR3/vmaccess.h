@@ -7,6 +7,7 @@
 #ifndef VMACCESS_H
 #define VMACCESS_H
 
+#include <time.h>
 #include <stdio.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
