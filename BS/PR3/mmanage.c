@@ -128,17 +128,26 @@ void sighandler(int signo) {
 
 void page_fault(void) {
   struct logevent log;
-  log.req_pageno = vmem->.adm.req_pageno;
+  vmem->adm.pf_count += 1;
+  log.pf_count = vmem->adm.pf_count;
+  log.g_count = vmem->adm.pf_count;
+  log.req_pageno = vmem->adm.req_pageno;
+  log.replaced_page = NULLPAGE;
   int free_frame;
   int to_delete;
+  
   free_frame = find_free_frame();                //Suche freien Platz im Physischen Speicher
 	  
   if(free_frame < 0) {                           //Wenn keiner gefunden wurde
-    to_delete = find_remove_fifo();              //    Suche einen Frame zum löschen
+    to_delete = find_remove_clock2();              //    Suche einen Frame zum löschen
+    log.replaced_page = vmem->pt.framepage[to_delete];
     store_page(to_delete);                       //    Speichere diese in die pagefile
     free_frame = to_delete;                      //    Diese Seite kann nun im physischen Speicher überschrieben werden
   }
+  log.alloc_frame = free_frame;
   fetch_page(free_frame);                        //Überschreibe die alte Page mit der benötigten aus der pagef
+  
+  logger(log);
   fprintf(stderr, "Processed SIGUSR1 - loaded PageNr %d\n", vmem->adm.req_pageno);
 }
 

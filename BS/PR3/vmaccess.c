@@ -41,7 +41,11 @@ int vmem_read(int address) {
   }
                                                    //Berechne die Physische Adresse
   int physAddr = vmem->pt.entries[pageNum].frame * VMEM_PAGESIZE + (address % VMEM_PAGESIZE);
-  vmem->pt.entries[pageNum].flags |= PTF_USED | PTF_USED1; //Setzt das Used-Bit für den Clock Algorithmus
+  if((vmem->pt.entries[pageNum].flags & PTF_USED) == 0) {
+    vmem->pt.entries[pageNum].flags |= PTF_USED;
+  } else {
+    vmem->pt.entries[pageNum].flags |= PTF_USED1;
+  }
   return vmem->data[physAddr];
 }
 
@@ -60,7 +64,12 @@ void vmem_write(int address, int data) {
     usleep(10000);
   }
 
-  vmem->pt.entries[pageNum].flags |= PTF_USED | PTF_USED1 | PTF_DIRTY;//Setze das Used, Used1 und Dirty-Flag
+  vmem->pt.entries[pageNum].flags |= PTF_DIRTY;//Setze das Used, Used1 und Dirty-Flag
+  if((vmem->pt.entries[pageNum].flags & PTF_USED) == 0) {
+    vmem->pt.entries[pageNum].flags |= PTF_USED;
+  } else {
+    vmem->pt.entries[pageNum].flags |= PTF_USED1;
+  }
   int physAddr = vmem->pt.entries[pageNum].frame * VMEM_PAGESIZE + (address % VMEM_PAGESIZE);
   vmem->data[physAddr] = data;                            //Schreibe data in das Daten-Array
 }
