@@ -60,7 +60,7 @@ void vmem_write(int address, int data) {
   
   if(!(vmem->pt.entries[pageNum].flags & PTF_PRESENT)) {
     kill(vmem->adm.mmanage_pid, SIGUSR1);
-    sem_wait(&(vmem->adm.sema));
+    sem_wait(&vmem->adm.sema);
     usleep(10000);
   }
 

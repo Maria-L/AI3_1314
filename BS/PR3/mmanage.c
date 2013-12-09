@@ -80,25 +80,35 @@ main(void)
         fprintf(stderr, "INT handler successfully installed\n");
     }
 
+#ifdef FIFO
+    fprintf(stderr, "\nFiFo in use");
+#endif
+#ifdef CLOCK
+    fprintf(stderr, "\nClock in use");
+#endif
+#ifdef CLOCK2
+    fprintf(stderr, "\nClock2 in use");
+#endif
+
     /* Signal processing loop */
     while(1) {
         signal_number = 0;
-	fprintf(stderr, "Warte auf Signal\n");
+	fprintf(stderr, "\nWarte auf Signal");
         pause();
         if(signal_number == SIGUSR1) {              /* Page fault */
           signal_number = 0;
         }
         else if(signal_number == SIGUSR2) {         /* PT dump */
-            fprintf(stderr, "Processed SIGUSR2\n");
+            fprintf(stderr, "\nProcessed SIGUSR2");
             signal_number = 0;
         }
         else if(signal_number == SIGINT) {          /* Exit Program */
 	    cleanup();
-            fprintf(stderr, "Processed SIGINT\n");
+            fprintf(stderr, "\nProcessed SIGINT");
 	    break;
 	} else {
           signal_number = 0;
-	  fprintf(stderr, "Unknown Signal\n");
+	  fprintf(stderr, "\nUnknown Signal");
         }
     }
     return 0;
@@ -111,7 +121,8 @@ void sighandler(int signo) {
     page_fault();
     sem_post(&(vmem->adm.sema));    //Gib vmaccess das Signal zum weiter machen
   } else if(signo == SIGUSR2) {
-    //make_dump();
+    make_dump();
+    sem_post(&vmem->adm.sema);
   }
 }
 
@@ -128,16 +139,40 @@ void page_fault(void) {
   free_frame = find_free_frame();                //Suche freien Platz im Physischen Speicher
 	  
   if(free_frame < 0) {                           //Wenn keiner gefunden wurde
-    to_delete = find_remove_clock2();             //    Suche einen Frame zum löschen
+    to_delete = NULLPAGE;
+#ifdef FIFO
+    to_delete = find_remove_fifo();              //    Suche einen Frame zum loeschen
+#endif
+#ifdef CLOCK
+    to_delete = find_remove_clock();
+#endif
+#ifdef CLOCK2
+    to_delete = find_remove_clock2();
+#endif
     log.replaced_page = vmem->pt.framepage[to_delete];
     store_page(to_delete);                       //    Speichere diese in die pagefile
-    free_frame = to_delete;                      //    Diese Seite kann nun im physischen Speicher überschrieben werden
+    free_frame = to_delete;                      //    Diese Seite kann nun im physischen Speicher ueberschrieben werden
   }
   log.alloc_frame = free_frame;
-  fetch_page(free_frame);                        //Überschreibe die alte Page mit der benötigten aus der pagef
+  fetch_page(free_frame);                        //ueberschreibe die alte Page mit der benoetigten aus der pagefile
   
   logger(log);
-  fprintf(stderr, "Processed SIGUSR1 - loaded PageNr %d\n", vmem->adm.req_pageno);
+  fprintf(stderr, "\nProcessed SIGUSR1 - loaded PageNr %d to FrameNr %d", vmem->adm.req_pageno, free_frame);
+}
+
+void make_dump(void) {
+  fprintf(stderr, "\n####   Dump   ####");
+  fprintf(stderr, "\n VMEM-ID:        %10d", vmem->adm.shm_id);
+  fprintf(stderr, "\n PAGE-ID:        %10d", vmem->adm.req_pageno);
+  fprintf(stderr, "\n ALLOC-FRAME-ID: %10d", vmem->adm.next_alloc_idx);
+  fprintf(stderr, "\n PF-COUNT:       %10d", vmem->adm.pf_count);
+  
+  int i;
+  fprintf(stderr, "\nFrameTable");
+  fprintf(stderr, "\n    Frame-Nr  Page-Nr");
+  for(i = 0; i< VMEM_NFRAMES; i++){
+    fprintf(stderr,"\n %10d %10d", i, vmem->pt.framepage[i]);
+  }
 }
 
 void vmem_init(void) {
@@ -183,9 +218,9 @@ void store_page(int pt_index) {
   int old_page = vmem->pt.framepage[pt_index];
   vmem->pt.entries[old_page].flags &= ~(PTF_PRESENT);
   
-  if(vmem->pt.entries[old_page].flags & PTF_DIRTY) {                          //Wenn die Page verändert wurde
-    vmem->pt.entries[old_page].flags &= ~(PTF_DIRTY);                         //  Setze das 
-    fseek(pagefile, sizeof(int) * VMEM_PAGESIZE * old_page, SEEK_SET);        //  Setze den Filepointer auf die gewünschte Position
+  if(vmem->pt.entries[old_page].flags & PTF_DIRTY) {                                     //Wenn die Page veraendert wurde
+    vmem->pt.entries[old_page].flags &= ~(PTF_DIRTY);                                    //  Setze das 
+    fseek(pagefile, sizeof(int) * VMEM_PAGESIZE * old_page, SEEK_SET);                   //  Setze den Filepointer auf die gewuenschte Position
     fwrite(&vmem->data[VMEM_PAGESIZE * pt_index], sizeof(int), VMEM_PAGESIZE, pagefile); //Schreibe die Daten
     rewind(pagefile);
   }
@@ -195,11 +230,11 @@ void fetch_page(int pt_index) {
   int old_page = vmem->pt.framepage[pt_index];
   vmem->pt.entries[old_page].flags &= ~(PTF_PRESENT);
   
-  fseek(pagefile, sizeof(int) * VMEM_PAGESIZE * vmem->adm.req_pageno, SEEK_SET);      //Setze den filepointer auf die gewünschte Position
-  fread(&vmem->data[VMEM_PAGESIZE * pt_index], sizeof(int), VMEM_PAGESIZE, pagefile); //Lese die Daten aus
+  fseek(pagefile, sizeof(int) * VMEM_PAGESIZE * vmem->adm.req_pageno, SEEK_SET);       //Setze den filepointer auf die gewuenschte Position
+  fread(&vmem->data[VMEM_PAGESIZE * pt_index], sizeof(int), VMEM_PAGESIZE, pagefile);  //Lese die Daten aus
   rewind(pagefile);
   
-  vmem->pt.entries[vmem->adm.req_pageno].flags |= PTF_PRESENT | PTF_USED;  //Setze das Present, Used und Used1 Flag auf 1
+  vmem->pt.entries[vmem->adm.req_pageno].flags |= PTF_PRESENT | PTF_USED;              //Setze das Present, Used und Used1 Flag auf 1
   vmem->pt.entries[vmem->adm.req_pageno].flags &= ~(PTF_DIRTY);                        //Setze das Dirty-Flag auf 0
   vmem->pt.entries[vmem->adm.req_pageno].frame = pt_index;                             //Aktualisiere den Speicherort
   vmem->pt.framepage[pt_index] = vmem->adm.req_pageno;
@@ -216,7 +251,7 @@ int find_remove_clock(void) {
     if((vmem->pt.entries[vmem->pt.framepage[vmem->adm.next_alloc_idx]].flags & PTF_USED) == 0) { //Wenn das Used-Bit nicht gesetzt ist
       int idx = vmem->adm.next_alloc_idx;                                                        //    Speichere diesen Index
       vmem->adm.next_alloc_idx = (vmem->adm.next_alloc_idx + 1) % VMEM_NFRAMES;                  //    Schalte den globalen Index um einen weiter
-      return idx;                                                                                //    Gib den vorherigen Index zurück
+      return idx;                                                                                //    Gib den vorherigen Index zurueck
     } else {                                                                                     //Sonst
       vmem->pt.entries[vmem->pt.framepage[vmem->adm.next_alloc_idx]].flags &= ~(PTF_USED);       //    Setze das Used-Bit auf 0
       vmem->adm.next_alloc_idx = (vmem->adm.next_alloc_idx + 1) % VMEM_NFRAMES;                  //    Schalte den Index einen weiter

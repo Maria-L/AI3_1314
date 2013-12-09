@@ -8,21 +8,22 @@
 #define MMANAGE_H
 #include "vmem.h"
 #include <limits.h>
-#include <sys/types.h>
+//#include <sys/types.h>
 #include <signal.h>
 #include <unistd.h>
 #include <sys/mman.h>
-#include <sys/stat.h>
-#include <fcntl.h> 
+//#include <sys/stat.h>
+//#include <fcntl.h> 
 
+#define CLOCK
 
 /** Event struct for logging */
 struct logevent {
-    int req_pageno;
-    int replaced_page;
-    int alloc_frame;
-    int pf_count;
-    int g_count;
+  int req_pageno;
+  int replaced_page;
+  int alloc_frame;
+  int pf_count;
+  int g_count;
 };
 
 /** Prototypes */
@@ -50,7 +51,7 @@ void cleanup(void);
 
 void logger(struct logevent le);
 
-void dump_pt(void);
+void make_dump(void);
 
 /** Misc */
 #define MMANAGE_PFNAME "./pagefile.bin"    /**< pagefile name */
@@ -66,11 +67,5 @@ void dump_pt(void);
 
 #define SEED_PF 290913        /**< Get reproducable pseudo-random numbers for
                            init_pagefile */
-
-#define VOID_IDX -1
-
-/* Edit to modify algo, or remove line and provide
- * -DVMEM_ALGO ... compiler flag*/
-/* #define VMEM_ALGO VMEM_ALGO_FIFO */
 
 #endif /* MMANAGE_H */
