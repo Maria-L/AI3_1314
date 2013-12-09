@@ -119,7 +119,7 @@ void sighandler(int signo) {
   signal_number = signo;
   if(signo == SIGUSR1) {
     page_fault();
-    sem_post(&(vmem->adm.sema));    //Gib vmaccess das Signal zum weiter machen
+    sem_post(&vmem->adm.sema);    //Gib vmaccess das Signal zum weiter machen
   } else if(signo == SIGUSR2) {
     make_dump();
     sem_post(&vmem->adm.sema);
@@ -182,6 +182,11 @@ void vmem_init(void) {
   shm_key = ftok(SHMKEY, 1);
   shm_id = shmget(shm_key, SHMSIZE, IPC_CREAT | 0666);
   vmem = shmat(shm_id, 0, 0);
+
+  if(vmem == NULL) {
+    perror("\nKonnte nicht zu VMEM verbinden");
+    exit(EXIT_FAILURE);
+  }
   
   vmem->adm.size = VMEM_PHYSMEMSIZE;
   vmem->adm.mmanage_pid = getpid();
@@ -215,23 +220,40 @@ int find_free_frame(void) {
 }
 
 void store_page(int pt_index) {
+  int err;
   int old_page = vmem->pt.framepage[pt_index];
   vmem->pt.entries[old_page].flags &= ~(PTF_PRESENT);
   
   if(vmem->pt.entries[old_page].flags & PTF_DIRTY) {                                     //Wenn die Page veraendert wurde
     vmem->pt.entries[old_page].flags &= ~(PTF_DIRTY);                                    //  Setze das 
-    fseek(pagefile, sizeof(int) * VMEM_PAGESIZE * old_page, SEEK_SET);                   //  Setze den Filepointer auf die gewuenschte Position
-    fwrite(&vmem->data[VMEM_PAGESIZE * pt_index], sizeof(int), VMEM_PAGESIZE, pagefile); //Schreibe die Daten
+    err = fseek(pagefile, sizeof(int) * VMEM_PAGESIZE * old_page, SEEK_SET);                   //  Setze den Filepointer auf die gewuenschte Position
+    if(err != 0) {
+      perror("\nFSeek failed");
+      exit(EXIT_FAILURE);
+    }
+    err = fwrite(&vmem->data[VMEM_PAGESIZE * pt_index], sizeof(int), VMEM_PAGESIZE, pagefile); //Schreibe die Daten
+    if(err != VMEM_PAGESIZE) {
+      perror("\nFRead error");
+    }
     rewind(pagefile);
   }
 }
 
 void fetch_page(int pt_index) { 
+  int err;
+
   int old_page = vmem->pt.framepage[pt_index];
   vmem->pt.entries[old_page].flags &= ~(PTF_PRESENT);
   
-  fseek(pagefile, sizeof(int) * VMEM_PAGESIZE * vmem->adm.req_pageno, SEEK_SET);       //Setze den filepointer auf die gewuenschte Position
-  fread(&vmem->data[VMEM_PAGESIZE * pt_index], sizeof(int), VMEM_PAGESIZE, pagefile);  //Lese die Daten aus
+  err = fseek(pagefile, sizeof(int) * VMEM_PAGESIZE * vmem->adm.req_pageno, SEEK_SET);       //Setze den filepointer auf die gewuenschte Position
+  if(err != 0) {
+    perror("\nFSeek failed");
+    exit(EXIT_FAILURE);
+  }
+  err = fread(&vmem->data[VMEM_PAGESIZE * pt_index], sizeof(int), VMEM_PAGESIZE, pagefile);  //Lese die Daten aus
+  if(err != VMEM_PAGESIZE) {
+    perror("\nFRead error");
+  }
   rewind(pagefile);
   
   vmem->pt.entries[vmem->adm.req_pageno].flags |= PTF_PRESENT | PTF_USED;              //Setze das Present, Used und Used1 Flag auf 1
@@ -276,10 +298,23 @@ int find_remove_clock2(void) {
 }
 
 void cleanup(void) {
-  shmdt(vmem);
+  int err;
 
-  fclose(logfile);
-  fclose(pagefile);
+  err = shmdt(vmem);
+  if(err != 0) {
+    perror("\nError disconnecting from Shared Memory");
+    exit(EXIT_FAILURE);
+  }
+  err = fclose(logfile);
+  if(err != 0) {
+    perror("\nError closing logfile");
+    exit(EXIT_FAILURE);
+  }
+  err = fclose(pagefile);
+  if(err != 0) {
+    perror("\nError closing pagefile");
+    exit(EXIT_FAILURE);
+  }
 }
 
 void init_pagefile(const char *fileName) {

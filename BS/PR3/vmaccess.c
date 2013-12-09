@@ -64,7 +64,7 @@ void vmem_write(int address, int data) {
     usleep(10000);
   }
 
-  vmem->pt.entries[pageNum].flags |= PTF_DIRTY;//Setze das Used, Used1 und Dirty-Flag
+  vmem->pt.entries[pageNum].flags |= PTF_DIRTY;           //Setze das Used, Used1 und Dirty-Flag
   if((vmem->pt.entries[pageNum].flags & PTF_USED) == 0) {
     vmem->pt.entries[pageNum].flags |= PTF_USED;
   } else {
