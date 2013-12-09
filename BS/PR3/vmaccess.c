@@ -16,7 +16,7 @@ void vm_init(void) {
   if(shm_id == -1) {
     perror("Error finding the Shared Memory");
     exit(EXIT_FAILURE);
-  } 
+    }
   vmem = shmat(shm_id, NULL, 0);
   if(vmem == (void *) -1) {
     perror("Error attatching to shared Memory");

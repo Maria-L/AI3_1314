@@ -17,20 +17,6 @@
  * currently nothing
  * */
 
-/* 
- *Inhalt von pagefile.bin wie folgt gegliedert
- *',' zwischen zwei Zahlen
- * '\n' nach jeder Page
- * 
- * Beispiel:
- * 
- * "11,12,13,14\n
- * 21,22,23,24\n
- * 31,32,33,34\n
- * 41,42,43,44\n"
- *
- */
-
 #include "mmanage.h"
 
 struct vmem_struct *vmem = NULL;
@@ -110,7 +96,10 @@ main(void)
 	    cleanup();
             fprintf(stderr, "Processed SIGINT\n");
 	    break;
-	}
+	} else {
+          signal_number = 0;
+	  fprintf(stderr, "Unknown Signal\n");
+        }
     }
     return 0;
 }
@@ -120,10 +109,10 @@ void sighandler(int signo) {
   signal_number = signo;
   if(signo == SIGUSR1) {
     page_fault();
+    sem_post(&(vmem->adm.sema));    //Gib vmaccess das Signal zum weiter machen
   } else if(signo == SIGUSR2) {
     //make_dump();
   }
-  sem_post(&(vmem->adm.sema));                   //Gib vmaccess das Signal zum weiter machen
 }
 
 void page_fault(void) {
@@ -139,7 +128,7 @@ void page_fault(void) {
   free_frame = find_free_frame();                //Suche freien Platz im Physischen Speicher
 	  
   if(free_frame < 0) {                           //Wenn keiner gefunden wurde
-    to_delete = find_remove_clock2();              //    Suche einen Frame zum löschen
+    to_delete = find_remove_clock2();             //    Suche einen Frame zum löschen
     log.replaced_page = vmem->pt.framepage[to_delete];
     store_page(to_delete);                       //    Speichere diese in die pagefile
     free_frame = to_delete;                      //    Diese Seite kann nun im physischen Speicher überschrieben werden
@@ -154,31 +143,26 @@ void page_fault(void) {
 void vmem_init(void) {
   int err;
   int i;
-
+ 
   shm_key = ftok(SHMKEY, 1);
-  shm_id = shmget(shm_key, SHMSIZE, IPC_EXCL | 0666);
+  shm_id = shmget(shm_key, SHMSIZE, IPC_CREAT | 0666);
   vmem = shmat(shm_id, 0, 0);
-
+  
   vmem->adm.size = VMEM_PHYSMEMSIZE;
   vmem->adm.mmanage_pid = getpid();
   vmem->adm.shm_id = shm_id;
-  vmem->adm.req_pageno = -1;
+  vmem->adm.req_pageno = NULLPAGE;
   vmem->adm.next_alloc_idx = 0;
   vmem->adm.pf_count = 0;
   err = sem_init(&(vmem->adm.sema), 1, 1);
   if(err != 0) {
     perror("Semaphore initialisation failed");
   }
-  //err = pthread_mutex_init(&vmem->adm.lock);
   
   for(i = 0; i < VMEM_NPAGES; i++) {
     vmem->pt.entries[i].flags = 0;
     vmem->pt.entries[i].frame = NULLPAGE;
   }
-  
-  /*for(i = 0; i < VMEM_BMSIZE; i++) {
-    vmem->adm.bitmap[i] = 0;
-  }*/
   
   for(i = 0; i < VMEM_NFRAMES; i++) {
     vmem->pt.framepage[i] = NULLPAGE;
@@ -192,7 +176,7 @@ int find_free_frame(void) {
       return i;
     }
   }
-  return -1;
+  return NULLPAGE;
 }
 
 void store_page(int pt_index) {
@@ -200,7 +184,8 @@ void store_page(int pt_index) {
   vmem->pt.entries[old_page].flags &= ~(PTF_PRESENT);
   
   if(vmem->pt.entries[old_page].flags & PTF_DIRTY) {                          //Wenn die Page verändert wurde
-    fseek(pagefile, sizeof(int) * VMEM_PAGESIZE * old_page, SEEK_SET);          //Setze den Filepointer auf die gewünschte Position
+    vmem->pt.entries[old_page].flags &= ~(PTF_DIRTY);                         //  Setze das 
+    fseek(pagefile, sizeof(int) * VMEM_PAGESIZE * old_page, SEEK_SET);        //  Setze den Filepointer auf die gewünschte Position
     fwrite(&vmem->data[VMEM_PAGESIZE * pt_index], sizeof(int), VMEM_PAGESIZE, pagefile); //Schreibe die Daten
     rewind(pagefile);
   }
@@ -214,7 +199,7 @@ void fetch_page(int pt_index) {
   fread(&vmem->data[VMEM_PAGESIZE * pt_index], sizeof(int), VMEM_PAGESIZE, pagefile); //Lese die Daten aus
   rewind(pagefile);
   
-  vmem->pt.entries[vmem->adm.req_pageno].flags |= PTF_PRESENT | PTF_USED | PTF_USED1;  //Setze das Present, Used und Used1 Flag auf 1
+  vmem->pt.entries[vmem->adm.req_pageno].flags |= PTF_PRESENT | PTF_USED;  //Setze das Present, Used und Used1 Flag auf 1
   vmem->pt.entries[vmem->adm.req_pageno].flags &= ~(PTF_DIRTY);                        //Setze das Dirty-Flag auf 0
   vmem->pt.entries[vmem->adm.req_pageno].frame = pt_index;                             //Aktualisiere den Speicherort
   vmem->pt.framepage[pt_index] = vmem->adm.req_pageno;
@@ -228,28 +213,28 @@ int find_remove_fifo(void) {
 
 int find_remove_clock(void) {
   while(1) {
-    if((vmem->pt.entries[vmem->pt.framepage[vmem->adm.next_alloc_idx]].flags & PTF_USED) == 0) {     //Wenn das Used-Bit nicht gesetzt ist
-      int idx = vmem->adm.next_alloc_idx;                                        //    Speichere diesen Index
-      vmem->adm.next_alloc_idx = (vmem->adm.next_alloc_idx + 1) % VMEM_NFRAMES;  //    Schalte den globalen Index um einen weiter
-      return idx;                                                                //    Gib den vorherigen Index zurück
-    } else {                                                                     //Sonst
-      vmem->pt.entries[vmem->pt.framepage[vmem->adm.next_alloc_idx]].flags &= ~(PTF_USED);           //    Setze das Used-Bit auf 0
-      vmem->adm.next_alloc_idx = (vmem->adm.next_alloc_idx + 1) % VMEM_NFRAMES;  //    Schalte den Index einen weiter
+    if((vmem->pt.entries[vmem->pt.framepage[vmem->adm.next_alloc_idx]].flags & PTF_USED) == 0) { //Wenn das Used-Bit nicht gesetzt ist
+      int idx = vmem->adm.next_alloc_idx;                                                        //    Speichere diesen Index
+      vmem->adm.next_alloc_idx = (vmem->adm.next_alloc_idx + 1) % VMEM_NFRAMES;                  //    Schalte den globalen Index um einen weiter
+      return idx;                                                                                //    Gib den vorherigen Index zurück
+    } else {                                                                                     //Sonst
+      vmem->pt.entries[vmem->pt.framepage[vmem->adm.next_alloc_idx]].flags &= ~(PTF_USED);       //    Setze das Used-Bit auf 0
+      vmem->adm.next_alloc_idx = (vmem->adm.next_alloc_idx + 1) % VMEM_NFRAMES;                  //    Schalte den Index einen weiter
     }
   }
 }
 
 int find_remove_clock2(void) {
   while(1) {
-    if((vmem->pt.entries[vmem->pt.framepage[vmem->adm.next_alloc_idx]].flags & PTF_USED) == 0) {
-      int idx = vmem->adm.next_alloc_idx;                                        //    Speichere diesen Index
-      vmem->adm.next_alloc_idx = (vmem->adm.next_alloc_idx + 1) % VMEM_NFRAMES;  //    Schalte den globalen Index um einen weiter
+    if((vmem->pt.entries[vmem->pt.framepage[vmem->adm.next_alloc_idx]].flags & PTF_USED) == 0) {        //Wenn PTF_USED == 0
+      int idx = vmem->adm.next_alloc_idx;                                                               //    Speichere diesen Index
+      vmem->adm.next_alloc_idx = (vmem->adm.next_alloc_idx + 1) % VMEM_NFRAMES;                         //    Schalte den globalen Index um einen weiter
       return idx;
-    } else if((vmem->pt.entries[vmem->pt.framepage[vmem->adm.next_alloc_idx]].flags & PTF_USED1) == 1){ //Wenn PTF_USED1 == 1
+    } else if(vmem->pt.entries[vmem->pt.framepage[vmem->adm.next_alloc_idx]].flags & PTF_USED1){        //Wenn PTF_USED1 == 1
       vmem->pt.entries[vmem->pt.framepage[vmem->adm.next_alloc_idx]].flags &= ~(PTF_USED1);             //    Setze PTF_USED1 = 0
       vmem->adm.next_alloc_idx = (vmem->adm.next_alloc_idx + 1) % VMEM_NFRAMES;                         //    Schalte den globalen Index um einen weiter
     } else {                                                                                            //Ansonsten
-      vmem->pt.entries[vmem->pt.framepage[vmem->adm.next_alloc_idx]].flags &= ~(PTF_USED);              //    Setze PTF_USED1 = 0
+      vmem->pt.entries[vmem->pt.framepage[vmem->adm.next_alloc_idx]].flags &= ~(PTF_USED);              //    Setze PTF_USED = 0
       vmem->adm.next_alloc_idx = (vmem->adm.next_alloc_idx + 1) % VMEM_NFRAMES;                         //    Schalte den globalen Index um einen weiter
     }
   }
@@ -271,7 +256,6 @@ void init_pagefile(const char *fileName) {
   for(i = 0; i < array_size; i++) {
     data[i] = 0;
   }
-  printf("\nuntil the remove");
   //remove(MMANAGE_PFNAME);
   pagefile = fopen(MMANAGE_PFNAME, "r+w");
   fwrite(data, sizeof(int), array_size, pagefile);

@@ -1,0 +1,169 @@
+##### vmaccess #####
+
+function vm_init
+  binde an geteilten Speicher an
+end function
+
+
+function vm_read (address)
+  wenn vmem noch nicht initialisiert ist
+    rufe vm_init auf
+  
+  page_num = address / VMEM_PAGESIZE
+  
+  Wenn das Present-Flag der Page nicht gesetzt ist
+    schreibe die benötigte Page in vmem
+    Schicke ein SIGUSR1 an mmanage
+    Warte auf sema auf mmanage
+    
+  physAddr = frameDerPage * VMEM_PAGESIZE + address % VMEM_PAGESIZE
+  
+  Setze entsprechende Used_Flags
+  
+  return vmem.data[physAddr]
+end function
+
+
+function vm_write(address, data)
+  wenn vmem noch nicht initialisiert ist
+    rufe vm_init auf
+  
+  page_num = address / VMEM_PAGESIZE
+  
+  Wenn das Present-Flag der Page nicht gesetzt ist
+    schreibe die benötigte Page in vmem
+    Schicke ein SIGUSR1 an mmanage
+    Warte auf sema auf mmanage
+    
+  Setze das Dirty-Flag und die Used-Flags
+  
+  physAddr = frameDerPage * VMEM_PAGESIZE + address % VMEM_PAGESIZE
+  
+  vmem.data[physAddr] = data
+end function
+
+
+##### mmanage #####
+
+function main
+  rufe init_pagefile auf
+  
+  lege das logfile an
+  
+  rufe vmem_init auf
+  
+  Initialisiere den Signalhandler mit der Funktion sighandler
+  
+  endlosschleife
+    pause
+    
+    Wenn das Signal SIGUSR1 kam
+      signal_number = 0
+    Wenn das Signal SIGUSR2 kam
+      signal_number = 0
+    Wenn das Signal SIGINT kam
+      rufe cleanup auf
+      breake aus der Endlosschleife
+    Bei allen anderen Signalen
+      Gebe eine Nachricht darüber aus
+      
+end function
+
+
+function sighandler(signo)
+  signal_number = signo
+  
+  Wenn das Signal SIGUSR1 kam
+    rufe page_fault auf
+    gib sema für vmaccess wieder frei
+  Wenn das Signal SIGUSR2 kam
+    rufe make_dump auf
+end function
+
+
+function page_fault
+  Inkrementiere den pf_count in vmem
+  
+  Rufe find_free_frame auf und speichere das Ergebnis in free_frame
+  
+  Wenn kein freies Frame gefunden wurde
+    Rufe einen der find_remove-Algorithmen auf und speichere das Ergebnis in to_delete
+    Rufe store_page mit to_delete auf
+    Setze free_frame = to_delete
+  
+  Rufe fetch_page mti free_frame auf
+  
+  Schreibe Logdaten
+end function
+
+
+function vmem_init
+  Erstelle den Geteilten Speicher und verbinde mit ihm
+  Schreibe Initialwerte in den geteilten Speicher
+end function
+
+
+
+function store_page(pt_index)
+  old_page = pagenum im frame an Position pt_index
+  Setze das Present-Flag von old_page auf 0
+  
+  Wenn das Dirty-Flag bei old_page gesetzt ist
+    Setze es auf 0
+    Schreibe die Daten in die Pagefile
+end function
+
+
+function fetch_page(pt_index) 
+  old_page = pagenum im frame an der Position pt_index
+  Setze das Present-Flag von old_page auf 0
+  
+  Lade vmem.req_pageno an die Stelle von pt_index
+  
+  Setze das Present und Used-Flag auf 1 und das Dirty-Flag von req_pageno auf 0
+  Aktualisiere in der Framepage an der Stelle pt_index die geladene Seite auf req_pageno
+end function
+
+
+function find_remove_fifo
+  Gib den aktuellen Wert von vmem.adm.next_alloc_idx zurück und inkrementiere ihn danach
+end function
+
+
+function find_remove_clock
+  endlosschleife
+    Wenn bei der Page an der Stelle next_alloc_idx das Used-Flag nicht gesetzt ist
+      Gib den Frame-Index zurück und inkrementiere ihn danach
+      Abbruch der Endlosschleife
+    Ansonsten
+      Setze das Used-Flag der Page auf 0
+      Inkrementiere den Frame-Index
+end function
+
+
+function find_remove_clock2
+  endlosschleife
+    Wenn bei der Page an der Stelle next_alloc_idx das Used-Flag nicht gesetzt ist
+      Gib den Frame-Index zurück und inkrementiere next_alloc_idx danach
+      Abbruch der Endlosschleife
+    Ansonsten wenn das Used1 Flag gesetzt ist
+      Setze es auf 0
+      Inkrementiere next_alloc_idx
+    Ansonsten
+      Setze das Used-Flag auf 0
+      Schalte next_alloc_idx einen weiter
+end function
+
+
+function cleanup
+  Trenne vom geteilten Speicher
+  
+  schließe das logfile und das pagefile
+end function
+
+
+
+function init pagefile(String)
+  Öffne das Pagefile mit read- und write-Berechtigung
+  Schreibe VMEM_PAGES * VMEM_PAGESIZE Default-Werte in das pagefile
+end function
