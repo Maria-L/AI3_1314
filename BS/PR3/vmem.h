@@ -13,9 +13,6 @@
 #include <signal.h>
 #include <unistd.h>
 #include <semaphore.h>
-//#include <sys/stat.h>
-//#include <sys/fcntl.h>
-//#include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <pthread.h>
