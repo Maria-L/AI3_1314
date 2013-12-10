@@ -92,23 +92,44 @@ main(void)
 
     /* Signal processing loop */
     while(1) {
+        int err;
         signal_number = 0;
 	fprintf(stderr, "\nWarte auf Signal");
+        err = fflush(stdin);
+        if(err != 0) {
+          perror("\nError at using fflush");
+          exit(EXIT_FAILURE);
+        }
         pause();
         if(signal_number == SIGUSR1) {              /* Page fault */
           signal_number = 0;
         }
         else if(signal_number == SIGUSR2) {         /* PT dump */
             fprintf(stderr, "\nProcessed SIGUSR2");
+            err = fflush(stdin);
+            if(err != 0) {
+              perror("\nError at using fflush");
+              exit(EXIT_FAILURE);
+            }
             signal_number = 0;
         }
         else if(signal_number == SIGINT) {          /* Exit Program */
 	    cleanup();
             fprintf(stderr, "\nProcessed SIGINT");
+            err = fflush(stdin);
+            if(err != 0) {
+              perror("\nError at using fflush");
+              exit(EXIT_FAILURE);
+            }
 	    break;
 	} else {
           signal_number = 0;
 	  fprintf(stderr, "\nUnknown Signal");
+          err = fflush(stdin);
+            if(err != 0) {
+              perror("\nError at using fflush");
+              exit(EXIT_FAILURE);
+            }
         }
     }
     return 0;
@@ -121,20 +142,20 @@ void sighandler(int signo) {
     page_fault();
     sem_post(&vmem->adm.sema);    //Gib vmaccess das Signal zum weiter machen
   } else if(signo == SIGUSR2) {
-    make_dump();
     sem_post(&vmem->adm.sema);
   }
 }
 
 void page_fault(void) {
   struct logevent log;
-  vmem->adm.pf_count += 1;
+  int free_frame;
+  int to_delete;
+  int err;
+  vmem->adm.pf_count += 1;                       //Logger befuellen
   log.pf_count = vmem->adm.pf_count;
   log.g_count = vmem->adm.pf_count;
   log.req_pageno = vmem->adm.req_pageno;
   log.replaced_page = NULLPAGE;
-  int free_frame;
-  int to_delete;
   
   free_frame = find_free_frame();                //Suche freien Platz im Physischen Speicher
 	  
@@ -158,37 +179,28 @@ void page_fault(void) {
   
   logger(log);
   fprintf(stderr, "\nProcessed SIGUSR1 - loaded PageNr %d to FrameNr %d", vmem->adm.req_pageno, free_frame);
-}
-
-void make_dump(void) {
-  fprintf(stderr, "\n####   Dump   ####");
-  fprintf(stderr, "\n VMEM-ID:        %10d", vmem->adm.shm_id);
-  fprintf(stderr, "\n PAGE-ID:        %10d", vmem->adm.req_pageno);
-  fprintf(stderr, "\n ALLOC-FRAME-ID: %10d", vmem->adm.next_alloc_idx);
-  fprintf(stderr, "\n PF-COUNT:       %10d", vmem->adm.pf_count);
-  
-  int i;
-  fprintf(stderr, "\nFrameTable");
-  fprintf(stderr, "\n    Frame-Nr  Page-Nr");
-  for(i = 0; i< VMEM_NFRAMES; i++){
-    fprintf(stderr,"\n %10d %10d", i, vmem->pt.framepage[i]);
+  err = fflush(stdin);
+  if(err != 0) {
+    perror("\nError at using fflush");
+    exit(EXIT_FAILURE);
   }
 }
+
 
 void vmem_init(void) {
   int err;
   int i;
  
-  shm_key = ftok(SHMKEY, 1);
+  shm_key = ftok(SHMKEY, 1);                       //Generiere Token aus SHMKEY
   shm_id = shmget(shm_key, SHMSIZE, IPC_CREAT | 0666);
-  vmem = shmat(shm_id, 0, 0);
+  vmem = shmat(shm_id, 0, 0);                      //Erstelle und verbinde zu geteiltem Speicher
 
   if(vmem == NULL) {
     perror("\nKonnte nicht zu VMEM verbinden");
     exit(EXIT_FAILURE);
   }
   
-  vmem->adm.size = VMEM_PHYSMEMSIZE;
+  vmem->adm.size = VMEM_PHYSMEMSIZE;               //Befuellung des Speichers mit Default-Werten
   vmem->adm.mmanage_pid = getpid();
   vmem->adm.shm_id = shm_id;
   vmem->adm.req_pageno = NULLPAGE;
@@ -209,8 +221,8 @@ void vmem_init(void) {
   }
 }
 
-int find_free_frame(void) {
-  int i;
+int find_free_frame(void) {          //Suche ein mal die Frametable nach einem freien Frame ab
+  int i;                             //und gib dieses bei Erfolg zurück
   for(i = 0; i < VMEM_NFRAMES; i++) {
     if(vmem->pt.framepage[i] == NULLPAGE) {
       return i;
@@ -300,24 +312,24 @@ int find_remove_clock2(void) {
 void cleanup(void) {
   int err;
 
-  err = shmdt(vmem);
+  err = shmdt(vmem);                          //Trenne von geteiltem Speicher
   if(err != 0) {
     perror("\nError disconnecting from Shared Memory");
     exit(EXIT_FAILURE);
   }
-  err = fclose(logfile);
+  err = fclose(logfile);                      //Schliesse das logfile
   if(err != 0) {
     perror("\nError closing logfile");
     exit(EXIT_FAILURE);
   }
-  err = fclose(pagefile);
+  err = fclose(pagefile);                     //Schliesse das pagefile
   if(err != 0) {
     perror("\nError closing pagefile");
     exit(EXIT_FAILURE);
   }
 }
 
-void init_pagefile(const char *fileName) {
+void init_pagefile(const char *fileName) {      //Oeffne/erstelle pagefile und befuelle sie mit 0en
   
   int array_size = VMEM_NPAGES * VMEM_PAGESIZE;
   int data[array_size];
@@ -327,7 +339,7 @@ void init_pagefile(const char *fileName) {
     data[i] = 0;
   }
   //remove(MMANAGE_PFNAME);
-  pagefile = fopen(MMANAGE_PFNAME, "r+w");
+  pagefile = fopen(MMANAGE_PFNAME, "w+");
   fwrite(data, sizeof(int), array_size, pagefile);
 }
 
