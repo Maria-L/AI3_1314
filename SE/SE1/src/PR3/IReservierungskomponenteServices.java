@@ -3,17 +3,7 @@ package PR3;
 import java.util.*;
 
 
-public interface IHotelsystemFassade {
-	/**Kommando:
-	 * Muss vor jeder anderen Funktion aufgerufen und erfolgreich beendet werden.
-	 * Einlogvorgang des Benutzers.  wenn falsch.
-	 * @pre passwort ist angemessen verschlüsselt
-	 * @param name Name des Kunuden
-	 * @param passwort Passwort (verschlüsselt) des Kunden
-	 * @throws IllegalArgumentException Exception für den Fall, dass das Passwort falsch eingegeben wurde
-	 */
-	void login(String name, String passwort) throws IllegalArgumentException;
-	
+public interface IReservierungskomponenteServices {
 	/**Abfrage:
 	 * Kann nach dem einloggen jederzeit aufgeführt werden
 	 * Sucht für die Auswahloberfläche eine Liste an Zimmern die in dem gewählten Zeitraum nicht belegt sind.
@@ -58,7 +48,7 @@ public interface IHotelsystemFassade {
 	 * @throws IllegalArgumentException Wenn das Zimmer schon belegt oder geloggt ist oder nicht existiert 
 	 */
 	void lockZimmer(int zimmernummer) throws IllegalArgumentException;
-
+	
 	/**Kommando:
 	 * Kann nach dem einloggen jederzeit aufgeführt werden
 	 * Erstellt die fertige Reservierung. Diese ist nun fix und eine Rechnung kann verschickt werden.
@@ -72,5 +62,4 @@ public interface IHotelsystemFassade {
 	 * @return Ist die Reservierung erfolgreich gewesen (true) oder nicht (false)
 	 */
 	boolean newReservierung(int kundenID, DatumTyp start, DatumTyp ende, Hash<Integer, Integer> zimmernummerZuPersonenzahlMap, List<Zusatzleistung> zusatzleistungen, String wuensche);
-	
 }
