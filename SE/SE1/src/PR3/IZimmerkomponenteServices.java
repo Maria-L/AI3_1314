@@ -4,10 +4,13 @@ import java.util.*;
 
 
 public interface IZimmerkomponenteServices {
+	
 	/**Abfrage:
-	 * Kann jederzeit vom System durchgeführt werden
-	 * Gibt eine Liste aller ZimmerIDs zurück
-	 * @return Liste aller ZimmerIDs
+	 * Kann jederzeit aufgerufen werden
+	 * Gibt zu dem eingegebenen Zimmer die dazu passende Art des Zimmers zurück
+	 * @param zimmer ZimmerID des abzufragenden Zimmers
+	 * @return ID der Zimmerart
+	 * @throws IllegalArgumentException Wenn das Zimmer nicht existiert
 	 */
-	List<Integer> getAllZimmerID();
+	Integer getZimmerArt(Integer zimmer) throws IllegalArgumentException;
 }
