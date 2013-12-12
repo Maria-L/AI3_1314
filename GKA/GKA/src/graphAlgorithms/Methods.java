@@ -7,6 +7,119 @@ import java.util.*;
 public class Methods {
 	public static Counter counter = new Counter(0);
 	public static Counter counterMatrix = new Counter(0);
+	
+	/*  
+	 * 0. Markiere jede Kante mit benutzt = 0 und erstelle eine initiale leere Kantenfolge
+	 * 1a. Wähle einen beliebigen Knoten vi aus dem Graphen G mit einem Grad > 0, Gehe zu 2
+	 * 1b. Wähle einen beliebigen Knoten aus der bisherigen Kantenfolge mit unbenutzt-Grad > 0. Wenn keiner gefunden wurde, kann keine Eulertour gefunden werden (nicht zusammenhängend)
+	 * 2.  Finde einen Kreis und verwende dafür den start und endpunkt vi. Wenn kein Kreis gefunden wurde, kann keine Eulertour gefunden werden.
+	 * 3.  Füge den Kreis in die bestehende Kantenfolge ein und markiere jede benutzte Kante mit benutzt = 1
+	 * 4.  Wenn jede Kante mit benutzt = 1 markiert wurde, ist eine Eulertour gefunden, wenn nicht gehe zu 1b
+	 */
+	
+	public static List<Integer> hierholzer(Graph graph){
+		List<Integer> efolge= new ArrayList<Integer>();
+		boolean unbenutzt;
+		for(int id : graph.getEdges()){
+			graph.setValE(id, "benutzt", 0);
+		}
+		
+		int vi = graph.getVertexes().get(0);
+		
+		while(true) {
+			if(vi == -1) {
+				for(int id : efolge) {
+					if(unbenutztGrad(graph, id) > 0) {
+						vi = id;
+						break;
+					}
+				}
+			}
+			
+			List<Integer> unterliste = hierholzerKreis(graph,vi);
+			
+			if(unterliste.size() == 0) {
+				throw new IllegalArgumentException("Kein Eulerkreis gefunden");
+			}
+			
+			efolge = mergeList(efolge,unterliste);
+			
+			for(int i = 0; i < efolge.size() - 1; i++){
+				for(int id : graph.getIncident(efolge.get(i))) {
+					if(graph.getSource(id) == efolge.get(i + 1) || graph.getTarget(id) == efolge.get(i + 1)) {
+						graph.setValE(id, "benutzt", 1);
+						break;
+					}
+				}
+			}
+			
+			unbenutzt = false;
+			for(int id: graph.getEdges()){
+				unbenutzt |= graph.getValE(id, "benutzt") == 0;
+				if(unbenutzt) {break;}
+			}
+			if(!unbenutzt) {
+				return efolge;
+			}
+			vi = -1;
+		}
+	}
+	
+	public static int unbenutztGrad(Graph graph, int id){
+		int unbenutztGrad = 0;
+		for(int ed : graph.getIncident(id)){
+			if(graph.getValE(ed, "benutzt") == 0){
+				unbenutztGrad ++;
+			}
+		}
+		return unbenutztGrad;
+	}
+	
+	public static List<Integer> hierholzerKreis(Graph graph, int vi){
+		List<Integer> kreis = new ArrayList<Integer>();
+		int currentvi = vi;
+		int nextvi = -1;
+		kreis.add(vi);
+		
+		do {
+			for(int ed : graph.getIncident(currentvi)){
+				if(graph.getValE(ed, "benutzt") == 0){
+					if(graph.getTarget(ed) == currentvi) {
+						nextvi = graph.getSource(ed);
+					} else {
+						nextvi = graph.getTarget(ed);
+					}
+					graph.setValE(ed, "benutzt", 1);
+					break;
+				}
+			}
+			kreis.add(nextvi);
+			currentvi = nextvi;
+		} while (currentvi != vi);
+		
+		return kreis;
+	}
+	
+	public static List<Integer> mergeList(List<Integer> oberliste, List<Integer> unterliste){
+		List<Integer> mergeList = new ArrayList<Integer>();
+		mergeList.addAll(oberliste);
+		int index = 0;
+		
+		if(oberliste.size() == 0){return unterliste;}
+		
+		for(int i : oberliste){
+			if(i == unterliste.get(0)){
+				mergeList.remove(index);
+				mergeList.addAll(index, unterliste);
+				return mergeList;
+			}
+			index ++;
+		}
+		if(mergeList == oberliste){
+			throw new IllegalArgumentException("Nicht zusammen passende Kreise. Eingabe illegal");
+		}
+		return mergeList;
+	}
 
 	/**Berechnet einen optimalen Fluss in einem schwach zusammenhängenden schlichten
 	 * Digraphen. In diesem Digraphen müssen für jede Kante eine Kapazität "kapazitaet" 
