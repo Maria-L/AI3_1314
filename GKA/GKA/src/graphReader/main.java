@@ -11,11 +11,12 @@ public class main {
 	/** @param args */
 	public static void main(String[] args) {
 
-		Graph graph = readGraphWith("Z:/Projekte/AI3_1314/GKA/GKA/src/graphReader/graphs/graph_10.graph", "kapazitaet");
+		Graph graph = readGraphWith("Z:/Projekte/AI3_1314/GKA/GKA/src/graphReader/graphs/graph_10.graph", "distanz");
 		
-		List<Integer> path = Methods.hierholzer(graph);
+		//List<Integer> path = Methods.hierholzer(graph);
 		
-		System.out.println(path);
+		List<Integer> kantenfolge = Methods.hamiltonDichtesteEcke(graph);
+		System.out.println("Ergebnis: " + kantenfolge + " mit der Länge " + Methods.laengeVon(graph, kantenfolge));
 	}
 	
 	public static Graph readGraphWith(String gr, String attribut) {

@@ -8,6 +8,85 @@ public class Methods {
 	public static Counter counter = new Counter(0);
 	public static Counter counterMatrix = new Counter(0);
 	
+	public static List<Integer> hamiltonDichtesteEcke(Graph graph) {
+																			//Schritt 1:
+		int vi = graph.getVertexes().get(0);								//Man wähle eine beliebige Ecke vi aus graph
+		List<Integer> akku = new ArrayList<Integer>(Arrays.asList(vi,vi));	//Und setze den bisher gefundenen Weg auf [vi, vi]
+		
+		System.out.println("Kantenfolge nach der Initialisierung: " + akku);
+																			//Schritt 2:
+		while(akku.size() < graph.getVertexes().size() + 1) {				//Solange nicht alle Ecken aufgenommen sind
+			int dichtesteEcke = dichtesteEcke(graph, akku);					//	Man wähle die dichteste Ecke zum bisher gefundenen Weg akku
+			int dist = Integer.MAX_VALUE;
+			List<Integer> tempKantenfolge = new ArrayList<Integer>();
+			
+			
+			System.out.println("Neue dichteste Ecke:  " + dichtesteEcke);
+			
+			for(int i = 1; i < akku.size(); i++) {							//	Und setze diese in die ideale Stelle der Kantenfolge ein
+				List<Integer> temp = new ArrayList<Integer>(akku);
+				temp.add(i, dichtesteEcke);
+				int tempDist = laengeVon(graph, temp);
+				
+				if(tempDist < dist) {
+					tempKantenfolge = temp;
+					dist = tempDist;
+				}
+			}
+			
+			akku = tempKantenfolge;
+			System.out.println("Aktuelle Kantenfolge: " + akku + " der Länge " + dist);
+		}
+		
+		return akku;
+	}
+	
+	public static int laengeVon(Graph graph, List<Integer> kantenfolge) {
+		int akku = 0;
+		
+		for(int i = 1; i < kantenfolge.size(); i++) {
+			if(graph.getAdjacent(kantenfolge.get(i-1)).contains(kantenfolge.get(i))) {	//Wenn die beiden Knoten miteinander verbunden sind
+				for(int id : graph.getIncident(kantenfolge.get(i-1))) {
+					if(graph.getSource(id) == kantenfolge.get(i)) {
+						akku += graph.getValE(id, "distanz");
+						break;
+					} else if (graph.getTarget(id) == kantenfolge.get(i)){
+						akku += graph.getValE(id, "distanz");
+						break;
+					}
+				}
+			} else {																	//Wenn nicht
+				return Integer.MAX_VALUE;												//	Gebe unendlich zurück
+			}
+		}
+		return akku;
+	}
+	
+	public static int dichtesteEcke(Graph graph, List<Integer> kantenfolge) {
+		int akku = -1;
+		int dist = Integer.MAX_VALUE;
+		
+		for(int vertex : kantenfolge) {						//Für jede Ecke aus der Kantenfolge
+			for(int id : graph.getIncident(vertex)) {		//	Für jede Incidente Kante dieser Ecken
+				if(graph.getValE(id, "distanz") < dist)	{	//		Wenn die bisherige Distanz unterboten werden kann
+					if(graph.getSource(id) == vertex) {		//			Target ist der zu erreichende Knoten
+						if(!kantenfolge.contains(graph.getTarget(id))) {	//Wenn Target nicht in kantenfolge ist
+							dist = graph.getValE(id, "distanz");			//	Speichere die neuen Werte
+							akku = graph.getTarget(id);
+						}
+					} else {								//			Source ist der zu erreichende Knoten
+						if(!kantenfolge.contains(graph.getSource(id))) {	//Wenn Source nicht in kantenfolge ist
+							dist = graph.getValE(id, "distanz");			//	Speichere die neuen Werte
+							akku = graph.getSource(id);
+						}
+					}
+				}
+			}
+		}
+		
+		return akku;
+	}
+	
 	/*  
 	 * 0. Markiere jede Kante mit benutzt = 0 und erstelle eine initiale leere Kantenfolge
 	 * 1a. Wähle einen beliebigen Knoten vi aus dem Graphen G mit einem Grad > 0, Gehe zu 2
@@ -38,6 +117,8 @@ public class Methods {
 			
 			List<Integer> unterliste = hierholzerKreis(graph,vi);
 			
+			System.out.println("Unterkreis über die Ecken: " + unterliste);
+			
 			if(unterliste.size() == 0) {
 				throw new IllegalArgumentException("Kein Eulerkreis gefunden");
 			}
@@ -59,6 +140,7 @@ public class Methods {
 				if(unbenutzt) {break;}
 			}
 			if(!unbenutzt) {
+				System.out.println("Gefundener Kreis über die Kantenfolge: " + efolge);
 				return efolge;
 			}
 			vi = -1;
