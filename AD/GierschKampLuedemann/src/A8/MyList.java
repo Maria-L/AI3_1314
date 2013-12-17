@@ -1,5 +1,6 @@
 package A8;
 
+import java.util.*;
 import A3.Counter;
 import A5.List;
 
@@ -8,7 +9,6 @@ public class MyList implements IList {
 	Object head = null;
 	IList tail = null;
 	static int length = 0;
-	static Counter count = new Counter();
 	
 	public MyList() {
 	}
@@ -20,7 +20,6 @@ public class MyList implements IList {
 	
 	public Object head() {
 		length--;
-		count.increment();
 		Object temp = head;
 		head = tail.top();
 		tail = tail.tail();
@@ -32,7 +31,6 @@ public class MyList implements IList {
 	}
 	
 	public IList tail() {
-		count.increment();
 		return tail;
 	}
 	public int length(){
@@ -40,7 +38,6 @@ public class MyList implements IList {
 	}
 	
 	public void head(Object n) {
-//		count.increment();
 		length++;
 		this.tail = new MyList(this.head, this.tail);
 		this.head = n;
@@ -54,23 +51,18 @@ public class MyList implements IList {
 			return false;
 		} else {
 			length++;
-			count.increment();
 			tail.insert(n,i-1);
 			return true;
 		}
 	}
-	public int getStepCounter(){
-		return count.getCount();
-	}
-	public void resetStepCounter(){
-		count.reset();
-	}
+	
 	public String toString(){
 		String accu = "[ ";
 		IList temp = this;
-		for(int i=0; i < length; i++){
-			accu = accu.concat(String.valueOf(temp.head()));
+		while(temp != null){
+			accu = accu.concat(String.valueOf(temp.top()));
 			accu = accu.concat(", ");
+			temp = temp.tail();
 		}
 		accu = accu.concat(" ]");
 		return accu;
@@ -85,4 +77,40 @@ public class MyList implements IList {
 			return ((int) this.top()) <= ((int) this.tail.top()) && tail.isIncreasingMonoton(); 
 		}
 	}
+
+	public IList random(int n) {
+		IList akku = new MyList();
+		Random generator = new Random();
+		
+		for(int i = 0; i < n ; i++) {
+			akku.head(generator.nextInt(1000));
+		}
+		
+		return akku;
+	}
+
+	@Override
+	public IList sortIncreasingMonoton(int n) {
+		IList akku = new MyList();
+		ArrayList<Integer> randomList = new ArrayList<Integer>();
+		Random generator = new Random();
+		int biggest = 0;
+		
+		for(int i = 0; i < n ; i++) {
+			randomList.add(generator.nextInt(1000));
+		}
+		
+		for(int i = 0; i < n; i++) {
+			for(int j = 0; j < randomList.size(); j++) {
+				if(randomList.get(j) > randomList.get(biggest)){
+					biggest = j;
+				}
+			}
+			akku.head(randomList.get(biggest));
+			randomList.remove(biggest);
+		}
+		return akku;
+	}
+	
+	
 }

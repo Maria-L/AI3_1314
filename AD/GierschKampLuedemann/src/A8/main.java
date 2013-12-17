@@ -11,10 +11,14 @@ public class main {
 		
 		list.head(5);
 		list.head(4);
-		list.head(2);
+		list.head(4);
 		list.head(1);
 		
 		System.out.println(list.isIncreasingMonoton());
+		
+		list = list.sortIncreasingMonoton(100);
+		
+		System.out.println(list);
 	}
 
 }

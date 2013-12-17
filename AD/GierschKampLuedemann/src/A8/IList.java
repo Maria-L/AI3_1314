@@ -10,4 +10,6 @@ public interface IList {
 	public boolean insert(Object n, int i);
 	public String toString();
 	public boolean isIncreasingMonoton();
+	public IList random(int n);
+	public IList sortIncreasingMonoton(int n);
 }
