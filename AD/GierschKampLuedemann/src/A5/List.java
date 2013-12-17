@@ -4,7 +4,7 @@ import A3.Counter;
 
 
 public class List  {
-	Object head = null;
+	public Object head = null;
 	List tail = null;
 	static int length = 0;
 	static Counter count = new Counter();
