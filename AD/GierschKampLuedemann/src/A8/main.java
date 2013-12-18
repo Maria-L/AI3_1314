@@ -7,18 +7,11 @@ public class main {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		IList list = new MyList();
+		IList list1 = new MyList();
+		list1 = list1.random(10000);
 		
-		list.head(5);
-		list.head(4);
-		list.head(4);
-		list.head(1);
-		
-		System.out.println(list.isIncreasingMonoton());
-		
-		list = list.sortIncreasingMonoton(100);
-		
-		System.out.println(list);
+		System.out.println("Unsortiert: " + list1);
+		System.out.println("Sortiert: " + list1.mergeSort());
 	}
 
 }

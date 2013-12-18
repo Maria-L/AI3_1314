@@ -8,7 +8,7 @@ import A5.List;
 public class MyList implements IList {
 	Object head = null;
 	IList tail = null;
-	static int length = 0;
+	int length = 0;
 	
 	public MyList() {
 	}
@@ -59,7 +59,7 @@ public class MyList implements IList {
 	public String toString(){
 		String accu = "[ ";
 		IList temp = this;
-		while(temp != null){
+		while(temp.top() != null){
 			accu = accu.concat(String.valueOf(temp.top()));
 			accu = accu.concat(", ");
 			temp = temp.tail();
@@ -71,7 +71,6 @@ public class MyList implements IList {
 	@Override
 	public boolean isIncreasingMonoton() {
 		if(tail.top() == null) {
-			System.out.println("Abbruch");
 			return true;
 		} else {
 			return ((int) this.top()) <= ((int) this.tail.top()) && tail.isIncreasingMonoton(); 
@@ -90,26 +89,73 @@ public class MyList implements IList {
 	}
 
 	@Override
-	public IList sortIncreasingMonoton(int n) {
+	public IList sortIncreasingMonoton(int n) {	
 		IList akku = new MyList();
-		ArrayList<Integer> randomList = new ArrayList<Integer>();
-		Random generator = new Random();
-		int biggest = 0;
+		IList randomList = this.random(n);
 		
-		for(int i = 0; i < n ; i++) {
-			randomList.add(generator.nextInt(1000));
-		}
-		
-		for(int i = 0; i < n; i++) {
-			for(int j = 0; j < randomList.size(); j++) {
-				if(randomList.get(j) > randomList.get(biggest)){
-					biggest = j;
+		while(randomList.top() != null) {
+			int elem = (int) randomList.head();
+			IList temp = akku;
+			int i = 0;
+			
+			while(true) {
+				if(temp.top() == null || (int) temp.top() >= elem) {
+					akku.insert(elem, i);
+					break;
+				} else {
+					i++;
+					temp = temp.tail();
 				}
 			}
-			akku.head(randomList.get(biggest));
-			randomList.remove(biggest);
 		}
+		
 		return akku;
+	}
+
+	@Override
+	public IList merge(IList list) {
+		IList akku = new MyList();
+		IList list1 = this;
+		IList list2 = list;
+		
+		while(list1.top() != null && list2.top() != null) {
+			if((int) list1.top() < (int) list2.top()){
+				akku.insert(list1.head(), akku.length());
+			} else {
+				akku.insert(list2.head(), akku.length());
+			}
+		}
+		
+		while(list1.top() != null) {
+			akku.insert(list1.head(), akku.length());
+		}
+		
+		while(list2.top() != null) {
+			akku.insert(list2.head(), akku.length());
+		}
+		
+		return akku;
+	}
+
+	@Override
+	public IList mergeSort() {
+		if(this.length() <= 1) {
+			return this;
+		} else {
+			IList list1 = new MyList();
+			IList list2 = new MyList();
+			int initSize = this.length() / 2;
+			
+			while(this.top() != null) {
+				if(this.length() > initSize) {
+					list1.head(this.head());
+				} else {
+					list2.head(this.head());
+				}
+			}
+			
+			return list1.mergeSort().merge(list2.mergeSort());
+		}
 	}
 	
 	

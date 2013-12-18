@@ -6,6 +6,31 @@ import java.util.List;
 
 
 public class Methods {
+	
+	public static ArrayList<Integer> ultimateInvest(List<Integer> investments) {
+		
+		int bestMinId = -1;
+		int bestMaxId = -1;
+		int bestRange = Integer.MIN_VALUE;
+		int smallest = Integer.MAX_VALUE;
+		int smallestId = -1;
+		
+		for(int i = 0; i < investments.size(); i++) {
+			if(investments.get(i) - smallest > bestRange) {
+				bestMinId = smallestId;
+				bestMaxId = i;
+				bestRange = investments.get(i) - smallest;
+			}
+			
+			if(smallest >= investments.get(i)) {
+				smallest = investments.get(i);
+				smallestId = i;
+			}
+		}
+		
+		return new ArrayList<Integer>(Arrays.asList(bestMinId, bestMaxId, bestRange));
+	}
+	
 	public static List<Integer> investment(List<Integer> investments){
 		int accu = Integer.MIN_VALUE;
 		int iopt = 0;
@@ -128,6 +153,7 @@ public class Methods {
 		
 		System.out.println(investm(invest));
 		System.out.println(investment(invest));
+		System.out.println(ultimateInvest(invest));
 		
 //		List unicorn = investmentOpt(invest);
 //		System.out.println("i:" + unicorn.get(0) + " j:" + unicorn.get(1) + " Max:" + unicorn.get(2));
