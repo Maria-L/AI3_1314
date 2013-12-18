@@ -84,7 +84,6 @@ public class MyList implements IList {
 		for(int i = 0; i < n ; i++) {
 			akku.head(generator.nextInt(1000));
 		}
-		
 		return akku;
 	}
 
@@ -108,7 +107,6 @@ public class MyList implements IList {
 				}
 			}
 		}
-		
 		return akku;
 	}
 
@@ -125,15 +123,12 @@ public class MyList implements IList {
 				akku.insert(list2.head(), akku.length());
 			}
 		}
-		
 		while(list1.top() != null) {
 			akku.insert(list1.head(), akku.length());
 		}
-		
 		while(list2.top() != null) {
 			akku.insert(list2.head(), akku.length());
 		}
-		
 		return akku;
 	}
 
@@ -153,7 +148,6 @@ public class MyList implements IList {
 					list2.head(this.head());
 				}
 			}
-			
 			return list1.mergeSort().merge(list2.mergeSort());
 		}
 	}
