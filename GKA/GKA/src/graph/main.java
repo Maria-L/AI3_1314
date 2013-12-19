@@ -1,5 +1,6 @@
 package graph;
 
+import graphAlgorithms.Counter;
 import graphAlgorithms.Methods;
 
 
@@ -32,6 +33,8 @@ public class main {
 		System.out.println(start.getValV(k3, "distanz"));
 		
 		System.out.println(start.getValV(k3, "vorgaenger"));
+		System.out.println(Methods.counter.getCount());
+		
 	}
 
 }
