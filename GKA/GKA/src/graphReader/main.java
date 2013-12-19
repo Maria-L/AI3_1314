@@ -11,8 +11,7 @@ public class main {
 	/** @param args */
 	public static void main(String[] args) {
 
-		Graph graph = readGraphWith("../graphs/graph_10.graph", "distanz");
-		//../GKA/src/graphReader/graphs/graph_10.graph????
+		Graph graph = readGraphWith("./src/graphReader/graphs/graph_10.graph", "distanz");
 		//List<Integer> path = Methods.hierholzer(graph);
 		
 		List<Integer> kantenfolge = Methods.hamiltonDichtesteEcke(graph);
