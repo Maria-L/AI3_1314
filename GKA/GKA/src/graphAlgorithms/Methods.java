@@ -9,13 +9,15 @@ public class Methods {
 	public static Counter counterMatrix = new Counter(0);
 	
 	public static List<Integer> hamiltonDichtesteEcke(Graph graph) {
-																			//Schritt 1:
+		counter.reset();
+		counter.increment();																	//Schritt 1:
 		int vi = graph.getVertexes().get(0);								//Man wähle eine beliebige Ecke vi aus graph
 		List<Integer> akku = new ArrayList<Integer>(Arrays.asList(vi,vi));	//Und setze den bisher gefundenen Weg auf [vi, vi]
 		
 		System.out.println("Kantenfolge nach der Initialisierung: " + akku);
 																			//Schritt 2:
 		while(akku.size() < graph.getVertexes().size() + 1) {				//Solange nicht alle Ecken aufgenommen sind
+			counter.increment();
 			int dichtesteEcke = dichtesteEcke(graph, akku);					//	Man wähle die dichteste Ecke zum bisher gefundenen Weg akku
 			int dist = Integer.MAX_VALUE;
 			List<Integer> tempKantenfolge = new ArrayList<Integer>();
@@ -41,6 +43,9 @@ public class Methods {
 		return akku;
 	}
 	
+	/*
+	 * Eine Methode die die Länge des Weges zurück gibt die ihr gegeben wird
+	 */
 	public static int laengeVon(Graph graph, List<Integer> kantenfolge) {
 		int akku = 0;
 		
@@ -67,17 +72,23 @@ public class Methods {
 		int dist = Integer.MAX_VALUE;
 		
 		for(int vertex : kantenfolge) {						//Für jede Ecke aus der Kantenfolge
+			counter.increment(2);
 			for(int id : graph.getIncident(vertex)) {		//	Für jede Incidente Kante dieser Ecken
 				if(graph.getValE(id, "distanz") < dist)	{	//		Wenn die bisherige Distanz unterboten werden kann
+					counter.increment();
 					if(graph.getSource(id) == vertex) {		//			Target ist der zu erreichende Knoten
+						counter.increment();
 						if(!kantenfolge.contains(graph.getTarget(id))) {	//Wenn Target nicht in kantenfolge ist
 							dist = graph.getValE(id, "distanz");			//	Speichere die neuen Werte
 							akku = graph.getTarget(id);
+							counter.increment(2);
 						}
 					} else {								//			Source ist der zu erreichende Knoten
+						counter.increment();
 						if(!kantenfolge.contains(graph.getSource(id))) {	//Wenn Source nicht in kantenfolge ist
 							dist = graph.getValE(id, "distanz");			//	Speichere die neuen Werte
 							akku = graph.getSource(id);
+							counter.increment(2);
 						}
 					}
 				}
@@ -97,12 +108,15 @@ public class Methods {
 	 */
 	
 	public static List<Integer> hierholzer(Graph graph){
+		counter.reset();
 		List<Integer> efolge= new ArrayList<Integer>();
 		boolean unbenutzt;
+		counter.increment();
 		for(int id : graph.getEdges()){
+			counter.increment();
 			graph.setValE(id, "benutzt", 0);
 		}
-		
+		counter.increment();
 		int vi = graph.getVertexes().get(0);
 		
 		while(true) {
@@ -126,8 +140,11 @@ public class Methods {
 			efolge = mergeList(efolge,unterliste);
 			
 			for(int i = 0; i < efolge.size() - 1; i++){
+				counter.increment();
 				for(int id : graph.getIncident(efolge.get(i))) {
+					counter.increment(2);
 					if(graph.getSource(id) == efolge.get(i + 1) || graph.getTarget(id) == efolge.get(i + 1)) {
+						counter.increment();
 						graph.setValE(id, "benutzt", 1);
 						break;
 					}
@@ -135,7 +152,9 @@ public class Methods {
 			}
 			
 			unbenutzt = false;
+			counter.increment();
 			for(int id: graph.getEdges()){
+				counter.increment();
 				unbenutzt |= graph.getValE(id, "benutzt") == 0;
 				if(unbenutzt) {break;}
 			}
@@ -149,7 +168,9 @@ public class Methods {
 	
 	public static int unbenutztGrad(Graph graph, int id){
 		int unbenutztGrad = 0;
+		counter.increment();
 		for(int ed : graph.getIncident(id)){
+			counter.increment();
 			if(graph.getValE(ed, "benutzt") == 0){
 				unbenutztGrad ++;
 			}
@@ -164,13 +185,19 @@ public class Methods {
 		kreis.add(vi);
 		
 		do {
+			counter.increment();
 			for(int ed : graph.getIncident(currentvi)){
+				counter.increment();
 				if(graph.getValE(ed, "benutzt") == 0){
+					counter.increment();
 					if(graph.getTarget(ed) == currentvi) {
+						counter.increment();
 						nextvi = graph.getSource(ed);
 					} else {
+						counter.increment();
 						nextvi = graph.getTarget(ed);
 					}
+					counter.increment();
 					graph.setValE(ed, "benutzt", 1);
 					break;
 				}

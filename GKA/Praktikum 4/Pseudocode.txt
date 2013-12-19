@@ -1,0 +1,16 @@
+Hierholzer:
+
+0. Markiere jede Kante mit benutzt = 0 und erstelle eine initiale leere Kantenfolge
+1a. Wähle einen beliebigen Knoten vi aus dem Graphen G mit einem Grad > 0, Gehe zu 2
+1b. Wähle einen beliebigen Knoten aus der bisherigen Kantenfolge mit unbenutzt-Grad > 0. Wenn keiner gefunden 	wurde, kann keine Eulertour gefunden werden (nicht zusammenhängend)
+2.  Finde einen Kreis und verwende dafür den Start und Endpunkt vi. Wenn kein Kreis gefunden wurde, kann keine 	Eulertour gefunden werden.
+3.  Füge den Kreis in die bestehende Kantenfolge ein und markiere jede benutzte Kante mit benutzt = 1
+4.  Wenn jede Kante mit benutzt = 1 markiert wurde, ist eine Eulertour gefunden, wenn nicht gehe zu 1b
+
+Die Einführung der dichtesten Ecke:
+
+0. Eine beliebige Ecke vi aus dem Graphen wird gewählt und der bisher gefundende Weg [vi, vi] gesetzt
+1. Solange nicht alle Ecken im Weg enthalten sind:
+	Die dichteste Ecke vi+1 zum bisherigen Weg wählen
+	Über die bisherige Folge iterieren und berechne an welcher Stelle des Kreises
+	vi+1 stehen muss damit es die kürzeste Kantenfolge ergibt.
