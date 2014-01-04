@@ -246,323 +246,54 @@ int init_module(void) {
   }
   
   if(translate_bufsize <= ZERO) {  //Wenn der Buffer <= 0 ist
+    printk(KERN_ALERT "Translate: Der Buffer ist zu klein\n");
+    return -1;
+  }
+  
+  err = register_chrdev(dev_major, dev_name, &fops);
+  if(err < ZERO) {
+    printk(KERN_ALERT "Translate: Es konnte keine Major-Nummer zugewiesen werden - abbruch\n");
+    return -1;
+  }
+  
   dev_major = err;
-  printk(KERN_ALERT "Translate: Die zuge                                                                                                                                                                                                                                                           
+  printk(KERN_ALERT "Translate: Die zugewiesene Major-Nummer ist %d\n", dev_major);
+  
+  translate_devices = kmalloc(COUNT_OF_DEVS * sizeof(struct translate_dev), GFP_KERNEL);
+  if(!translate_devices) {
+    printk(KERN_ALERT "Translate: Es konnte kein Kernel-Speicher zugewiesen werden - abbruch\n");
+    //unregister_chrdev_region(dev, COUNT_OF_DEVS - 1); //##########Fragwuerdig##########    Ganz besonders weil cleanup_module das auch koennen sollte?!?
+    err = -ENOMEM;
+    goto fail;
+  }
+  
+  memset(translate_devices, ZERO, COUNT_OF_DEVS * sizeof(struct translate_dev));
+  for(i = 0; i < COUNT_OF_DEVS; i++) {
+    device = &translate_devices[i];
+    sema_init(device->sem, 1);
+    device->buffersize = translate_bufsize;
+    init_waitqueue_head(device->queue);
+    if(!device->buffer) {
+      printk(KERN_ALERT "Translate: Allozierung fuer den Buffer von Geraet-Nummer %d\n", i);
+      device->buffer = kmalloc(translate_bufsize, GFP_KERNEL); //#########sizeof char ?!?##########
+      if(!device-buffer) {
+	err = -ENOMEM;
+	goto fail;
+      }
+    }
+    device->end = device-> buffer + device->buffersize;
+    device->rp = device->wp = device->buffer;
+    device->fillcount = 0;
+  }
+  
+  printk(KERN_ALERT "Translate: Initialisierung abgeschlossen\n");
+  return 0;
+  
+  
+  fail:
+    cleanup_module();
+    return err;
+}
   
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-          æſł@€€łł@ſæſðŋŋħæſðæſð
-          
-                  æſł@€€łł@ſæſðŋŋħæſðæſð
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-sssssssssssssssssssSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSsssssSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-                                                                                                            
 //########## Hilfsfunktionen ##########
