@@ -245,54 +245,67 @@ int init_module(void) {
     }
   }
   
-  if(translate_bufsize <= ZERO) {  //Wenn der Buffer <= 0 ist
+  if(translate_bufsize <= ZERO) {                      //Wenn der Buffer <= 0 ist
     printk(KERN_ALERT "Translate: Der Buffer ist zu klein\n");
-    return -1;
+    return -1;                                         //  Abbruch
   }
   
-  err = register_chrdev(dev_major, dev_name, &fops);
-  if(err < ZERO) {
+  err = register_chrdev(dev_major, dev_name, &fops);   //Fordere dynamische Major-Number vom Kernel an
+  if(err < ZERO) {                                     //Wenn keine Nummer zugewiesen werden konnte
     printk(KERN_ALERT "Translate: Es konnte keine Major-Nummer zugewiesen werden - abbruch\n");
-    return -1;
+    return -1;                                         //  Abbruch
   }
   
-  dev_major = err;
+  dev_major = err;                                     //Speichere Major-Number
   printk(KERN_ALERT "Translate: Die zugewiesene Major-Nummer ist %d\n", dev_major);
   
-  translate_devices = kmalloc(COUNT_OF_DEVS * sizeof(struct translate_dev), GFP_KERNEL);
-  if(!translate_devices) {
+  translate_devices = kmalloc(COUNT_OF_DEVS * sizeof(struct translate_dev), GFP_KERNEL);   //Fordere Speicher fuer das Geraet vom Kernel an
+  if(!translate_devices) {                                                                 //Wenn nicht genug Speicher im Kernel zur Verfuegung steht
     printk(KERN_ALERT "Translate: Es konnte kein Kernel-Speicher zugewiesen werden - abbruch\n");
     //unregister_chrdev_region(dev, COUNT_OF_DEVS - 1); //##########Fragwuerdig##########    Ganz besonders weil cleanup_module das auch koennen sollte?!?
-    err = -ENOMEM;
+    err = -ENOMEM;                                                                         //  Abbruch und zur fail-Sequenz mit ENOMEM
     goto fail;
   }
   
-  memset(translate_devices, ZERO, COUNT_OF_DEVS * sizeof(struct translate_dev));
-  for(i = 0; i < COUNT_OF_DEVS; i++) {
-    device = &translate_devices[i];
-    sema_init(device->sem, 1);
-    device->buffersize = translate_bufsize;
-    init_waitqueue_head(device->queue);
-    if(!device->buffer) {
-      printk(KERN_ALERT "Translate: Allozierung fuer den Buffer von Geraet-Nummer %d\n", i);
-      device->buffer = kmalloc(translate_bufsize, GFP_KERNEL); //#########sizeof char ?!?##########
-      if(!device-buffer) {
-	err = -ENOMEM;
-	goto fail;
-      }
+  memset(translate_devices, ZERO, COUNT_OF_DEVS * sizeof(struct translate_dev));           //Setze den Inhalt des erhaltenen Speichers auf 0
+  for(i = 0; i < COUNT_OF_DEVS; i++) {                                                     //Fuer jedes Minor-Geraet
+    device = &translate_devices[i];                                                        //  Speicher eine lokale Referenz auf dieses Geraet
+    sema_init(device->sem, 1);                                                             //  Initialisiere den Semaphoren mit 1
+    device->buffersize = translate_bufsize;                                                //  Setzte die Buffergroesse auf translate_bufsize
+    printk(KERN_ALERT "Translate: Allozierung fuer den Buffer von Geraet-Nummer %d\n", i);
+    device->buffer = kmalloc(translate_bufsize, GFP_KERNEL); //#########sizeof char ?!?########## //Forder Speicher fuer den Buffer des Geraets an
+    if(!device-buffer) {                                                                   //  Wenn nicht genug Speicher zur Verfuegung stand
+      err = -ENOMEM;                                                                       //    Abbruch und zur fail-Sequenz mit ENOMEM
+      goto fail;
     }
-    device->end = device-> buffer + device->buffersize;
-    device->rp = device->wp = device->buffer;
-    device->fillcount = 0;
+    device->end = device-> buffer + device->buffersize;                                    //  Setze das Ende des Buffers
+    device->rp = device->wp = device->buffer;                                              //  Setze den Read- und Write-Pointer an dern Anfang des Buffers
+    device->fillcount = 0;                                                                 //  Setze den Fillcount auf 0
   }
   
   printk(KERN_ALERT "Translate: Initialisierung abgeschlossen\n");
-  return 0;
+  return 0;                                                                                //Gebe 0 zum erfolgreichen Abschliessen der FUnktion zurueck
   
   
-  fail:
-    cleanup_module();
+  fail:                //Fail-Region
+    cleanup_module();  //  Rufe Cleannnnnnnnnnnnnnnup.......
     return err;
+}
+
+void cleanup_module(void) {
+  int i;
+  
+  if(!translate_devices) {
+    return;
+  }
+  
+  for(i = 0; i < count_of_devices; i++) {
+    kfree(translate_devices[i].buffer);
+  }
+  
+  kfree(translate_devices);
+  unregister_chrdev_region(dev, count_of_devices);
+  translate_devices = NULL;
 }
   
   
