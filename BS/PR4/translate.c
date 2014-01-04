@@ -288,25 +288,60 @@ int init_module(void) {
   
   
   fail:                //Fail-Region
-    cleanup_module();  //  Rufe Cleannnnnnnnnnnnnnnup.......
-    return err;
+    cleanup_module();  //  Rufe Cleanup auf
+    return err;        //  Brich mit dem eingegebenen Fehler ab
 }
 
 void cleanup_module(void) {
-  int i;
+  int i;                                            //Zaehl-Variable
   
-  if(!translate_devices) {
-    return;
+  if(!translate_devices) {                          //Wenn kein Geraet gefunden wurde
+    return;                                         //  Brich ab
   }
   
-  for(i = 0; i < count_of_devices; i++) {
-    kfree(translate_devices[i].buffer);
+  for(i = 0; i < count_of_devices; i++) {           //Fuer jede Minor-Number
+    kfree(translate_devices[i].buffer);             //  Gib den Buffer des jeweiligen Geraets frei
   }
   
-  kfree(translate_devices);
-  unregister_chrdev_region(dev, count_of_devices);
-  translate_devices = NULL;
+  kfree(translate_devices);                         //Gib den Speicher der Geraete frei
+  unregister_chrdev_region(dev, count_of_devices);  //Deregistriere daes Treibers
+  translate_devices = NULL;                         //Nulle den Pointer aus
 }
   
-  
 //########## Hilfsfunktionen ##########
+char encode_char(char c) {
+  if(c >= 'A' && c <= 'Z') {                             //Wenn c zwischen 'A' und 'Z' liegt
+    return translate_subst[(c - 'A') + ALPHABET_LENGTH]; //  Gib den dazu passenden Grossbuchstaben zurueck
+  } else if (c >= 'a' && c <= 'z') {                     //Sonst wenn c zwischen 'a' und 'z' liegt
+    return translate_subst[(c - 'a')];                   //  Gib den dazu passenden Kleinbuchstaben zurueck
+  }
+  return c;                                              //Wenn keiner dieser Faelle eingetreten ist gib das Original zurueck
+}
+
+char decode_char(char c) {
+  int index;
+  
+  if((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'Z')) {
+    index = indexOf(c);
+	if(index < 0) {
+	  printk(KERN_ALERT "Translate: Character konnte nicht gefunden werden - Fehler\n");
+	} else if(index < ALPHABET_LENGTH) {
+	  return 'a' + index;
+	} else {
+	  return 'A' + (index - ALPHABET_LENGTH);
+	}
+  }
+  return c;
+}
+
+int indexOf(char c) {
+  char *p;
+  p = strchr(translate_subst, c);
+  
+  if(p == NULL) {
+    printk(KERN_ALERT "Translate: Coult not find char\n");
+	return -1;
+  }
+  
+  return (int) (p - translate_subst);
+}

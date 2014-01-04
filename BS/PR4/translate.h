@@ -67,9 +67,9 @@ ssize_t translate_read(struct file *filp, char __user * buf, size_t count, loff_
 ssize_t translate_write(struct file *filp, const char __user * buf, size_t count, loff_t * f_pos); //Schreibt in den Buffer des Geraetes
 
 //########## Hilfsfunktionen ##########
-char encode_char(char inputChar);           //Verschluesselt den eingegebenen char nach der Kodierungstabelle
-char decode_char(char inputChar);           //Entschluesselt den eingegebenen char nach der Kodierungstabelle
-int indexOf(char inputChar);                //Sucht den Index des eingegebenen char im Buffer
+char encode_char(char c);           //Verschluesselt den eingegebenen char nach der Kodierungstabelle
+char decode_char(char c);           //Entschluesselt den eingegebenen char nach der Kodierungstabelle
+int indexOf(char c);                //Sucht den Index des eingegebenen char im Buffer
 void printDevice(struct translate_dev *dev);//Schreibt den aktuellen Zustand des Geraets in das Kernellog
 
 #endif
