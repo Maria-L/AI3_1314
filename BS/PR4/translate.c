@@ -122,7 +122,7 @@ ssize_t translate_write(struct file *filp, const char __user * buf, size_t count
   dev = filp->private_data;   //Nehme Translate-Informationen von der Benutzereingabe
   minor = dev->minor_number;  //Speichere die Minor-Device-Number
   
-  printk(KERN_ALERT "Translate: %s starting to write\n" buf);
+  printk(KERN_ALERT "Translate: %s starting to write\n", buf);
   
   err = down_interruptible(&dev->sem);  //Warte auf den Semaphoren
   if(err) {                             //Wenn der Prozess per Signal geweckt wurde
@@ -150,28 +150,419 @@ ssize_t translate_write(struct file *filp, const char __user * buf, size_t count
     count = min(count, (size_t) (dev->rp - dev->wp - 1));            //  Setze Count auf das Minimum von Count und den Elementen bis zum Read-Pointer
   }
   
-  if(minor == ONE) {                           //Wenn ########################## Weiter kommentieren
-    err = copy_from_user(dev->wp, buf, count);
-    if(err) {
-      up(&dev->queue);
-      return -EFAULT;
+  if(minor == ONE) {                           //Wenn nicht codiert werden muss
+    err = copy_from_user(dev->wp, buf, count); //  Kopiere count elemente aus buf ab wp
+    if(err) {                                  //  Wenn nicht count elemente Kopiert wurden
+      up(&dev->sem);                           //    Gib den Semaphoren frei
+      return -EFAULT;                          //    Gebe EFAULT zueueck
     }
-  } else {
-    for(i = 0; i < count; i++) {
+  } else {                                     //Sonst muss codiert werden
+    for(i = 0; i < count; i++) {               //  Kopiere und codiere count Elemente aus buf in wp
       dev->wp[i] = encode_char(buf[i]);
     }
   }
   
-  dev->wp += count;
-  if(dev->wp == dev->end) {
-    dev->wp = dev->buffer;
+  dev->wp += count;          //Setze den Write-Pointer um count Elemente nach vorne
+  if(dev->wp == dev->end) {  //Wenn der Write-Pointer am Ende des Buffers angekommen ist
+    dev->wp = dev->buffer;   //  Setze ihn an den Anfang des Buffers
   }
   
-  dev->fillcount += count
-  wakt_up(&dev->queue);
-  up(&dev->sem);
-  return count;
+  dev->fillcount += count;   //Erhoehe den Fillcount um count
+  wake_up(&dev->queue);      //Wecke alle Elemente aus der Warteschlange
+  up(&dev->sem);             //Gib den Semaphoren wieder frei
+  return count;              //Gib count zurueck
 }
 
 
+int translate_open(struct inode *inode, struct file *filp) {
+  struct translate_dev *dev;       //Translate-Device
+  int minor;                       //Minor-Number
+  
+  minor = MINOR(inode->i_rdev);    //Fische die Minor-Number aus inode
+  dev = &translate_devices[minor]; //Setze dev auf das Korrekte Translate-Device im Speicher
+  dev->minor_number = minor;       //Speicher die ermittelte Minor-Number ab
+  filp->private_data = dev;        //Speichere die Referenz auf das Device in filp->private_data ab
+  //############Obere zwei Zeilen unter Umstaenden vertauschen?
+  
+  printk(KERN_ALERT "Translate: translate_open wurde mit minor_number %d gestartet\n", minor);
+  
+  if(filp->f_mode & FMODE_READ) {  //Wenn gelesen werden soll
+    if(dev->nreaders > ZERO) {     //  Wenn schon ein anderer Prozess liest
+      return -EBUSY;               //    Gib EBUSY zurueck
+    }
+    dev->nreaders++;               //  Sonst inkrementiere die Anzahl der Reader
+  }
+  
+  if(filp->f_mode & FMODE_WRITE) { //Wenn geschrieben werden soll
+    if(dev->nwriters > ZERO) {     //  Wenn schon ein anderer Prozess schreibt
+      return -EBUSY;               //    gib EBUSY zurueck
+    }
+    dev->nwriters++;               //  Sonst inkrementiere die Anzahl der Writer
+  }
+  nonseekable_open(inode, filp);   //Setzt LSEEK, PREAD und PWRITE in filp auf 0 um den Kernel darueber zu
+                                   //Informieren, dass im Buffer nicht gesucht werden kann
+  
+  return 0;                        //Gebe 0 zum erfolgreichen Abschliessen der Funktion zurueck
+}
+
+
+int translate_close(struct inode *inode, struct file *filp) {
+  struct translate_dev *dev;        //Translate-Device
+  
+  dev = filp->private_data;         //Speichere die Referenz auf die Daten in filp zwischen
+  
+  printk(KERN_ALERT "Translate: translate_close wurde mit minor_number %d gestartet\n", dev->minor_number);
+  
+  if(filp->f_mode & FMODE_READ) {   //Wenn der Prozess Schreibrechte hatte
+    dev->nreaders--;                //  Dekrementiere die Anzahl der Reader
+  }
+  
+  if(filp->f_mode & FMODE_WRITE) {  //Wenn der Prozess Leserechte hatte
+    dev->nwriters--;                //  Dekrementiere die ANzahl der Leser
+  }
+  
+  return 0;                         //Gebe 0 zum erfolgreichen Abschliessen der Funkion zurueck
+}
+
+
+int init_module(void) {
+  int i;                        //Zaehler-Variable
+  int err;                      //Error-Variable
+  struct translate_dev *device; //Translate-Device
+  dev_t dev;                    //Standart-Device                    ##########Notwendig?!?##########
+  
+  dev = 0;                      //Setze dev auf 0                    ##########Notwendig?!?##########
+  
+  printk(KERN_ALERT "Translate: Starte Initialisierung...\n");
+  
+  if(strlen(translate_subst) > TRANSLATE_SUBST_LENGTH) {  //Wenn der vom Nutzer eingegebene String laenger als die Translate-Tabelle ist
+    return -1;                                            //  Gib unverichteter Dinge -1 zurueck
+  }
+  
+  if(strlen(translate_subst) < TRANSLATE_SUBST_LENGTH) {                 //Wenn der eingegebene String kuerzer als die Translate-Tabelle ist
+    for(i = strlen(translate_subst); i <= TRANSLATE_SUBST_LENGTH; i++) { //  Haenge an den eingegebenen String das Ende der original-Tabelle an
+      translate_subst[i] = translate_subst_def[i];                       //  Hierbei wird bis <= gezahelt, weil so die terminierende null mitkopiert wird
+    }
+  }
+  
+  if(translate_bufsize <= ZERO) {  //Wenn der Buffer <= 0 ist
+  dev_major = err;
+  printk(KERN_ALERT "Translate: Die zuge                                                                                                                                                                                                                                                           
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+          æſł@€€łł@ſæſðŋŋħæſðæſð
+          
+                  æſł@€€łł@ſæſðŋŋħæſðæſð
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+sssssssssssssssssssSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSsssssSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+                                                                                                            
 //########## Hilfsfunktionen ##########
