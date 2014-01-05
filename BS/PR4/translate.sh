@@ -13,7 +13,7 @@ rm -f /dev/${device}[0-1]
 #end use a pathname as newer modules dont look in . by default
 /sbin/insmod ./$module.ko $* || exit 1
 
-major=$(grep /proc/devices -e $module | cut -d\ -f1)
+major=$(grep /proc/devices -e $module | cut -d\  -f1)
 
 mknod /dev/${device}0 c $major 0
 mknod /dev/${device}1 c $major 1
