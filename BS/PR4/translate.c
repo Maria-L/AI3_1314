@@ -55,7 +55,7 @@ ssize_t translate_read(struct file *filp, char __user * buf, size_t count, loff_
   dev = filp->private_data;  //Nehme Translate-Informationen von der Benutzereingabe
   minor = dev->minor_number; //Speichere die Minor-Device-Number
   
-  printk(KERN_ALERT "Translate: Beginne zu lesen\n", buf);
+  printk(KERN_ALERT "Translate: Beginne zu lesen\n");
   
   err = down_interruptible(&dev->sem);  //Warte auf den Semaphoren
   if(err) {                             //Wenn der Prozess per Signal geweckt wurde
@@ -222,6 +222,7 @@ int translate_close(struct inode *inode, struct file *filp) {
     dev->nwriters--;                //  Dekrementiere die ANzahl der Leser
   }
   
+  printk(KERN_ALERT "Translate: translate_close wurde beendet\n");
   return 0;                         //Gebe 0 zum erfolgreichen Abschliessen der Funkion zurueck
 }
 
@@ -350,4 +351,13 @@ int indexOf(char c) {
   }
   
   return (int) (p - translate_subst);
+}
+
+void printDevice(struct translate_dev *dev) {
+  printk(KERN_ALERT "Translate: ----------PRINT DEVICE---------\n");
+  printk(KERN_ALERT "Translate: Device translate%d\n", dev->minor_number);
+  printk(KERN_ALERT "Translate: Buffersize: %d fillcount: %d\n", dev->buffersize, dev->fillcount);
+  printk(KERN_ALERT "Translate: Start: %p, End: %p\n", dev->buffer, dev->end);
+  printk(KERN_ALERT "Translate: Read: %p, Write: %p\n", dev->rp, dev->wp);
+  printk(KERN_ALERT "Translate: Readers: %p, Writers: %p\n", dev->nreaders, dev->nwriters);
 }
