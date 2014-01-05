@@ -55,7 +55,7 @@ ssize_t translate_read(struct file *filp, char __user * buf, size_t count, loff_
   dev = filp->private_data;  //Nehme Translate-Informationen von der Benutzereingabe
   minor = dev->minor_number; //Speichere die Minor-Device-Number
   
-  printk(KERN_ALERT "Translate: %s starting to read\n", buf);
+  printk(KERN_ALERT "Translate: Beginne zu lesen\n", buf);
   
   err = down_interruptible(&dev->sem);  //Warte auf den Semaphoren
   if(err) {                             //Wenn der Prozess per Signal geweckt wurde
@@ -63,7 +63,7 @@ ssize_t translate_read(struct file *filp, char __user * buf, size_t count, loff_
   }
   
   if(dev->fillcount <= ZEROBUFFER) {                                //Wenn der Buffer leer ist
-    printk(KERN_ALERT "Translate: Empty buffer, waiting for elements\n");
+    printk(KERN_ALERT "Translate: Leerer Buffer, warte auf Elemente\n");
 
     up(&dev->sem);                                                  //  Gib den Semaphoren frei
     err = wait_event_interruptible(dev->queue, dev->fillcount > 0); //  Reihe dich in die Warteschlange ein, bis die Bedingung erfuellt ist
@@ -180,7 +180,7 @@ int translate_open(struct inode *inode, struct file *filp) {
   
   minor = MINOR(inode->i_rdev);    //Fische die Minor-Number aus inode
   dev = &translate_devices[minor]; //Setze dev auf das Korrekte Translate-Device im Speicher
-  dev->minor_number = minor;       //Speicher die ermittelte Minor-Number ab
+  dev->minor_number = minor;       //Speicher die ermittelte Minor-Number ab    ####### NICHT BENOETIGT?!? #######
   filp->private_data = dev;        //Speichere die Referenz auf das Device in filp->private_data ab
   //############Obere zwei Zeilen unter Umstaenden vertauschen?
   
@@ -202,6 +202,7 @@ int translate_open(struct inode *inode, struct file *filp) {
   nonseekable_open(inode, filp);   //Setzt LSEEK, PREAD und PWRITE in filp auf 0 um den Kernel darueber zu
                                    //Informieren, dass im Buffer nicht gesucht werden kann
   
+  printk(KERN_ALERT "Translate: translate_open wurde beendet\n");
   return 0;                        //Gebe 0 zum erfolgreichen Abschliessen der Funktion zurueck
 }
 
@@ -240,9 +241,11 @@ int init_module(void) {
   }
   
   if(strlen(translate_subst) < TRANSLATE_SUBST_LENGTH) {                 //Wenn der eingegebene String kuerzer als die Translate-Tabelle ist
+    printk(KERN_ALERT "Translate: Unvollstaendige Tabelle - ergaenze automatisch\n");
     for(i = strlen(translate_subst); i <= TRANSLATE_SUBST_LENGTH; i++) { //  Haenge an den eingegebenen String das Ende der original-Tabelle an
       translate_subst[i] = translate_subst_def[i];                       //  Hierbei wird bis <= gezahelt, weil so die terminierende null mitkopiert wird
     }
+	translate_subst[TRANSLATE_SUBST_LENGTH] = ZERO;
   }
   
   if(translate_bufsize <= ZERO) {                      //Wenn der Buffer <= 0 ist
@@ -259,7 +262,7 @@ int init_module(void) {
   dev_major = err;                                     //Speichere Major-Number
   printk(KERN_ALERT "Translate: Die zugewiesene Major-Nummer ist %d\n", dev_major);
   
-  translate_devices = kmalloc(COUNT_OF_DEVS * sizeof(struct translate_dev), GFP_KERNEL);   //Fordere Speicher fuer das Geraet vom Kernel an
+  translate_devices = kmalloc(count_of_devices * sizeof(struct translate_dev), GFP_KERNEL);   //Fordere Speicher fuer das Geraet vom Kernel an
   if(!translate_devices) {                                                                 //Wenn nicht genug Speicher im Kernel zur Verfuegung steht
     printk(KERN_ALERT "Translate: Es konnte kein Kernel-Speicher zugewiesen werden - abbruch\n");
     //unregister_chrdev_region(dev, COUNT_OF_DEVS - 1); //##########Fragwuerdig##########    Ganz besonders weil cleanup_module das auch koennen sollte?!?
@@ -271,14 +274,17 @@ int init_module(void) {
   for(i = 0; i < COUNT_OF_DEVS; i++) {                                                     //Fuer jedes Minor-Geraet
     device = &translate_devices[i];                                                        //  Speicher eine lokale Referenz auf dieses Geraet
     sema_init(&device->sem, 1);                                                             //  Initialisiere den Semaphoren mit 1
+	init_waitqueue_head(&device->queue);
     device->buffersize = translate_bufsize;                                                //  Setzte die Buffergroesse auf translate_bufsize
     printk(KERN_ALERT "Translate: Allozierung fuer den Buffer von Geraet-Nummer %d\n", i);
-    device->buffer = kmalloc(translate_bufsize, GFP_KERNEL); //#########sizeof char ?!?########## //Forder Speicher fuer den Buffer des Geraets an
-    if(!device->buffer) {                                                                   //  Wenn nicht genug Speicher zur Verfuegung stand
-      err = -ENOMEM;                                                                       //    Abbruch und zur fail-Sequenz mit ENOMEM
-      goto fail;
-    }
-    device->end = device-> buffer + device->buffersize;                                    //  Setze das Ende des Buffers
+	if(!device->buffer) {
+      device->buffer = kmalloc(translate_bufsize * sizeof(char), GFP_KERNEL); //#########sizeof char ?!?########## //Forder Speicher fuer den Buffer des Geraets an
+      if(!device->buffer) {                                                                   //  Wenn nicht genug Speicher zur Verfuegung stand
+        err = -ENOMEM;                                                                       //    Abbruch und zur fail-Sequenz mit ENOMEM
+        goto fail;
+      }
+	}
+    device->end = device->buffer + device->buffersize;                                    //  Setze das Ende des Buffers
     device->rp = device->wp = device->buffer;                                              //  Setze den Read- und Write-Pointer an dern Anfang des Buffers
     device->fillcount = 0;                                                                 //  Setze den Fillcount auf 0
   }
@@ -321,7 +327,7 @@ char encode_char(char c) {
 char decode_char(char c) {
   int index;
   
-  if((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'Z')) {
+  if((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) {
     index = indexOf(c);
 	if(index < 0) {
 	  printk(KERN_ALERT "Translate: Character konnte nicht gefunden werden - Fehler\n");
