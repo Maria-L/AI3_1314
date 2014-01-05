@@ -270,11 +270,11 @@ int init_module(void) {
   memset(translate_devices, ZERO, COUNT_OF_DEVS * sizeof(struct translate_dev));           //Setze den Inhalt des erhaltenen Speichers auf 0
   for(i = 0; i < COUNT_OF_DEVS; i++) {                                                     //Fuer jedes Minor-Geraet
     device = &translate_devices[i];                                                        //  Speicher eine lokale Referenz auf dieses Geraet
-    sema_init(device->sem, 1);                                                             //  Initialisiere den Semaphoren mit 1
+    sema_init(&device->sem, 1);                                                             //  Initialisiere den Semaphoren mit 1
     device->buffersize = translate_bufsize;                                                //  Setzte die Buffergroesse auf translate_bufsize
     printk(KERN_ALERT "Translate: Allozierung fuer den Buffer von Geraet-Nummer %d\n", i);
     device->buffer = kmalloc(translate_bufsize, GFP_KERNEL); //#########sizeof char ?!?########## //Forder Speicher fuer den Buffer des Geraets an
-    if(!device-buffer) {                                                                   //  Wenn nicht genug Speicher zur Verfuegung stand
+    if(!device->buffer) {                                                                   //  Wenn nicht genug Speicher zur Verfuegung stand
       err = -ENOMEM;                                                                       //    Abbruch und zur fail-Sequenz mit ENOMEM
       goto fail;
     }
@@ -304,7 +304,7 @@ void cleanup_module(void) {
   }
   
   kfree(translate_devices);                         //Gib den Speicher der Geraete frei
-  unregister_chrdev_region(dev, count_of_devices);  //Deregistriere daes Treibers
+  unregister_chrdev(dev_major, dev_name);  //Deregistriere des Treibers
   translate_devices = NULL;                         //Nulle den Pointer aus
 }
   
