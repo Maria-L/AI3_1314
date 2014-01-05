@@ -109,6 +109,7 @@ ssize_t translate_read(struct file *filp, char __user * buf, size_t count, loff_
   up(&dev->sem);           //Gib den Semaphoren wieder frei
   wake_up(&dev->queue);    //Wecke die Prozesse in der Warteschlange
   
+  printDevice(dev);
   return count;
 }
 
@@ -171,6 +172,7 @@ ssize_t translate_write(struct file *filp, const char __user * buf, size_t count
   wake_up(&dev->queue);      //Wecke alle Elemente aus der Warteschlange
   up(&dev->sem);             //Gib den Semaphoren wieder frei
   printk(KERN_ALERT "Translate: Finished writing\n");
+  printDevice(dev);
   return count;              //Gib count zurueck
 }
 
@@ -276,10 +278,10 @@ int init_module(void) {
   for(i = 0; i < COUNT_OF_DEVS; i++) {                                                     //Fuer jedes Minor-Geraet
     device = &translate_devices[i];                                                        //  Speicher eine lokale Referenz auf dieses Geraet
     sema_init(&device->sem, 1);                                                             //  Initialisiere den Semaphoren mit 1
-	init_waitqueue_head(&device->queue);
+    init_waitqueue_head(&device->queue);
     device->buffersize = translate_bufsize;                                                //  Setzte die Buffergroesse auf translate_bufsize
     printk(KERN_ALERT "Translate: Allozierung fuer den Buffer von Geraet-Nummer %d\n", i);
-	if(!device->buffer) {
+    if(!device->buffer) {
       device->buffer = kmalloc(translate_bufsize * sizeof(char), GFP_KERNEL); //#########sizeof char ?!?########## //Forder Speicher fuer den Buffer des Geraets an
       if(!device->buffer) {                                                                   //  Wenn nicht genug Speicher zur Verfuegung stand
         err = -ENOMEM;                                                                       //    Abbruch und zur fail-Sequenz mit ENOMEM
