@@ -122,7 +122,7 @@ ssize_t translate_write(struct file *filp, const char __user * buf, size_t count
   dev = filp->private_data;   //Nehme Translate-Informationen von der Benutzereingabe
   minor = dev->minor_number;  //Speichere die Minor-Device-Number
   
-  printk(KERN_ALERT "Translate: %s starting to write\n", buf);
+  printk(KERN_ALERT "Translate: starting to write\n");
   
   err = down_interruptible(&dev->sem);  //Warte auf den Semaphoren
   if(err) {                             //Wenn der Prozess per Signal geweckt wurde
@@ -170,6 +170,7 @@ ssize_t translate_write(struct file *filp, const char __user * buf, size_t count
   dev->fillcount += count;   //Erhoehe den Fillcount um count
   wake_up(&dev->queue);      //Wecke alle Elemente aus der Warteschlange
   up(&dev->sem);             //Gib den Semaphoren wieder frei
+  printk(KERN_ALERT "Translate: Finished writing\n");
   return count;              //Gib count zurueck
 }
 
