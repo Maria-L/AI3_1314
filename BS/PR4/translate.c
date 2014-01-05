@@ -169,8 +169,8 @@ ssize_t translate_write(struct file *filp, const char __user * buf, size_t count
   }
   
   dev->fillcount += count;   //Erhoehe den Fillcount um count
-  wake_up(&dev->queue);      //Wecke alle Elemente aus der Warteschlange
   up(&dev->sem);             //Gib den Semaphoren wieder frei
+  wake_up(&dev->queue);      //Wecke alle Elemente aus der Warteschlange
   printk(KERN_ALERT "Translate: Finished writing\n");
   printDevice(dev);
   return count;              //Gib count zurueck
