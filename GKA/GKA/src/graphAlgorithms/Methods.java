@@ -10,7 +10,7 @@ public class Methods {
 	
 	public static List<Integer> hamiltonDichtesteEcke(Graph graph) {
 		counter.reset();
-		counter.increment();																	//Schritt 1:
+		counter.increment();												//Schritt 1:
 		int vi = graph.getVertexes().get(0);								//Man wähle eine beliebige Ecke vi aus graph
 		List<Integer> akku = new ArrayList<Integer>(Arrays.asList(vi,vi));	//Und setze den bisher gefundenen Weg auf [vi, vi]
 		
