@@ -120,8 +120,8 @@ public class Methods {
 			counter.increment();
 			graph.setValE(id, "benutzt", 0);
 		}
-		for(int id: graph.getEdges()){
-			if(unbenutztGrad(graph, id)%2 != 0){
+		for(int id: graph.getVertexes()){
+			if((unbenutztGrad(graph, id))%2 != 0){
 				throw new IllegalArgumentException("Kein Eulerkreis gefunden");
 			}
 		}

@@ -11,10 +11,10 @@ public class main {
 	/** @param args */
 	public static void main(String[] args) {
 
-		Graph graph = readGraphWith("./src/graphReader/graphs/graph_11.graph", "distanz");
+		Graph graph = readGraphWith("./src/graphReader/graphs/graph_12.graph", "distanz");
 		//List<Integer> path = Methods.hierholzer(graph);
 		
-		List<Integer> kantenfolge = Methods.hierholzer(graph);
+		List<Integer> kantenfolge = Methods.hamiltonDichtesteEcke(graph);
 		System.out.println("Ergebnis: " + kantenfolge + " mit der Länge " + Methods.laengeVon(graph, kantenfolge));
 		System.out.println("Dabei wurden " + Methods.counter.getCount() + " Schritte benötigt");
 		
