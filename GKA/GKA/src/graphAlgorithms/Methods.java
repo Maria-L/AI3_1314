@@ -12,11 +12,11 @@ public class Methods {
 		counter.reset();
 		counter.increment();												//Schritt 1:
 		int vi = graph.getVertexes().get(0);								//Man wähle eine beliebige Ecke vi aus graph
-		List<Integer> akku = new ArrayList<Integer>(Arrays.asList(vi,vi));	//Und setze den bisher gefundenen Weg auf [vi, vi]
+		List<Integer> akku = new ArrayList<Integer>(Arrays.asList(vi,vi));	//Und setze den bisher gefundenen Weg akku auf [vi, vi]
 		
 		System.out.println("Kantenfolge nach der Initialisierung: " + akku);
 																			//Schritt 2:
-		while(akku.size() < graph.getVertexes().size() + 1) {				//Solange nicht alle Ecken aufgenommen sind
+		while(akku.size() < graph.getVertexes().size() + 1) {				//Solange nicht alle Ecken in akku aufgenommen sind
 			counter.increment();
 			int dichtesteEcke = dichtesteEcke(graph, akku);					//	Man wähle die dichteste Ecke zum bisher gefundenen Weg akku
 			int dist = Integer.MAX_VALUE;
@@ -25,7 +25,7 @@ public class Methods {
 			
 			System.out.println("Neue dichteste Ecke:  " + dichtesteEcke);
 			
-			for(int i = 1; i < akku.size(); i++) {							//	Und setze diese in die ideale Stelle der Kantenfolge ein
+			for(int i = 1; i < akku.size(); i++) {							//	Und setze diese in die ideale Stelle in akku ein, das heißt die, in der der Weg minimal ist
 				List<Integer> temp = new ArrayList<Integer>(akku);
 				temp.add(i, dichtesteEcke);
 				int tempDist = laengeVon(graph, temp);
@@ -39,8 +39,8 @@ public class Methods {
 			akku = tempKantenfolge;
 			System.out.println("Aktuelle Kantenfolge: " + akku + " der Länge " + dist);
 		}
-		
-		return akku;
+																			//Schritt 3:
+		return akku;														//Der Weg über alle Kanten ist gefunden - Rückgabe von akku
 	}
 	
 	/*
@@ -50,12 +50,16 @@ public class Methods {
 		int akku = 0;
 		
 		for(int i = 1; i < kantenfolge.size(); i++) {
+			counter.increment();
 			if(graph.getAdjacent(kantenfolge.get(i-1)).contains(kantenfolge.get(i))) {	//Wenn die beiden Knoten miteinander verbunden sind
+				counter.increment();
 				for(int id : graph.getIncident(kantenfolge.get(i-1))) {
+					counter.increment();
 					if(graph.getSource(id) == kantenfolge.get(i)) {
 						akku += graph.getValE(id, "distanz");
 						break;
 					} else if (graph.getTarget(id) == kantenfolge.get(i)){
+						counter.increment(2);
 						akku += graph.getValE(id, "distanz");
 						break;
 					}
@@ -107,23 +111,28 @@ public class Methods {
 	 * 4.  Wenn jede Kante mit benutzt = 1 markiert wurde, ist eine Eulertour gefunden, wenn nicht gehe zu 1b
 	 */
 	
-	public static List<Integer> hierholzer(Graph graph){
+	public static List<Integer> hierholzer(Graph graph) {
 		counter.reset();
-		List<Integer> efolge= new ArrayList<Integer>();
-		boolean unbenutzt;
+		List<Integer> efolge= new ArrayList<Integer>();		
+		boolean unbenutzt = true;
 		counter.increment();
-		for(int id : graph.getEdges()){
+		for(int id : graph.getEdges()){			// Alle Ecken mit unbenutzt = 0 initialisieren
 			counter.increment();
 			graph.setValE(id, "benutzt", 0);
 		}
+		for(int id: graph.getEdges()){
+			if(unbenutztGrad(graph, id)%2 != 0){
+				throw new IllegalArgumentException("Kein Eulerkreis gefunden");
+			}
+		}
 		counter.increment();
-		int vi = graph.getVertexes().get(0);
+		int vi = graph.getVertexes().get(0);	// Initialkante wählen
 		
-		while(true) {
-			if(vi == -1) {
+		while(unbenutzt) {						//Solange noch Kanten unbenutzt sind
+			if(vi == -1) {						
 				for(int id : efolge) {
-					if(unbenutztGrad(graph, id) > 0) {
-						vi = id;
+					if(unbenutztGrad(graph, id) > 0) {	// Ist der Unbenutzgrad dieser Ecke größer als 0?
+						vi = id;						//Benutze diese Ecke
 						break;
 					}
 				}
@@ -133,19 +142,19 @@ public class Methods {
 			
 			System.out.println("Unterkreis über die Ecken: " + unterliste);
 			
-			if(unterliste.size() == 0) {
+			if(unterliste.size() == 0) {									// Wenn keine Unterliste gefunden werden kann, kann es keine Eulertour geben
 				throw new IllegalArgumentException("Kein Eulerkreis gefunden");
 			}
 			
-			efolge = mergeList(efolge,unterliste);
+			efolge = mergeList(efolge,unterliste);							//Unterliste in die Tour einfügen
 			
-			for(int i = 0; i < efolge.size() - 1; i++){
+			for(int i = 0; i < efolge.size() - 1; i++){						//iteriert über die Ecken der Folge
 				counter.increment();
-				for(int id : graph.getIncident(efolge.get(i))) {
+				for(int id : graph.getIncident(efolge.get(i))) {			//iteriert über die Kanten der jeweiligen Ecke
 					counter.increment(2);
-					if(graph.getSource(id) == efolge.get(i + 1) || graph.getTarget(id) == efolge.get(i + 1)) {
+					if(graph.getSource(id) == efolge.get(i + 1) || graph.getTarget(id) == efolge.get(i + 1)) {//prüft ob die Kante diese Ecke mit der nächsten verbindet
 						counter.increment();
-						graph.setValE(id, "benutzt", 1);
+						graph.setValE(id, "benutzt", 1);					// makiere die Ecke als benutzt
 						break;
 					}
 				}
@@ -153,25 +162,25 @@ public class Methods {
 			
 			unbenutzt = false;
 			counter.increment();
-			for(int id: graph.getEdges()){
+			for(int id: graph.getEdges()){									//iteriert über alle Kanten des Graphen
 				counter.increment();
-				unbenutzt |= graph.getValE(id, "benutzt") == 0;
+				unbenutzt |= graph.getValE(id, "benutzt") == 0;				//prüft ob es noch unbenutzte Kanten gibt
 				if(unbenutzt) {break;}
-			}
-			if(!unbenutzt) {
-				System.out.println("Gefundener Kreis über die Kantenfolge: " + efolge);
-				return efolge;
 			}
 			vi = -1;
 		}
+		System.out.println("Gefundener Kreis über die Kantenfolge: " + efolge);
+		return efolge;
 	}
-	
+	/*
+	 * Eine Methode die zählt wie viele unbenutze Kanten eine Ecke hat
+	 */
 	public static int unbenutztGrad(Graph graph, int id){
 		int unbenutztGrad = 0;
 		counter.increment();
-		for(int ed : graph.getIncident(id)){
+		for(int ed : graph.getIncident(id)){		//iteriert über alle Kanten eines Knoten
 			counter.increment();
-			if(graph.getValE(ed, "benutzt") == 0){
+			if(graph.getValE(ed, "benutzt") == 0){	// Wenn sie unbenutzt ist den Grad erhöhen
 				unbenutztGrad ++;
 			}
 		}

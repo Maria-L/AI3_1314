@@ -11,12 +11,16 @@ public class main {
 	/** @param args */
 	public static void main(String[] args) {
 
-		Graph graph = readGraphWith("./src/graphReader/graphs/graph_10.graph", "distanz");
+		Graph graph = readGraphWith("./src/graphReader/graphs/graph_11.graph", "distanz");
 		//List<Integer> path = Methods.hierholzer(graph);
 		
-		List<Integer> kantenfolge = Methods.hamiltonDichtesteEcke(graph);
+		List<Integer> kantenfolge = Methods.hierholzer(graph);
 		System.out.println("Ergebnis: " + kantenfolge + " mit der Länge " + Methods.laengeVon(graph, kantenfolge));
-		System.out.println(Methods.counter.getCount());
+		System.out.println("Dabei wurden " + Methods.counter.getCount() + " Schritte benötigt");
+		
+		for(int id : graph.getVertexes()) {
+			System.out.println("ID: " + id + "    Name: " + graph.getStrV(id, "name"));
+		}
 	}
 	
 	public static Graph readGraphWith(String gr, String attribut) {
