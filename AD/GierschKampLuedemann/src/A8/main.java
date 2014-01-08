@@ -12,6 +12,7 @@ public class main {
 		
 		System.out.println("Unsortiert: " + list1);
 		System.out.println("Sortiert: " + list1.mergeSort());
+		System.out.println("Ist sortiert? " + list1.isIncreasingMonoton());
 	}
 
 }

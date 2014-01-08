@@ -1,8 +1,7 @@
 package A8;
 
 import java.util.*;
-import A3.Counter;
-import A5.List;
+
 
 
 public class MyList implements IList {
@@ -18,6 +17,7 @@ public class MyList implements IList {
 		this.tail = tail;
 	}
 	
+	@Override
 	public Object head() {
 		length--;
 		Object temp = head;
@@ -26,23 +26,29 @@ public class MyList implements IList {
 		return temp;
 	}
 	
+	@Override
 	public Object top() {
 		return head;
 	}
 	
+	@Override
 	public IList tail() {
 		return tail;
 	}
+	
+	@Override
 	public int length(){
 		return length;
 	}
 	
+	@Override
 	public void head(Object n) {
 		length++;
 		this.tail = new MyList(this.head, this.tail);
 		this.head = n;
 	}
 	
+	@Override
 	public boolean insert(Object n, int i) {
 		if(i == 0) {
 			head(n);
@@ -56,6 +62,7 @@ public class MyList implements IList {
 		}
 	}
 	
+	@Override
 	public String toString(){
 		String accu = "[ ";
 		IList temp = this;
@@ -70,7 +77,7 @@ public class MyList implements IList {
 
 	@Override
 	public boolean isIncreasingMonoton() {
-		if(tail.top() == null) {
+		if(tail == null) {
 			return true;
 		} else {
 			return ((int) this.top()) <= ((int) this.tail.top()) && tail.isIncreasingMonoton(); 
