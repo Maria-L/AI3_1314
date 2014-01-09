@@ -14,4 +14,5 @@ public interface IList {
 	public boolean isIncreasingMonoton();
 	public IList random(int n);
 	public IList sortIncreasingMonoton(int n);
+	public void append (Object n);
 }
