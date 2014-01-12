@@ -51,9 +51,11 @@ ssize_t translate_read(struct file *filp, char __user * buf, size_t count, loff_
   int minor;                 //Minor-Device-Number
   int i;                     //Zaehler-Variable
   struct translate_dev *dev; //Translate-Informationen
+  char stringBuffer[TRANSLATE_BUFSIZE];        //Buffer fuer die Rueckgabe
   
   dev = filp->private_data;  //Nehme Translate-Informationen von der Benutzereingabe
   minor = dev->minor_number; //Speichere die Minor-Device-Number
+  //stringBuffer = "";
   
   printk(KERN_ALERT "Translate: Beginne zu lesen\n");
   
@@ -88,7 +90,13 @@ ssize_t translate_read(struct file *filp, char __user * buf, size_t count, loff_
   
   if(minor == ONE) {                   //Wenn Decodiert werden muss
     for(i = 0; i < count; i++) {       //  Decodiere und schreibe count mal in den User-Speicher
-      buf[i] = decode_char(dev->rp[i]);
+      //buf[i] = decode_char(dev->rp[i]);
+      stringBuffer[i] = decode_char(dev->rp[i]);
+    }
+    err = copy_to_user(buf, stringBuffer, count);
+    if(err) {
+      up(&dev->sem);
+      return -EFAULT;
     }
   } else {                             //Wenn nicht decodiert werden muss
     err = copy_to_user(buf, dev->rp, count);//Kopiere die Ergebnisse in den User-Speicher
@@ -314,24 +322,24 @@ void cleanup_module(void) {
   }
   
   kfree(translate_devices);                         //Gib den Speicher der Geraete frei
-  unregister_chrdev(dev_major, dev_name);  //Deregistriere des Treibers
+  unregister_chrdev(dev_major, dev_name);           //Deregistriere des Treibers
   translate_devices = NULL;                         //Nulle den Pointer aus
 }
   
 //########## Hilfsfunktionen ##########
 char encode_char(char c) {
   if(c >= 'A' && c <= 'Z') {                             //Wenn c zwischen 'A' und 'Z' liegt
-    return translate_subst[(c - 'A') + ALPHABET_LENGTH]; //  Gib den dazu passenden Grossbuchstaben zurueck
+    return translate_subst[(c - 'A') + ALPHABET_LENGTH]; //  Gib den dazu passenden Kleinbuchstaben zurueck
   } else if (c >= 'a' && c <= 'z') {                     //Sonst wenn c zwischen 'a' und 'z' liegt
-    return translate_subst[(c - 'a')];                   //  Gib den dazu passenden Kleinbuchstaben zurueck
+    return translate_subst[(c - 'a')];                   //  Gib den dazu passenden Grossbuchstaben zurueck
   }
   return c;                                              //Wenn keiner dieser Faelle eingetreten ist gib das Original zurueck
 }
 
 char decode_char(char c) {
-  int index;
+  int index;                                               //Index zum Zwischenspeichern
   
-  if((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) {
+  if((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) {   //Wenn c ein Buchstabe des Alphabets ist
     index = indexOf(c);
 	if(index < 0) {
 	  printk(KERN_ALERT "Translate: Character konnte nicht gefunden werden - Fehler\n");

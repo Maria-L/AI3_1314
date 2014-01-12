@@ -18,4 +18,4 @@ major=$(grep /proc/devices -e $module | cut -d\  -f1)
 mknod /dev/${device}0 c $major 0
 mknod /dev/${device}1 c $major 1
 
-echo "Installed two devices with major number $major"
+echo "Zwei Geraete mit Major-Number $major installiert"
