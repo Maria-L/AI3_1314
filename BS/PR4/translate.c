@@ -76,10 +76,7 @@ ssize_t translate_read(struct file *filp, char __user * buf, size_t count, loff_
       return -ERESTARTSYS;                                          //    Gib ERESTARTSYS zurueck
     }
   }
-  
-  /*if(dev->fillcount == 0) {
-    return 0;
-  }*/
+
   
   if(dev->wp > dev->rp) {                             //Wenn der Write-Pointer hinter dem Read-Pointer steht
     count = min(count, (size_t) (dev->wp - dev->rp)); //  Setze count auf das minimum von count und den uebrigen Elementen vom wp bis zum rp
@@ -87,22 +84,22 @@ ssize_t translate_read(struct file *filp, char __user * buf, size_t count, loff_
     count = min(count, (size_t) (dev->end - dev->rp));//  Setze count auf das minimum von count und den uebrigen Elementen bis zum Ende des Buffers
   }
   
-  if(minor == MINORONE) {              //Wenn Decodiert werden muss
-    for(i = 0; i < count; i++) {       //  Decodiere und schreibe count mal in den User-Speicher
-      stringBuffer[i] = decode_char(dev->rp[i]);
+  if(minor == MINORONE) {                        //Wenn Decodiert werden muss
+    for(i = 0; i < count; i++) {                 //  Decodiere und schreibe count mal in den stringBuffer
+      stringBuffer[i] = decode_char(dev->rp[i]); 
     }
-    err = copy_to_user(buf, stringBuffer, count);
-    if(err) {
-      return -EFAULT;
+    err = copy_to_user(buf, stringBuffer, count);//Kopiere den erstellten String in den User-Buffer
+    if(err) {                                    //Wenn dabei ein Fehler passiert ist
+      return -EFAULT;                            //  Gib EFAULT zurueck
     }
-  } else {                             //Wenn nicht decodiert werden muss
-    err = copy_to_user(buf, dev->rp, count);//Kopiere die Ergebnisse in den User-Speicher
-    if(err) {                          //  Wenn dabei ein Fehler passiert ist
-      return -EFAULT;                  //    Gebe EFAULT zurueck
+  } else {                                       //Wenn nicht decodiert werden muss
+    err = copy_to_user(buf, dev->rp, count);     //  Kopiere die Ergebnisse in den User-Speicher
+    if(err) {                                    //    Wenn dabei ein Fehler passiert ist
+      return -EFAULT;                            //      Gebe EFAULT zurueck
     }
   }
   
-  dev->rp += count;          //Setze den Read-Pointer weiter
+  dev->rp += count;          //Setze den Read-Pointer um count weiter
   if(dev->rp == dev->end) {  //Wenn der Read-Pointer am Ende des Buffers angekommen ist
     dev->rp = dev->buffer;   //  Setze den Read-Pointer auf den Anfang des Buffers
   }
@@ -156,22 +153,18 @@ ssize_t translate_write(struct file *filp, const char __user * buf, size_t count
     count = min(count, (size_t) (dev->rp - dev->wp));            //  Setze Count auf das Minimum von Count und den Elementen bis zum Read-Pointer
   }
   
-  if(minor == MINORZERO) {                      //Wenn codiert werden muss
-    err = copy_from_user(stringBuffer, buf, count);
-    if(err) {
-      return -EFAULT;
+  if(minor == MINORZERO) {                          //Wenn codiert werden muss
+    err = copy_from_user(stringBuffer, buf, count); //  Kopiere die zu codierenden Zeichen aus dem User-Buffer in stringBuffer
+    if(err) {                                       //  Wenn dabei ein Fehler passiert ist
+      return -EFAULT;                               //    Gib EFAULT zurueck
     }
-    for(i = 0; i < count; i++) {
+    for(i = 0; i < count; i++) {                    //  Decodiere und schreibe die Zeichen ab dem Write-Pointer in den Geraete-Buffer
       dev->wp[i] = encode_char(stringBuffer[i]);
     }
-    
-    //for(i = 0; i < count; i++) {               //  Kopiere und codiere count Elemente aus buf in wp
-    //  dev->wp[i] = encode_char(buf[i]);
-    //}
-  } else {                                     //Sonst muss nicht codiert werden
-    err = copy_from_user(dev->wp, buf, count); //  Kopiere count elemente aus buf ab wp
-    if(err) {                                  //  Wenn nicht count elemente Kopiert wurden
-      return -EFAULT;                          //    Gebe EFAULT zueueck
+  } else {                                          //Sonst muss nicht codiert werden
+    err = copy_from_user(dev->wp, buf, count);      //  Kopiere count elemente aus buf ab wp
+    if(err) {                                       //  Wenn nicht count elemente Kopiert wurden
+      return -EFAULT;                               //    Gebe EFAULT zueueck
     }
   }
   
@@ -199,7 +192,6 @@ int translate_open(struct inode *inode, struct file *filp) {
   dev = &translate_devices[minor]; //Setze dev auf das Korrekte Translate-Device im Speicher
   dev->minor_number = minor;       //Speicher die ermittelte Minor-Number ab    ####### NICHT BENOETIGT?!? #######
   filp->private_data = dev;        //Speichere die Referenz auf das Device in filp->private_data ab
-  //############Obere zwei Zeilen unter Umstaenden vertauschen?
   
   printk(KERN_ALERT "Translate: translate_open wurde mit minor_number %d gestartet\n", minor);
   
@@ -255,6 +247,7 @@ int init_module(void) {
   printk(KERN_ALERT "Translate: Starte Initialisierung...\n");
   
   if(strlen(translate_subst) > TRANSLATE_SUBST_LENGTH) {  //Wenn der vom Nutzer eingegebene String laenger als die Translate-Tabelle ist
+    printk(KERN_ALERT "Translate: Eingegebener Translate_String ist zu lang - dieser dart maximal %d Zeichen haben - Abbruch\n", ALPHABET_LENGTH * 2);
     return -1;                                            //  Gib unverichteter Dinge -1 zurueck
   }
   
@@ -280,7 +273,7 @@ int init_module(void) {
   dev_major = err;                                     //Speichere Major-Number
   printk(KERN_ALERT "Translate: Die zugewiesene Major-Nummer ist %d\n", dev_major);
   
-  translate_devices = kmalloc(count_of_devices * sizeof(struct translate_dev), GFP_KERNEL);   //Fordere Speicher fuer das Geraet vom Kernel an
+  translate_devices = kmalloc(count_of_devices * sizeof(struct translate_dev), GFP_KERNEL);//Fordere Speicher fuer das Geraet vom Kernel an
   if(!translate_devices) {                                                                 //Wenn nicht genug Speicher im Kernel zur Verfuegung steht
     printk(KERN_ALERT "Translate: Es konnte kein Kernel-Speicher zugewiesen werden - abbruch\n");
     err = -ENOMEM;                                                                         //  Abbruch und zur fail-Sequenz mit ENOMEM
@@ -290,24 +283,24 @@ int init_module(void) {
   memset(translate_devices, 0, COUNT_OF_DEVS * sizeof(struct translate_dev));              //Setze den Inhalt des erhaltenen Speichers auf 0
   for(i = 0; i < COUNT_OF_DEVS; i++) {                                                     //Fuer jedes Minor-Geraet
     device = &translate_devices[i];                                                        //  Speicher eine lokale Referenz auf dieses Geraet
-    sema_init(&device->sem, 1);                                                             //  Initialisiere den Semaphoren mit 1
+    sema_init(&device->sem, 1);                                                            //  Initialisiere den Semaphoren mit 1
     init_waitqueue_head(&device->queue);
     device->buffersize = translate_bufsize;                                                //  Setzte die Buffergroesse auf translate_bufsize
     printk(KERN_ALERT "Translate: Allozierung fuer den Buffer von Geraet-Nummer %d\n", i);
     if(!device->buffer) {
-      device->buffer = kmalloc(translate_bufsize * sizeof(char), GFP_KERNEL); //#########sizeof char ?!?########## //Forder Speicher fuer den Buffer des Geraets an
-      if(!device->buffer) {                                                                   //  Wenn nicht genug Speicher zur Verfuegung stand
-        err = -ENOMEM;                                                                       //    Abbruch und zur fail-Sequenz mit ENOMEM
+      device->buffer = kmalloc(translate_bufsize * sizeof(char), GFP_KERNEL);              //  Forder Speicher fuer den Buffer des Geraets an
+      if(!device->buffer) {                                                                //    Wenn nicht genug Speicher zur Verfuegung stand
+        err = -ENOMEM;                                                                     //      Abbruch und zur fail-Sequenz mit ENOMEM
         goto fail;
       }
 	}
-    device->end = device->buffer + device->buffersize;                                    //  Setze das Ende des Buffers
+    device->end = device->buffer + device->buffersize;                                     //  Setze das Ende des Buffers
     device->rp = device->wp = device->buffer;                                              //  Setze den Read- und Write-Pointer an dern Anfang des Buffers
     device->fillcount = 0;                                                                 //  Setze den Fillcount auf 0
   }
   
   printk(KERN_ALERT "Translate: Initialisierung abgeschlossen\n");
-  return 0;                                                                                //Gebe 0 zum erfolgreichen Abschliessen der FUnktion zurueck
+  return 0;                                                                                //Gebe 0 zum erfolgreichen Abschliessen der Funktion zurueck
   
   
   fail:                //Fail-Region
@@ -327,7 +320,7 @@ void cleanup_module(void) {
   }
   
   kfree(translate_devices);                         //Gib den Speicher der Geraete frei
-  unregister_chrdev(dev_major, dev_name);           //Deregistriere des Treibers
+  unregister_chrdev(dev_major, dev_name);           //Deregistrieren des Treibers
   translate_devices = NULL;                         //Nulle den Pointer aus
 }
   
