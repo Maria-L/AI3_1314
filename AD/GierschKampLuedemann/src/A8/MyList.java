@@ -5,8 +5,8 @@ import java.util.*;
 
 public class MyList implements IList {
 
-	Object head = null;
-	IList tail = null;
+	public Object head = null;
+	public IList tail = null;
 	int length = 0;
 
 	public MyList() {}
@@ -38,6 +38,11 @@ public class MyList implements IList {
 	public IList tail() {
 		return tail;
 	}
+	
+	@Override
+	public void tail(IList list) {
+		this.tail = list;
+	}
 
 	@Override
 	public int length() {
@@ -64,16 +69,6 @@ public class MyList implements IList {
 			length++;
 			tail.insert(n, i - 1);
 			return true;
-		}
-	}
-	
-	public void append(Object n) {
-		if (this.top() == null) {
-			this.head = n;
-		} else if (this.tail == null) {
-			this.tail = new MyList(n, null);
-		} else {
-			tail.append(n);
 		}
 	}
 
@@ -137,29 +132,55 @@ public class MyList implements IList {
 		}
 		return akku;
 	}
+	
 
+//########## Geänderte Funktion ##########
 	@Override
 	public IList merge(IList list) {
 		IList akku = new MyList();
 		IList list1 = this;
 		IList list2 = list;
+		IList lastAkku = akku;									//Zwischenspeicher für das aktuelle letzte Element von akku
 
-		while (list1.top() != null && list2.top() != null) {
+		while (list1.top() != null && list2.top() != null) {	//Mergen der Listen Anfang
 			if ((int) list1.top() < (int) list2.top()) {
-				akku.append(list1.head());
+				if(lastAkku.top() == null) {
+					lastAkku.head(list1.head());
+				} else {
+					lastAkku.tail(new MyList(list1.head(), null));
+					lastAkku = lastAkku.tail();
+				}
 			} else {
-				akku.append(list2.head());
+				if(lastAkku.top() == null) {
+					lastAkku.head(list2.head());
+				} else {
+					lastAkku.tail(new MyList(list2.head(), null));
+					lastAkku = lastAkku.tail();
+				}
+			}
+		}														//Mergen der Listen Ende
+		
+		while (list1.top() != null) {							//Anhängen der ersten Liste
+			if(lastAkku.top() == null) {
+				lastAkku.head(list1.head());
+			} else {
+				lastAkku.tail(new MyList(list1.head(), null));
+				lastAkku = lastAkku.tail();
 			}
 		}
-		while (list1.top() != null) {
-			akku.append(list1.head());
-		}
-		while (list2.top() != null) {
-			akku.append(list2.head());
+		
+		while (list2.top() != null) {							//Anhängen der zweiten Liste
+			if(lastAkku.top() == null) {
+				lastAkku.head(list2.head());
+			} else {
+				lastAkku.tail(new MyList(list2.head(), null));
+				lastAkku = lastAkku.tail();
+			}
 		}
 		return akku;
 	}
-
+//########################################
+	
 	@Override
 	public IList mergeSort() {
 		if (this.tail == null) {
