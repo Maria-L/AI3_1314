@@ -63,7 +63,7 @@ ssize_t translate_read(struct file *filp, char __user * buf, size_t count, loff_
     return -ERESTARTSYS;                //  Gib ERESTARTSYS zurueck
   }
   
-  if(dev->fillcount <= ZEROBUFFER) {                                //Wenn der Buffer leer ist
+  while(dev->fillcount <= ZEROBUFFER) {                             //Solange der Buffer leer ist
     printk(KERN_ALERT "Translate: Leerer Buffer, warte auf Elemente\n");
 
     up(&dev->sem);                                                  //  Gib den Semaphoren frei
@@ -75,10 +75,6 @@ ssize_t translate_read(struct file *filp, char __user * buf, size_t count, loff_
     if(err) {                                                       //  Wenn der prozess per Signal geweckt wurde
       return -ERESTARTSYS;                                          //    Gib ERESTARTSYS zurueck
     }
-  }
-  
-  if(dev->fillcount == 0) {  //FRAGWUERDIG?!?
-    return 0;
   }
   
   if(dev->wp > dev->rp) {                             //Wenn der Write-Pointer hinter dem Read-Pointer steht
@@ -104,16 +100,16 @@ ssize_t translate_read(struct file *filp, char __user * buf, size_t count, loff_
     }
   }
   
-  dev->rp += count;        //Setze den Read-Pointer weiter
-  if(dev->rp == dev->end) {   //Wenn der Read-Pointer am Ende des Buffers angekommen ist
-    dev->rp = dev->buffer; //  Setze den Read-Pointer auf den Anfang des Buffers
+  dev->rp += count;          //Setze den Read-Pointer weiter
+  if(dev->rp == dev->end) {  //Wenn der Read-Pointer am Ende des Buffers angekommen ist
+    dev->rp = dev->buffer;   //  Setze den Read-Pointer auf den Anfang des Buffers
   }
   
-  dev->fillcount -= count; //Dekrementiere den Fill-Count
+  dev->fillcount -= count;   //Dekrementiere den Fill-Count
   
   printk(KERN_ALERT "Translate: Read %li Chars from translate%d\n", (long) count, minor);
-  up(&dev->sem);           //Gib den Semaphoren wieder frei
-  wake_up(&dev->queue);    //Wecke die Prozesse in der Warteschlange
+  up(&dev->sem);             //Gib den Semaphoren wieder frei
+  wake_up(&dev->queue);      //Wecke die Prozesse in der Warteschlange
   
   printDevice(dev);
   return count;
@@ -136,7 +132,7 @@ ssize_t translate_write(struct file *filp, const char __user * buf, size_t count
     return -ERESTARTSYS;                //  Gib ERESTARTSYS zurueck
   }
   
-  if(dev->fillcount >= translate_bufsize) {                                       //Wenn der Buffer voll ist
+  while(dev->fillcount >= translate_bufsize) {                                    //Solange der Buffer voll ist
     up(&dev->sem);                                                                //  gib den Semaphoren wieder frei
     
     err = wait_event_interruptible(dev->queue, dev->fillcount < translate_bufsize);// Reihe dich in die Warteschlange ein
