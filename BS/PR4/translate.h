@@ -10,7 +10,7 @@
 #endif
 
 #ifndef TRANSLATE_SUBST
-#define TRANSLATE_SUBST "ABCDEFGHIJKLMNOPQRSTUFVXYZabcdefghijklmnopqrstuvwxyz"
+#define TRANSLATE_SUBST "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 #endif
 
 #ifndef ALPHABET_LENGTH

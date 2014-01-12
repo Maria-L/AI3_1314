@@ -77,6 +77,10 @@ ssize_t translate_read(struct file *filp, char __user * buf, size_t count, loff_
     }
   }
   
+  /*if(dev->fillcount == 0) {
+    return 0;
+  }*/
+  
   if(dev->wp > dev->rp) {                             //Wenn der Write-Pointer hinter dem Read-Pointer steht
     count = min(count, (size_t) (dev->wp - dev->rp)); //  Setze count auf das minimum von count und den uebrigen Elementen vom wp bis zum rp
   } else {                                            //Sonst
@@ -89,13 +93,11 @@ ssize_t translate_read(struct file *filp, char __user * buf, size_t count, loff_
     }
     err = copy_to_user(buf, stringBuffer, count);
     if(err) {
-      up(&dev->sem);
       return -EFAULT;
     }
   } else {                             //Wenn nicht decodiert werden muss
     err = copy_to_user(buf, dev->rp, count);//Kopiere die Ergebnisse in den User-Speicher
     if(err) {                          //  Wenn dabei ein Fehler passiert ist
-      up(&dev->sem);                   //    Gib den Semaphoren wieder frei
       return -EFAULT;                  //    Gebe EFAULT zurueck
     }
   }
@@ -107,11 +109,11 @@ ssize_t translate_read(struct file *filp, char __user * buf, size_t count, loff_
   
   dev->fillcount -= count;   //Dekrementiere den Fill-Count
   
-  printk(KERN_ALERT "Translate: Read %li Chars from translate%d\n", (long) count, minor);
+  printDevice(dev);
+  printk(KERN_ALERT "Translate: %d Zeichen von translate%d gelesen\n", (int) count, minor);
   up(&dev->sem);             //Gib den Semaphoren wieder frei
   wake_up(&dev->queue);      //Wecke die Prozesse in der Warteschlange
   
-  printDevice(dev);
   return count;
 }
 
@@ -121,6 +123,7 @@ ssize_t translate_write(struct file *filp, const char __user * buf, size_t count
   int minor;                  //Minor-Device-Number
   int i;                      //Zaehler-Variable
   struct translate_dev *dev;  //Translate-Informationen
+  char stringBuffer[TRANSLATE_BUFSIZE];        //Buffer fuer die Rueckgabe
   
   dev = filp->private_data;   //Nehme Translate-Informationen von der Benutzereingabe
   minor = dev->minor_number;  //Speichere die Minor-Device-Number
@@ -150,18 +153,25 @@ ssize_t translate_write(struct file *filp, const char __user * buf, size_t count
   if(dev->wp >= dev->rp) {                                           //Wenn der Readpointer einen Wrap-Around hatte
     count = min(count, (size_t) (dev->end - dev->wp));               //  Setze Count auf das Minimum von Count und den Elementen bis zum Ende der Liste
   } else {                                                           //Sonst
-    count = min(count, (size_t) (dev->rp - dev->wp - 1));            //  Setze Count auf das Minimum von Count und den Elementen bis zum Read-Pointer
+    count = min(count, (size_t) (dev->rp - dev->wp));            //  Setze Count auf das Minimum von Count und den Elementen bis zum Read-Pointer
   }
   
-  if(minor == MINORONE) {                      //Wenn nicht codiert werden muss
+  if(minor == MINORZERO) {                      //Wenn codiert werden muss
+    err = copy_from_user(stringBuffer, buf, count);
+    if(err) {
+      return -EFAULT;
+    }
+    for(i = 0; i < count; i++) {
+      dev->wp[i] = encode_char(stringBuffer[i]);
+    }
+    
+    //for(i = 0; i < count; i++) {               //  Kopiere und codiere count Elemente aus buf in wp
+    //  dev->wp[i] = encode_char(buf[i]);
+    //}
+  } else {                                     //Sonst muss nicht codiert werden
     err = copy_from_user(dev->wp, buf, count); //  Kopiere count elemente aus buf ab wp
     if(err) {                                  //  Wenn nicht count elemente Kopiert wurden
-      up(&dev->sem);                           //    Gib den Semaphoren frei
       return -EFAULT;                          //    Gebe EFAULT zueueck
-    }
-  } else {                                     //Sonst muss codiert werden
-    for(i = 0; i < count; i++) {               //  Kopiere und codiere count Elemente aus buf in wp
-      dev->wp[i] = encode_char(buf[i]);
     }
   }
   
@@ -171,10 +181,12 @@ ssize_t translate_write(struct file *filp, const char __user * buf, size_t count
   }
   
   dev->fillcount += count;   //Erhoehe den Fillcount um count
+  
+  printDevice(dev);
   up(&dev->sem);             //Gib den Semaphoren wieder frei
   wake_up(&dev->queue);      //Wecke alle Elemente aus der Warteschlange
-  printk(KERN_ALERT "Translate: Finished writing\n");
-  printDevice(dev);
+  printk(KERN_ALERT "Translate: %d Zeichen in translate%d geschrieben\n", (int) count, minor);
+
   return count;              //Gib count zurueck
 }
 
@@ -236,6 +248,9 @@ int init_module(void) {
   int i;                        //Zaehler-Variable
   int err;                      //Error-Variable
   struct translate_dev *device; //Translate-Device
+  dev_t dev;
+  
+  dev = 0;
   
   printk(KERN_ALERT "Translate: Starte Initialisierung...\n");
   
@@ -356,10 +371,10 @@ int indexOf(char c) {
 }
 
 void printDevice(struct translate_dev *dev) {
-  printk(KERN_ALERT "Translate: ----------PRINT DEVICE---------\n");
+  printk(KERN_ALERT "Translate: ----------BEGIN PRINT DEVICE---------\n");
   printk(KERN_ALERT "Translate: Device translate%d\n", dev->minor_number);
   printk(KERN_ALERT "Translate: Buffersize: %d fillcount: %d\n", dev->buffersize, dev->fillcount);
-  printk(KERN_ALERT "Translate: Start: %p, End: %p\n", dev->buffer, dev->end);
-  printk(KERN_ALERT "Translate: Read: %p, Write: %p\n", dev->rp, dev->wp);
-  printk(KERN_ALERT "Translate: Readers: %d, Writers: %d\n", dev->nreaders, dev->nwriters);
+  printk(KERN_ALERT "Translate: Anzahl der Reader: %d\n", dev->nreaders);
+  printk(KERN_ALERT "Translate: Anzahl der Writer: %d\n", dev->nwriters);
+  printk(KERN_ALERT "Translate: ---------- END PRINT DEVICE ---------\n");
 }
