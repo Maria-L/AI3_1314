@@ -1,15 +1,6 @@
 #ifndef _TRANSLATE_H_
 #define _TRANSLATE_H_
 
-#ifndef init_MUTEX
-#define init_MUTEX(mutex) sema_init(mutex, 1)
-#endif
-
-#define PDEBUG(fmt, args...) printk( KERN_DEBUG "translate: " fmt, ## args)
-
-#undef PDEBUGG
-#define PDEBUGG(fmt, args...)
-
 #ifndef COUNT_OF_DEVS
 #define COUNT_OF_DEVS 2
 #endif
@@ -34,26 +25,27 @@
 #define ZEROBUFFER 0
 #endif
 
-#ifndef ZERO
-#define ZERO 0
+#ifndef MINORZERO
+#define MINORZERO 0
 #endif
 
-#ifndef ONE
-#define ONE 1
+#ifndef MINORONE
+#define MINORONE 1
 #endif
 
-#ifndef DYNAMIC_MAJOR
-#define DYNAMIC_MAJOR 0
-#endif
 
 // Geraete-Struct fuer translate
 struct translate_dev {
-  char *buffer, *end;        //Buffer-Anfangs und End-adresse
-  int buffersize, fillcount; //Groesse des Buffers und die Anzahl der beschriebenen Stellen im Buffer
-  char *rp, *wp;             //Position des Read und des Write-Pointers
-  int nreaders, nwriters;    //Anzahl der lesenden und schreibenden Prozesse
+  char *buffer;              //Buffer-Anfangsadresse
+  char *end;                 //Buffer-Endadresse
+  int buffersize;            //Groesse des Buffers und die 
+  int fillcount;             //Anzahl der beschriebenen Stellen im Buffer
+  char *rp;                  //Position des Read-Pointers
+  char *wp;                  //Position des Write-Pointers
+  int nreaders;              //Anzahl der lesenden Prozesse
+  int nwriters;              //Anzahl der schreibenden Prozesse
   int minor_number;          //Minor-Number des Geraetes: 0 -> Encode | 1 -> Decode
-  struct semaphore sem;      //Semaphore um gleichzeitige Zugriffe zu vermeiden
+  struct semaphore sem;      //Semaphore um gleichzeitige Zugriffe mehrerer Prozesse auf ein Minor-Device zu verhindern
   struct cdev cdev;          //Von der Inode-Struktur benoetigtes Element zur Repraesentation von Char-Devices
   wait_queue_head_t queue;   //Warteschlange fuer Prozesse
 };

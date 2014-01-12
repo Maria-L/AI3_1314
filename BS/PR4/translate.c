@@ -23,7 +23,7 @@ static int count_of_devices = COUNT_OF_DEVS; //Anzahl der Sub-Devices
 
 int translate_bufsize = TRANSLATE_BUFSIZE;   //Groesse des Buffers
 
-char *translate_subst_def = TRANSLATE_SUBST; //Fixe Translate-Tabelle
+char *translate_subst_def = TRANSLATE_SUBST; //Fixe Translate-Tabelle zum unter Umstaenden Vervollstaendigen von translate_subst
 char *translate_subst = TRANSLATE_SUBST;     //Translate-Tabelle, die vom Nutzer vorgegeben werden kann
 
 int dev_minor = 0; //Minor-Device-Number, muss noch vergeben werden
@@ -55,7 +55,6 @@ ssize_t translate_read(struct file *filp, char __user * buf, size_t count, loff_
   
   dev = filp->private_data;  //Nehme Translate-Informationen von der Benutzereingabe
   minor = dev->minor_number; //Speichere die Minor-Device-Number
-  //stringBuffer = "";
   
   printk(KERN_ALERT "Translate: Beginne zu lesen\n");
   
@@ -88,9 +87,8 @@ ssize_t translate_read(struct file *filp, char __user * buf, size_t count, loff_
     count = min(count, (size_t) (dev->end - dev->rp));//  Setze count auf das minimum von count und den uebrigen Elementen bis zum Ende des Buffers
   }
   
-  if(minor == ONE) {                   //Wenn Decodiert werden muss
+  if(minor == MINORONE) {              //Wenn Decodiert werden muss
     for(i = 0; i < count; i++) {       //  Decodiere und schreibe count mal in den User-Speicher
-      //buf[i] = decode_char(dev->rp[i]);
       stringBuffer[i] = decode_char(dev->rp[i]);
     }
     err = copy_to_user(buf, stringBuffer, count);
@@ -101,7 +99,7 @@ ssize_t translate_read(struct file *filp, char __user * buf, size_t count, loff_
   } else {                             //Wenn nicht decodiert werden muss
     err = copy_to_user(buf, dev->rp, count);//Kopiere die Ergebnisse in den User-Speicher
     if(err) {                          //  Wenn dabei ein Fehler passiert ist
-      up(&dev->sem);                   //    Gib den Semaphoren wieder frei           #### FRAGWUERDIG ####
+      up(&dev->sem);                   //    Gib den Semaphoren wieder frei
       return -EFAULT;                  //    Gebe EFAULT zurueck
     }
   }
@@ -159,7 +157,7 @@ ssize_t translate_write(struct file *filp, const char __user * buf, size_t count
     count = min(count, (size_t) (dev->rp - dev->wp - 1));            //  Setze Count auf das Minimum von Count und den Elementen bis zum Read-Pointer
   }
   
-  if(minor == ONE) {                           //Wenn nicht codiert werden muss
+  if(minor == MINORONE) {                      //Wenn nicht codiert werden muss
     err = copy_from_user(dev->wp, buf, count); //  Kopiere count elemente aus buf ab wp
     if(err) {                                  //  Wenn nicht count elemente Kopiert wurden
       up(&dev->sem);                           //    Gib den Semaphoren frei
@@ -198,14 +196,14 @@ int translate_open(struct inode *inode, struct file *filp) {
   printk(KERN_ALERT "Translate: translate_open wurde mit minor_number %d gestartet\n", minor);
   
   if(filp->f_mode & FMODE_READ) {  //Wenn gelesen werden soll
-    if(dev->nreaders > ZERO) {     //  Wenn schon ein anderer Prozess liest
+    if(dev->nreaders > 0) {        //  Wenn schon ein anderer Prozess liest
       return -EBUSY;               //    Gib EBUSY zurueck
     }
     dev->nreaders++;               //  Sonst inkrementiere die Anzahl der Reader
   }
   
   if(filp->f_mode & FMODE_WRITE) { //Wenn geschrieben werden soll
-    if(dev->nwriters > ZERO) {     //  Wenn schon ein anderer Prozess schreibt
+    if(dev->nwriters > 0) {        //  Wenn schon ein anderer Prozess schreibt
       return -EBUSY;               //    gib EBUSY zurueck
     }
     dev->nwriters++;               //  Sonst inkrementiere die Anzahl der Writer
@@ -242,9 +240,6 @@ int init_module(void) {
   int i;                        //Zaehler-Variable
   int err;                      //Error-Variable
   struct translate_dev *device; //Translate-Device
-  dev_t dev;                    //Standart-Device                    ##########Notwendig?!?##########
-  
-  dev = 0;                      //Setze dev auf 0                    ##########Notwendig?!?##########
   
   printk(KERN_ALERT "Translate: Starte Initialisierung...\n");
   
@@ -257,16 +252,16 @@ int init_module(void) {
     for(i = strlen(translate_subst); i <= TRANSLATE_SUBST_LENGTH; i++) { //  Haenge an den eingegebenen String das Ende der original-Tabelle an
       translate_subst[i] = translate_subst_def[i];                       //  Hierbei wird bis <= gezahelt, weil so die terminierende null mitkopiert wird
     }
-	translate_subst[TRANSLATE_SUBST_LENGTH] = ZERO;
+    translate_subst[TRANSLATE_SUBST_LENGTH] = 0;
   }
   
-  if(translate_bufsize <= ZERO) {                      //Wenn der Buffer <= 0 ist
+  if(translate_bufsize <= 0) {                         //Wenn der Buffer <= 0 ist
     printk(KERN_ALERT "Translate: Der Buffer ist zu klein\n");
     return -1;                                         //  Abbruch
   }
   
   err = register_chrdev(dev_major, dev_name, &fops);   //Fordere dynamische Major-Number vom Kernel an
-  if(err < ZERO) {                                     //Wenn keine Nummer zugewiesen werden konnte
+  if(err < 0) {                                        //Wenn keine Nummer zugewiesen werden konnte
     printk(KERN_ALERT "Translate: Es konnte keine Major-Nummer zugewiesen werden - abbruch\n");
     return -1;                                         //  Abbruch
   }
@@ -277,12 +272,11 @@ int init_module(void) {
   translate_devices = kmalloc(count_of_devices * sizeof(struct translate_dev), GFP_KERNEL);   //Fordere Speicher fuer das Geraet vom Kernel an
   if(!translate_devices) {                                                                 //Wenn nicht genug Speicher im Kernel zur Verfuegung steht
     printk(KERN_ALERT "Translate: Es konnte kein Kernel-Speicher zugewiesen werden - abbruch\n");
-    //unregister_chrdev_region(dev, COUNT_OF_DEVS - 1); //##########Fragwuerdig##########    Ganz besonders weil cleanup_module das auch koennen sollte?!?
     err = -ENOMEM;                                                                         //  Abbruch und zur fail-Sequenz mit ENOMEM
     goto fail;
   }
   
-  memset(translate_devices, ZERO, COUNT_OF_DEVS * sizeof(struct translate_dev));           //Setze den Inhalt des erhaltenen Speichers auf 0
+  memset(translate_devices, 0, COUNT_OF_DEVS * sizeof(struct translate_dev));              //Setze den Inhalt des erhaltenen Speichers auf 0
   for(i = 0; i < COUNT_OF_DEVS; i++) {                                                     //Fuer jedes Minor-Geraet
     device = &translate_devices[i];                                                        //  Speicher eine lokale Referenz auf dieses Geraet
     sema_init(&device->sem, 1);                                                             //  Initialisiere den Semaphoren mit 1
@@ -340,28 +334,29 @@ char decode_char(char c) {
   int index;                                               //Index zum Zwischenspeichern
   
   if((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) {   //Wenn c ein Buchstabe des Alphabets ist
-    index = indexOf(c);
-	if(index < 0) {
-	  printk(KERN_ALERT "Translate: Character konnte nicht gefunden werden - Fehler\n");
-	} else if(index < ALPHABET_LENGTH) {
-	  return 'a' + index;
-	} else {
-	  return 'A' + (index - ALPHABET_LENGTH);
+    index = indexOf(c);                                    //  Suche den Index dieses Buchstaben im Substitutionsstring heraus
+	if(index < 0) {                                    //  Wenn der Buchstabe nicht gefunden wurde
+	  printk(KERN_ALERT "Translate: Character konnte nicht gefunden werden, Substitutionsstring moeglicherweise Fahlerhaft\n"); 
+	                                                   //   Gib einen Fehler aus
+	} else if(index < ALPHABET_LENGTH) {               //  Wenn der Buchstabe in der ersten Haelfte des Substitutionsstrings vorkam
+	  return 'a' + index;                              //    Gib den passenden Kleinbuchstaben zurueck
+	} else {                                           //  Sonst
+	  return 'A' + (index - ALPHABET_LENGTH);          //    Gib den passenden Grossbuchstaben zurueck
 	}
   }
-  return c;
+  return c;                                                //Wenn c kein Buchstabe des Alphabets war, gib ihn unveraendert zurueck
 }
 
 int indexOf(char c) {
-  char *p;
-  p = strchr(translate_subst, c);
+  char *p;                        //Char zum Speichern
+  p = strchr(translate_subst, c); //Suche das erste Vorkommen von c im Substitutionsstring heraus
   
-  if(p == NULL) {
+  if(p == NULL) {                 //  Wenn c nicht gefunden werden konnte
     printk(KERN_ALERT "Translate: Coult not find char\n");
-	return -1;
+	return -1;                //    Gib -1 als Fehlerwert zurueck
   }
   
-  return (int) (p - translate_subst);
+  return (int) (p - translate_subst); //Gib den Pointer auf das erste Vorkommen - den Anfang des Substitutionsstrings als Integer aus
 }
 
 void printDevice(struct translate_dev *dev) {
@@ -370,5 +365,5 @@ void printDevice(struct translate_dev *dev) {
   printk(KERN_ALERT "Translate: Buffersize: %d fillcount: %d\n", dev->buffersize, dev->fillcount);
   printk(KERN_ALERT "Translate: Start: %p, End: %p\n", dev->buffer, dev->end);
   printk(KERN_ALERT "Translate: Read: %p, Write: %p\n", dev->rp, dev->wp);
-  printk(KERN_ALERT "Translate: Readers: %p, Writers: %p\n", dev->nreaders, dev->nwriters);
+  printk(KERN_ALERT "Translate: Readers: %d, Writers: %d\n", dev->nreaders, dev->nwriters);
 }
