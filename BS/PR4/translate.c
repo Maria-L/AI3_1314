@@ -280,8 +280,8 @@ int init_module(void) {
     goto fail;
   }
   
-  memset(translate_devices, 0, COUNT_OF_DEVS * sizeof(struct translate_dev));              //Setze den Inhalt des erhaltenen Speichers auf 0
-  for(i = 0; i < COUNT_OF_DEVS; i++) {                                                     //Fuer jedes Minor-Geraet
+  memset(translate_devices, 0, count_of_devices * sizeof(struct translate_dev));              //Setze den Inhalt des erhaltenen Speichers auf 0
+  for(i = 0; i < count_of_devices; i++) {                                                     //Fuer jedes Minor-Geraet
     printk(KERN_ALERT "Translate: Allozierung fuer den Buffer von Geraet-Nummer %d\n", i);
     device = &translate_devices[i];                                                        //  Speicher eine lokale Referenz auf dieses Geraet
     sema_init(&device->sem, 1);                                                            //  Initialisiere den Semaphoren mit 1
@@ -316,6 +316,7 @@ void cleanup_module(void) {
   }
   
   for(i = 0; i < count_of_devices; i++) {           //Fuer jede Minor-Number
+    sema_destroy(&translate_devices[i].sem);        //  Zerstoere den Semaphoren                 ########################UNGETESTET######################
     kfree(translate_devices[i].buffer);             //  Gib den Buffer des jeweiligen Geraets frei
   }
   
