@@ -1,4 +1,4 @@
-#ifndef _TRANSLATE_H_
+﻿#ifndef _TRANSLATE_H_
 #define _TRANSLATE_H_
 
 #ifndef COUNT_OF_DEVS
