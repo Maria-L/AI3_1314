@@ -1,0 +1,1 @@
+cmd_/home/user/Projekte3/AI3_1314/BS/PR4/translate.ko := ld -r -m elf_x86_64 -T /usr/src/linux-3.11.6-4/scripts/module-common.lds --build-id  -o /home/user/Projekte3/AI3_1314/BS/PR4/translate.ko /home/user/Projekte3/AI3_1314/BS/PR4/translate.o /home/user/Projekte3/AI3_1314/BS/PR4/translate.mod.o

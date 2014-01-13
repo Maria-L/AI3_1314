@@ -1,0 +1,51 @@
+Log fuer translate0 mit dem Alphabet in klein- und grossschreibung als Eingabe
+
+
+2014-01-13T15:58:22.049872+01:00 linux-0n80 kernel: [64011.525257] Translate: Starte Initialisierung...
+2014-01-13T15:58:22.049889+01:00 linux-0n80 kernel: [64011.525263] Translate: Die zugewiesene Major-Nummer ist 250
+2014-01-13T15:58:22.049891+01:00 linux-0n80 kernel: [64011.525265] Translate: Allozierung fuer den Buffer von Geraet-Nummer 0
+2014-01-13T15:58:22.049894+01:00 linux-0n80 kernel: [64011.525267] Translate: Allozierung fuer den Buffer von Geraet-Nummer 1
+2014-01-13T15:58:22.049896+01:00 linux-0n80 kernel: [64011.525269] Translate: Initialisierung abgeschlossen
+2014-01-13T15:58:36.622824+01:00 linux-0n80 kernel: [64026.098972] Translate: translate_open wurde mit minor_number 0 gestartet
+2014-01-13T15:58:36.622839+01:00 linux-0n80 kernel: [64026.098976] Translate: translate_open wurde beendet
+2014-01-13T15:58:36.622841+01:00 linux-0n80 kernel: [64026.098985] Translate: Beginne zu lesen
+2014-01-13T15:58:36.622843+01:00 linux-0n80 kernel: [64026.098988] Translate: Leerer Buffer, warte auf Elemente
+2014-01-13T15:58:42.342847+01:00 linux-0n80 kernel: [64031.818104] Translate: translate_open wurde mit minor_number 0 gestartet
+2014-01-13T15:58:42.342863+01:00 linux-0n80 kernel: [64031.818108] Translate: translate_open wurde beendet
+2014-01-13T15:58:42.342865+01:00 linux-0n80 kernel: [64031.818118] Translate: starting to write
+2014-01-13T15:58:42.342867+01:00 linux-0n80 kernel: [64031.818121] Translate: ----------BEGIN PRINT DEVICE---------
+2014-01-13T15:58:42.342869+01:00 linux-0n80 kernel: [64031.818123] Translate: Device translate0
+2014-01-13T15:58:42.342871+01:00 linux-0n80 kernel: [64031.818125] Translate: Buffersize: 40 fillcount: 40
+2014-01-13T15:58:42.342873+01:00 linux-0n80 kernel: [64031.818127] Translate: Anzahl der Reader: 1
+2014-01-13T15:58:42.342875+01:00 linux-0n80 kernel: [64031.818129] Translate: Anzahl der Writer: 1
+2014-01-13T15:58:42.342877+01:00 linux-0n80 kernel: [64031.818131] Translate: ---------- END PRINT DEVICE ---------
+2014-01-13T15:58:42.342879+01:00 linux-0n80 kernel: [64031.818160] Translate: 40 Zeichen in translate0 geschrieben
+2014-01-13T15:58:42.342881+01:00 linux-0n80 kernel: [64031.818163] Translate: starting to write
+2014-01-13T15:58:42.342884+01:00 linux-0n80 kernel: [64031.818204] Translate: ----------BEGIN PRINT DEVICE---------
+2014-01-13T15:58:42.342886+01:00 linux-0n80 kernel: [64031.818207] Translate: Device translate0
+2014-01-13T15:58:42.342888+01:00 linux-0n80 kernel: [64031.818210] Translate: Buffersize: 40 fillcount: 0
+2014-01-13T15:58:42.342890+01:00 linux-0n80 kernel: [64031.818212] Translate: Anzahl der Reader: 1
+2014-01-13T15:58:42.342892+01:00 linux-0n80 kernel: [64031.818213] Translate: Anzahl der Writer: 1
+2014-01-13T15:58:42.342894+01:00 linux-0n80 kernel: [64031.818215] Translate: ---------- END PRINT DEVICE ---------
+2014-01-13T15:58:42.342897+01:00 linux-0n80 kernel: [64031.818217] Translate: 40 Zeichen von translate0 gelesen
+2014-01-13T15:58:42.342898+01:00 linux-0n80 kernel: [64031.818239] Translate: Beginne zu lesen
+2014-01-13T15:58:42.342900+01:00 linux-0n80 kernel: [64031.818241] Translate: Leerer Buffer, warte auf Elemente
+2014-01-13T15:58:42.342902+01:00 linux-0n80 kernel: [64031.818249] Translate: ----------BEGIN PRINT DEVICE---------
+2014-01-13T15:58:42.342904+01:00 linux-0n80 kernel: [64031.818251] Translate: Device translate0
+2014-01-13T15:58:42.342907+01:00 linux-0n80 kernel: [64031.818253] Translate: Buffersize: 40 fillcount: 13
+2014-01-13T15:58:42.342909+01:00 linux-0n80 kernel: [64031.818255] Translate: Anzahl der Reader: 1
+2014-01-13T15:58:42.342910+01:00 linux-0n80 kernel: [64031.818257] Translate: Anzahl der Writer: 1
+2014-01-13T15:58:42.342913+01:00 linux-0n80 kernel: [64031.818259] Translate: ---------- END PRINT DEVICE ---------
+2014-01-13T15:58:42.342915+01:00 linux-0n80 kernel: [64031.818263] Translate: 13 Zeichen in translate0 geschrieben
+2014-01-13T15:58:42.342917+01:00 linux-0n80 kernel: [64031.818270] Translate: translate_close wurde mit minor_number 0 gestartet
+2014-01-13T15:58:42.342919+01:00 linux-0n80 kernel: [64031.818272] Translate: translate_close wurde beendet
+2014-01-13T15:58:42.342921+01:00 linux-0n80 kernel: [64031.818350] Translate: ----------BEGIN PRINT DEVICE---------
+2014-01-13T15:58:42.342922+01:00 linux-0n80 kernel: [64031.818352] Translate: Device translate0
+2014-01-13T15:58:42.342924+01:00 linux-0n80 kernel: [64031.818354] Translate: Buffersize: 40 fillcount: 0
+2014-01-13T15:58:42.342926+01:00 linux-0n80 kernel: [64031.818356] Translate: Anzahl der Reader: 1
+2014-01-13T15:58:42.342929+01:00 linux-0n80 kernel: [64031.818358] Translate: Anzahl der Writer: 0
+2014-01-13T15:58:42.342931+01:00 linux-0n80 kernel: [64031.818360] Translate: ---------- END PRINT DEVICE ---------
+2014-01-13T15:58:42.342933+01:00 linux-0n80 kernel: [64031.818362] Translate: 13 Zeichen von translate0 gelesen
+2014-01-13T15:58:42.342935+01:00 linux-0n80 kernel: [64031.818370] Translate: Beginne zu lesen
+2014-01-13T15:58:42.342937+01:00 linux-0n80 kernel: [64031.818372] Translate: Leerer Buffer, warte auf Elemente
+2014-01-13T15:58:44.504953+01:00 linux-0n80 sudo:     user : TTY=pts/2 ; PWD=/var/log ; USER=root ; COMMAND=/usr/bin/grep Translate: messages
