@@ -316,7 +316,6 @@ void cleanup_module(void) {
   }
   
   for(i = 0; i < count_of_devices; i++) {           //Fuer jede Minor-Number
-    sema_destroy(&translate_devices[i].sem);        //  Zerstoere den Semaphoren                 ########################UNGETESTET######################
     kfree(translate_devices[i].buffer);             //  Gib den Buffer des jeweiligen Geraets frei
   }
   
