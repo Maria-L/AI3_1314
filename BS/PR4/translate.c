@@ -147,10 +147,10 @@ ssize_t translate_write(struct file *filp, const char __user * buf, size_t count
   }
   
   count = min(count, (size_t) (translate_bufsize - dev->fillcount)); //Setze Count auf das Minimum von Count und den Uebrigen Buffer-Elementen
-  if(dev->wp >= dev->rp) {                                           //Wenn der Readpointer einen Wrap-Around hatte
+  if(dev->wp >= dev->rp) {                                           //Wenn der Read-Pointer einen Wrap-Around hatte
     count = min(count, (size_t) (dev->end - dev->wp));               //  Setze Count auf das Minimum von Count und den Elementen bis zum Ende der Liste
   } else {                                                           //Sonst
-    count = min(count, (size_t) (dev->rp - dev->wp));            //  Setze Count auf das Minimum von Count und den Elementen bis zum Read-Pointer
+    count = min(count, (size_t) (dev->rp - dev->wp));                //  Setze Count auf das Minimum von Count und den Elementen bis zum Read-Pointer
   }
   
   if(minor == MINORZERO) {                          //Wenn codiert werden muss
@@ -190,7 +190,7 @@ int translate_open(struct inode *inode, struct file *filp) {
   
   minor = MINOR(inode->i_rdev);    //Fische die Minor-Number aus inode
   dev = &translate_devices[minor]; //Setze dev auf das Korrekte Translate-Device im Speicher
-  dev->minor_number = minor;       //Speicher die ermittelte Minor-Number ab    ####### NICHT BENOETIGT?!? #######
+  dev->minor_number = minor;       //Speicher die ermittelte Minor-Number ab
   filp->private_data = dev;        //Speichere die Referenz auf das Device in filp->private_data ab
   
   printk(KERN_ALERT "Translate: translate_open wurde mit minor_number %d gestartet\n", minor);
@@ -287,7 +287,7 @@ int init_module(void) {
     init_waitqueue_head(&device->queue);
     device->buffersize = translate_bufsize;                                                //  Setzte die Buffergroesse auf translate_bufsize
     printk(KERN_ALERT "Translate: Allozierung fuer den Buffer von Geraet-Nummer %d\n", i);
-    if(!device->buffer) {
+    if(!device->buffer) {      //MUSS DIESE ABFRAGE SEIN?!?!?!?!?!?
       device->buffer = kmalloc(translate_bufsize * sizeof(char), GFP_KERNEL);              //  Forder Speicher fuer den Buffer des Geraets an
       if(!device->buffer) {                                                                //    Wenn nicht genug Speicher zur Verfuegung stand
         err = -ENOMEM;                                                                     //      Abbruch und zur fail-Sequenz mit ENOMEM
@@ -321,7 +321,7 @@ void cleanup_module(void) {
   
   kfree(translate_devices);                         //Gib den Speicher der Geraete frei
   unregister_chrdev(dev_major, dev_name);           //Deregistrieren des Treibers
-  translate_devices = NULL;                         //Nulle den Pointer aus
+  translate_devices = NULL;                         //Nulle den Pointer aus                   //IST DAS NOTWENDIG?!?!?!?
 }
   
 //########## Hilfsfunktionen ##########
