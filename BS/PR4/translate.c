@@ -282,18 +282,18 @@ int init_module(void) {
   
   memset(translate_devices, 0, COUNT_OF_DEVS * sizeof(struct translate_dev));              //Setze den Inhalt des erhaltenen Speichers auf 0
   for(i = 0; i < COUNT_OF_DEVS; i++) {                                                     //Fuer jedes Minor-Geraet
+    printk(KERN_ALERT "Translate: Allozierung fuer den Buffer von Geraet-Nummer %d\n", i);
     device = &translate_devices[i];                                                        //  Speicher eine lokale Referenz auf dieses Geraet
     sema_init(&device->sem, 1);                                                            //  Initialisiere den Semaphoren mit 1
     init_waitqueue_head(&device->queue);
     device->buffersize = translate_bufsize;                                                //  Setzte die Buffergroesse auf translate_bufsize
-    printk(KERN_ALERT "Translate: Allozierung fuer den Buffer von Geraet-Nummer %d\n", i);
-    if(!device->buffer) {      //MUSS DIESE ABFRAGE SEIN?!?!?!?!?!?
-      device->buffer = kmalloc(translate_bufsize * sizeof(char), GFP_KERNEL);              //  Forder Speicher fuer den Buffer des Geraets an
-      if(!device->buffer) {                                                                //    Wenn nicht genug Speicher zur Verfuegung stand
-        err = -ENOMEM;                                                                     //      Abbruch und zur fail-Sequenz mit ENOMEM
-        goto fail;
-      }
-	}
+
+    device->buffer = kmalloc(translate_bufsize * sizeof(char), GFP_KERNEL);                //  Forder Speicher fuer den Buffer des Geraets an
+    if(!device->buffer) {                                                                  //    Wenn nicht genug Speicher zur Verfuegung stand
+      err = -ENOMEM;                                                                       //      Abbruch und zur fail-Sequenz mit ENOMEM
+      goto fail;
+    }
+
     device->end = device->buffer + device->buffersize;                                     //  Setze das Ende des Buffers
     device->rp = device->wp = device->buffer;                                              //  Setze den Read- und Write-Pointer an dern Anfang des Buffers
     device->fillcount = 0;                                                                 //  Setze den Fillcount auf 0
@@ -321,7 +321,7 @@ void cleanup_module(void) {
   
   kfree(translate_devices);                         //Gib den Speicher der Geraete frei
   unregister_chrdev(dev_major, dev_name);           //Deregistrieren des Treibers
-  translate_devices = NULL;                         //Nulle den Pointer aus                   //IST DAS NOTWENDIG?!?!?!?
+  translate_devices = NULL;                         //Nulle den Pointer aus
 }
   
 //########## Hilfsfunktionen ##########
