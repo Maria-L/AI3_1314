@@ -125,7 +125,7 @@ ssize_t translate_write(struct file *filp, const char __user * buf, size_t count
   dev = filp->private_data;   //Nehme Translate-Informationen von der Benutzereingabe
   minor = dev->minor_number;  //Speichere die Minor-Device-Number
   
-  printk(KERN_ALERT "Translate: starting to write\n");
+  printk(KERN_ALERT "Translate: starte zu lesen\n");
   
   err = down_interruptible(&dev->sem);  //Warte auf den Semaphoren
   if(err) {                             //Wenn der Prozess per Signal geweckt wurde
@@ -357,7 +357,7 @@ int indexOf(char c) {
   p = strchr(translate_subst, c); //Suche das erste Vorkommen von c im Substitutionsstring heraus
   
   if(p == NULL) {                 //  Wenn c nicht gefunden werden konnte
-    printk(KERN_ALERT "Translate: Coult not find char\n");
+    printk(KERN_ALERT "Translate: Konnte Character nicht finden\n");
 	return -1;                //    Gib -1 als Fehlerwert zurueck
   }
   
@@ -367,7 +367,7 @@ int indexOf(char c) {
 void printDevice(struct translate_dev *dev) {
   printk(KERN_ALERT "Translate: ----------BEGIN PRINT DEVICE---------\n");
   printk(KERN_ALERT "Translate: Device translate%d\n", dev->minor_number);
-  printk(KERN_ALERT "Translate: Buffersize: %d fillcount: %d\n", dev->buffersize, dev->fillcount);
+  printk(KERN_ALERT "Translate: buffersize: %d fillcount: %d\n", dev->buffersize, dev->fillcount);
   printk(KERN_ALERT "Translate: Anzahl der Reader: %d\n", dev->nreaders);
   printk(KERN_ALERT "Translate: Anzahl der Writer: %d\n", dev->nwriters);
   printk(KERN_ALERT "Translate: ---------- END PRINT DEVICE ---------\n");

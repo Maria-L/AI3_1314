@@ -1,7 +1,7 @@
 #!/bin/sh
 module="translate"
 device="translate"
-mode="664"
+mode="666"
 
 # entferne veraltete nodes
 rm -f /dev/${device}[0-1]
