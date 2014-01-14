@@ -4,6 +4,7 @@ package A8;
 public interface IList {
 	public Object head();
 	public IList tail();
+	public void tail(IList list);
 	public int length();
 	public Object top();
 	public IList mergeSort();
@@ -14,5 +15,5 @@ public interface IList {
 	public boolean isIncreasingMonoton();
 	public IList random(int n);
 	public IList sortIncreasingMonoton(int n);
-	public void append (Object n);
+	//public IList append (IList last, Object n);
 }
