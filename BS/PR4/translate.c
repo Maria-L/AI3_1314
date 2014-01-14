@@ -30,7 +30,7 @@ int dev_minor = 0; //Minor-Device-Number, muss noch vergeben werden
 int dev_major = 0; //Major-Device-Number, muss noch vergeben werden
 
 //Gegebenenfalls ersetzen der Parameter durch Nutzereingaben
-module_param(translate_bufsize, int, 0);  
+module_param(translate_bufsize, int, 0);
 module_param(translate_subst, charp, 0);
 
 
@@ -153,6 +153,7 @@ ssize_t translate_write(struct file *filp, const char __user * buf, size_t count
     count = min(count, (size_t) (dev->rp - dev->wp));                //  Setze Count auf das Minimum von Count und den Elementen bis zum Read-Pointer
   }
   
+  count = min(count, (size_t) TRANSLATE_BUFSIZE);   //Vermeide warning
   if(minor == MINORZERO) {                          //Wenn codiert werden muss
     err = copy_from_user(stringBuffer, buf, count); //  Kopiere die zu codierenden Zeichen aus dem User-Buffer in stringBuffer
     if(err) {                                       //  Wenn dabei ein Fehler passiert ist
