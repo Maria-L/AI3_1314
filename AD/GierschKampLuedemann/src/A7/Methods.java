@@ -12,6 +12,7 @@ public class Methods {
 		int bestMinId = -1;
 		int bestMaxId = -1;
 		int bestRange = Integer.MIN_VALUE;
+		
 		int smallest = Integer.MAX_VALUE;
 		int smallestId = -1;
 		
