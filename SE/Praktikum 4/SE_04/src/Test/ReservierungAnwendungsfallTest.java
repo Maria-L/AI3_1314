@@ -160,7 +160,15 @@ public class ReservierungAnwendungsfallTest {
 		} catch (Exception e) {
 			e.getStackTrace();
 		}
-
+		
+		//Stammgast 
+		resAn.reserviereZimmer(gast.getNr(), 22);
+		resAn.reserviereZimmer(gast.getNr(), 66);
+		resAn.reserviereZimmer(gast.getNr(), 33);
+		resAn.reserviereZimmer(gast.getNr(), 44);
+		
+		Gast gast2 = gastAn.sucheGastNachName("Tony Tobago");
+		assertEquals(1, gast2.getStammkunde());
 	}
 
 }
