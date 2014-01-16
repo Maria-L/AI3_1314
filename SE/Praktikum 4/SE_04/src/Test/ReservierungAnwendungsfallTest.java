@@ -2,6 +2,9 @@ package Test;
 
 import static org.junit.Assert.*;
 
+import gast.EmailTyp;
+import gast.Gast;
+import gast.GastAnwendungsfall;
 import ireservierung.IGastAnwendungsfall;
 
 import java.sql.Connection;
@@ -19,9 +22,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import reservierung.EmailTyp;
-import reservierung.Gast;
-import reservierung.GastAnwendungsfall;
 import reservierung.Reservierung;
 import reservierung.ReservierungAnwendungsfall;
 import reservierung.ReservierungsVerwalter;

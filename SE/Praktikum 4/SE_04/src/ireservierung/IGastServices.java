@@ -1,7 +1,8 @@
 package ireservierung;
+import gast.EmailTyp;
+import gast.Gast;
 import reservierung.*;
 
-import reservierung.Gast;
 
 public interface IGastServices {
 	

@@ -3,6 +3,7 @@ import java.util.List;
 
 import db.ConnectionException;
 import db.DBFascade;
+import gast.GastAnwendungsfall;
 import ireservierung.*;
 
 public class ReservierungAnwendungsfall implements IReservierungService {

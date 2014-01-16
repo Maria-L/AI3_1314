@@ -1,4 +1,4 @@
-package reservierung;
+package gast;
 
 import ireservierung.*;
 import db.DBFascade;

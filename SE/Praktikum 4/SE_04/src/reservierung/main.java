@@ -1,5 +1,8 @@
 package reservierung;
 
+import gast.EmailTyp;
+import gast.Gast;
+import gast.GastAnwendungsfall;
 import java.net.ConnectException;
 import java.sql.SQLException;
 

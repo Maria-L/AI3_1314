@@ -1,10 +1,10 @@
 package mocks;
 
-import reservierung.EmailTyp;
-import reservierung.Gast;
-import reservierung.GastVerwalter;
 import db.ConnectionException;
 import db.DBFascade;
+import gast.EmailTyp;
+import gast.Gast;
+import gast.GastVerwalter;
 import ireservierung.IGastAnwendungsfall;
 
 public class GastAnwendungsfallMock implements IGastAnwendungsfall {

@@ -1,4 +1,4 @@
-package reservierung;
+package gast;
 
 import java.util.regex.Pattern;
 
@@ -18,6 +18,7 @@ public class EmailTyp {
 		
 		new EmailTyp(email.substring(0, name_char), email.substring(name_char, domain_char), email.substring(domain_char, email.length()));
 	}
+	
 	public EmailTyp(String name, String server, String domain) {
 		if(name.length() <= 60 && name.length() >= 1 && (Pattern.matches( "[\\w._-]*", name))){
 			this.name = name;

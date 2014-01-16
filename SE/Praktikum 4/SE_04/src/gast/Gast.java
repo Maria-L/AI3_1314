@@ -1,4 +1,5 @@
-package reservierung;
+package gast;
+
 
 public class Gast{
 

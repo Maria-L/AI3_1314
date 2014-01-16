@@ -1,4 +1,4 @@
-package reservierung;
+package gast;
 
 import db.ConnectionException;
 import db.DBFascade;
