@@ -8,6 +8,7 @@ public class EmailTyp {
 	private String server;
 	private String domain;
 	
+	//Konstruktor für Strings
 	public EmailTyp(String email){
 		int name_char = email.indexOf('@');
 		int domain_char = email.lastIndexOf('.');
@@ -18,7 +19,7 @@ public class EmailTyp {
 		
 		new EmailTyp(email.substring(0, name_char), email.substring(name_char, domain_char), email.substring(domain_char, email.length()));
 	}
-	
+	//Konstruktor mit drei Feldern für die Datenbank. Umständliche Implementierung 
 	public EmailTyp(String name, String server, String domain) {
 		if(name.length() <= 60 && name.length() >= 1 && (Pattern.matches( "[\\w._-]*", name))){
 			this.name = name;
@@ -31,7 +32,7 @@ public class EmailTyp {
 			this.domain = domain;
 		}else throw new IllegalArgumentException(". Zeichen fehlt oder Domain Name lang");
 	}
-	
+	//Getter
 	public EmailTyp neueEmail(String name, String server, String domain){
 		return new EmailTyp(name, server, domain);
 	}
