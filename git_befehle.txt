@@ -1,3 +1,4 @@
+#####Start--Einrichten#####
 ssh-keygen 		        -> Erstellt eine Datei im aktuellen Verzeichnis in dem der SSH 
                                 Key steht. Hierbei wird ein Passwort erfragt, dass für die 			
                                 Operationen über diese Ssh benötigt wird. Eine Ssh bindet den Pc in 			
@@ -11,6 +12,7 @@ cd ..                       	-> Wehselt in den übergeordneten Ordner
 git clone (Link) 	        -> Clont den Order auf den der Link verweist in das Verzeichnis in 				
                                 dem man sich befindet
 
+#####Standart Befehle#####
 git add . 	    	        -> Alle Dateien im aktuellen Verzeichnis werden dem lokalen Repo zugeordnet
 
 git commit -am "Kommentar"  	-> Nachdem man die Dateien dem lokalen Repo zugeordnet hat muss
@@ -28,3 +30,38 @@ git push origin master      	-> Muss man eingeben wenn Git mault, dass kein Brun
 git stash			-> Legt alle Dateien, die ab dem letzten Commit verändert wurden, auf einen Stack. Dadurch kann man seine File quasi wieder auf den letzten Commit zurücksetzen.
 
 git stash pop			-> Holt den letzten Stash vom Stack und schreibt die Files wieder ins Dateisystem.
+#########Branches############
+####Quelle: https://www.atlassian.com/git/workflows#!workflow-gitflow #######
+Erstellen:
+git branch develop 		//erstellt einen neuen Branch namens develop
+git push -u origin develop	// pusht den Branch auf den Server
+				//origin steht hier als Keyword für das Parent directory
+Auschecken:
+git checkout -b develop origin/develop // checkt den neuen branch aus
+
+Ein Feature aus dem develop Zeig auschecken:
+git checkout -b some-feature develop // 
+
+Ein Feature in develop mergen:
+git pull origin develop		// develop auf den neusten Stand bringen
+git checkout develop		// wechselt in den Branch develop
+git merge some-feature		// merged some-feature in den develop zeig
+git push			// pusht den erweiterten develop Zweig
+git branch -d some-feature	// löscht den feature Branch --> Aufräumen
+
+Ein Realease erstellen:
+
+git checkout -b release-0.1 develop	//erstellt einen Release Branch
+
+Ein Release in Master mergen:
+git checkout master			//holt den Master Branch
+git merge release-0.1			//merged releade in Master
+git push				
+git checkout develop			//release sollte auch nochmal in develop gemerged werden um 
+git merge release-0.1			// es aktuel zu halten für weitere features etc.
+git push
+git branch -d release-0.1		//löscht den realease Branch --> Aufräumen
+
+Ein commit taggen für übersichtlichkeit:
+git tag -a 0.1 -m "Initial public release" master 
+git push --tags
